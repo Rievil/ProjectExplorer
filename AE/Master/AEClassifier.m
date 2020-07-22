@@ -1,14 +1,13 @@
 classdef AEClassifier < handle
-    %verejne promene
+    %Public var
     properties (SetAccess = public)
-        %Struktura mìøení - datum - vzorky
+        %Main project structure
         Measuremnts; 
-        %Promìnná s nastavením pro analýzu
+        %Default settings
         Options;
-        %úprava tøíd po posledním ètení, zde se iteruje nastavení feature extraktorù
+        %Classification variables
         ClassData; 
-        %Celková knihovna již vytvoøených tøíd z jiných mìøení bez
-        %zdrojových dat
+        %Output class library
         TrainLib;
         %Statistické zpracování všech extrahovaných featur a tøíd
         ClassProfiles;
@@ -23,6 +22,7 @@ classdef AEClassifier < handle
         MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
         MeaFolder;
         BasicFolder;
+        CL char; %zástupce pro command line
     end
     
 %------------------------------------------------------------------
@@ -31,21 +31,30 @@ classdef AEClassifier < handle
 
     methods (Access = public) %práce s daty a základní uživatelské funkce
         %vytvoøení objektu a vybrání mìøené složky
-        function obj = AEClassifier
+        function obj = AEClassifier(OpenType)          
+            obj.Options=SetOption(obj,OpenType);
+        end
+        
+        %------------------------------------------------------------------
+        %Ukládání struktury
+        %------------------------------------------------------------------
+        function LoadMeasurement(obj)
             %Measuremnts=struct;
             %Vzbraní složkz a nahrání cesty k jednotlivým souborùm
             [MeaFolder]=GetMeaFolder(obj);
-            %MeaFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-            obj.MeaFolder=[MeaFolder '\'];
-            
-            %GetBasicTest(obj,obj.MeaFolder);
-            obj.Measuremnts.Basic=GetBasicTest(obj,obj.MeaFolder);           
-            obj.Options=SetOption(obj);
-            obj.Measuremnts.Count=length(obj.Measuremnts.Basic);
+            if MeaFolder~="none"
+                %MeaFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+                obj.MeaFolder=[MeaFolder '\'];
+                %GetBasicTest(obj,obj.MeaFolder);
+                obj.Measuremnts.Basic=GetBasicTest(obj,obj.MeaFolder);                 
+                obj.Measuremnts.Count=length(obj.Measuremnts.Basic);                
+            else
+                InfoMessage(obj,'Info: The path was not set');                    
+            end
             %vyckává na další akci> zmìna nastavení, spuštìní analýzy,
             %výbìr inspekèních bodù
         end
-        
+        %
         %------------------------------------------------------------------
         %Ukládání struktury
         %------------------------------------------------------------------
@@ -65,7 +74,7 @@ classdef AEClassifier < handle
         %------------------------------------------------------------------
         %Nastav promìnné v nastavení objektu
         %------------------------------------------------------------------
-        function [T]=SetOption(obj)
+        function [T]=SetOption(~,OpenType)
             T=struct;
             T.AnalyzeAllHits=false;
             T.NumberOfInspectionPoints=10;
@@ -76,6 +85,17 @@ classdef AEClassifier < handle
             T.HitDetector=0;
             T.Signals=true;
             T.Samples=1;
+            
+            switch OpenType
+                case 1 % manual ussage of AEClassifier
+                    T.OpenType=1;
+                    T.OpenTypeLabel='manual ussage of AEClassifier';
+                case 2 % UsageByProjectExplorer
+                    T.OpenType=2;
+                    T.OpenTypeLabel='Project explorer usage of AEClassifier';
+                otherwise 
+                    T.OpenType=1;
+            end
         end
         
         %------------------------------------------------------------------
@@ -1004,78 +1024,82 @@ classdef AEClassifier < handle
         %------------------------------------------------------------------
         function [BaseTest]=GetBasicTest(obj,pathTMP)
             warning('off','all');
-            path=char(pathTMP);
-            %files=dir([path '*.xls']);
-            all_files = dir(path);
-            all_dir = all_files([all_files(:).isdir]);
-            all_dir(1:2)=[];
-            MeaCount = numel(all_dir);
-            MeaFolderNames={all_dir.name};
+            try
+                path=char(pathTMP);
+                
+                all_files = dir(path);
+                all_dir = all_files([all_files(:).isdir]);
+                all_dir(1:2)=[];
+                MeaCount = numel(all_dir);
+                MeaFolderNames={all_dir.name};
 
-            files =[dir([path '*.xls']); dir([path '*.xlsx']);  dir([path '*.csv'])];
-            fileNameTMP=[files(:).name];
-            fileName=lower(string(split(fileNameTMP,'.xls')));
+                files =[dir([path '*.xls']); dir([path '*.xlsx']);  dir([path '*.csv'])];
+                fileNameTMP=[files(:).name];
+                fileName=lower(string(split(fileNameTMP,'.xls')));
 
-            paterrns={'cas sila','cas stlaceni','pentest'};
-            sheetNames={'Test Curve Data','Test Curve Data',''};
-            VarNames={'Force','Defformation','Categorical'};
+                paterrns={'cas sila','cas stlaceni','pentest'};
+                sheetNames={'Test Curve Data','Test Curve Data',''};
+                VarNames={'Force','Defformation','Categorical'};
 
-            Tab=struct();
-            for i=1:length(paterrns)
-                Index=find(contains(fileName,paterrns{i}));
-                if ~isempty(Index)
-                    switch i
-                        case 1
-                            T1=readtable([files(Index).folder '\' files(Index).name],'Sheet','Test Curve Data');    
-                            Tab(i).T=ResamplePressData(obj,T1);
-                        case 2
-                            T2=readtable([files(Index).folder '\' files(Index).name],'Sheet','Test Curve Data');
-                            Tab(i).T=ResamplePressData(obj,T2);
-                        case 3
-                            Tab(i).T=readtable([files(Index).folder '\' files(Index).name]);
-                            PocetMereni=size(Tab(i).T,2)/2;
-                        otherwise                
+                Tab=struct();
+                for i=1:length(paterrns)
+                    Index=find(contains(fileName,paterrns{i}));
+                    if ~isempty(Index)
+                        switch i
+                            case 1
+                                T1=readtable([files(Index).folder '\' files(Index).name],'Sheet','Test Curve Data');    
+                                Tab(i).T=ResamplePressData(obj,T1);
+                            case 2
+                                T2=readtable([files(Index).folder '\' files(Index).name],'Sheet','Test Curve Data');
+                                Tab(i).T=ResamplePressData(obj,T2);
+                            case 3
+                                Tab(i).T=readtable([files(Index).folder '\' files(Index).name]);
+                            otherwise                
+                        end
                     end
                 end
-            end
 
-            BaseTest=struct();
-            for i=1:MeaCount
-                try
-                    if ~isempty(Tab(3).T)
-                        tmpName=char(strrep(string(Tab(3).T{i,1}),' ',''));
-                        BaseTest(i).Name=MeaFolderNames{i};
+                BaseTest=struct();
+                for i=1:MeaCount
+                    try
+                        if ~isempty(Tab(3).T)
+                            tmpName=char(strrep(string(Tab(3).T{i,1}),' ',''));
+                            BaseTest(i).Name=MeaFolderNames{i};
 
-                        lenTMP=double(Tab(3).T{i,2});
-                        BaseTest(i).Length=lenTMP;
+                            lenTMP=double(Tab(3).T{i,2});
+                            BaseTest(i).Length=lenTMP;
 
-                        speedTMP=double(strrep(string(Tab(3).T{i,7}),',','.'));
-                        BaseTest(i).Speed=speedTMP;
+                            speedTMP=double(strrep(string(Tab(3).T{i,7}),',','.'));
+                            BaseTest(i).Speed=speedTMP;
+                        end
+                    catch
+                        InfoMessage(obj,'Error: Didnt find pentest data! Make sure that,pentest.xls file is in mea folder!');                     
                     end
-                catch
-                    error('### Error: Didnt find pentest data! Make sure that,pentest.xls file is in mea folder! ###');
-                end
-                if ~isempty(Tab(2).T)
-                    timeTMP=Tab(2).T{:,(i-1)*2+1};
-                    timeTMP=timeTMP(~isnan(timeTMP));
-                    BaseTest(i).Time=timeTMP;
+                    if ~isempty(Tab(2).T)
+                        timeTMP=Tab(2).T{:,(i-1)*2+1};
+                        timeTMP=timeTMP(~isnan(timeTMP));
+                        BaseTest(i).Time=timeTMP;
 
-                    deffTMP=Tab(2).T{:,(i-1)*2+2};
-                    deffTMP=deffTMP(~isnan(deffTMP));
-                    BaseTest(i).Deff=deffTMP;
-                end
+                        deffTMP=Tab(2).T{:,(i-1)*2+2};
+                        deffTMP=deffTMP(~isnan(deffTMP));
+                        BaseTest(i).Deff=deffTMP;
+                    end
 
-                if ~isempty(Tab(1).T)
-                    timeTMP=Tab(1).T{:,(i-1)*2+1};
-                    timeTMP=timeTMP(~isnan(timeTMP));
-                    BaseTest(i).Time=timeTMP;
+                    if ~isempty(Tab(1).T)
+                        timeTMP=Tab(1).T{:,(i-1)*2+1};
+                        timeTMP=timeTMP(~isnan(timeTMP));
+                        BaseTest(i).Time=timeTMP;
 
-                    forceTMP=Tab(1).T{:,(i-1)*2+2};
-                    forceTMP=forceTMP(~isnan(forceTMP));
-                    BaseTest(i).Force=forceTMP;
-                    BaseTest(i).TimeHitSelection=[];
+                        forceTMP=Tab(1).T{:,(i-1)*2+2};
+                        forceTMP=forceTMP(~isnan(forceTMP));
+                        BaseTest(i).Force=forceTMP;
+                        BaseTest(i).TimeHitSelection=[];
+                    end
                 end
+            catch
+                InfoMessage(obj,'Error: Unable to load measurments, check the files ...');
             end
+            InfoMessage(obj,'Info: Successfuly loaded data!');
             warning('on','all');
         end
         %------------------------------------------------------------------
@@ -1246,7 +1270,11 @@ classdef AEClassifier < handle
         %Vykresli jednotlivé hity v selektoru hitù
         %------------------------------------------------------------------
         function [MeaFolder]=GetMeaFolder(obj)
+            
             MeaFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+            if MeaFolder==0
+                MeaFolder="none";
+            end
         end
         %------------------------------------------------------------------
         %Pøeèti jeden hit
@@ -1346,6 +1374,19 @@ classdef AEClassifier < handle
             Cards=string(CardsTMP);
         end
     end %konec private metod
+    
+    methods (Access = private) %Informování uživatele o práci programu
+        function InfoMessage(obj,Msg)
+            obj.CL=Msg;
+                switch obj.Options.OpenType
+                    case 1 %manualni pouzivani programu
+                        disp(obj.CL); %ifnormuji v command line o praci porgramu
+                    case 2 
+                        %informacni hlasku davam do obj.CL aby si to project explorer mohl prevuit a zpracovat
+                end
+        end
+        
+    end %Konec private method
     
 end %konec objektu
 
