@@ -7,7 +7,12 @@ clear all;
 %smaže všechny promìné kromì ...
 clearvars  -except h;
 %%
-h=AEClassifier;
+b=ProjectExplorer;
+%%
+%%
+h=AEClassifier(1);
+%%
+LoadMeasurement(h);
 %%
 SaveWork(h);
 %%
