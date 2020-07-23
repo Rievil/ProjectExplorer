@@ -19,7 +19,23 @@ SaveWork(h);
 [h]=LoadWork(h);
 %%
 %tyto pøíkazy již není potøeba používat
-
+UserInfo=struct;
+    networkinterfaces = java.net.NetworkInterface.getNetworkInterfaces;
+    nimacs = cell(0, 2);
+    while networkinterfaces.hasMoreElements
+         networkinterface = networkinterfaces.nextElement;
+         macstring = strjoin(cellstr(dec2hex(typecast(networkinterface.getHardwareAddress, 'uint8'))), ':');
+          nimacs = [nimacs; {char(networkinterface.getDisplayName), macstring}];
+    end
+    RT=cell2table(nimacs, 'VariableNames', {'Interface', 'MAC'});
+    
+    for i=1:size(RT,1)
+        if length(RT.MAC(i))
+            
+            break;
+        end
+    end
+    UserInfo.MAC=RT{i,2};
 %%
 %vše lze zapsat pøímo do volání funkce
 %je jedno jestli se píšou malé nebo velké písmena
