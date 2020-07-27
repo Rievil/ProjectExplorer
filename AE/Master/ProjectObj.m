@@ -1,4 +1,4 @@
-classdef ProjectObj < super
+classdef ProjectObj < handle
     properties (SetAccess=public)
         Name char; %name of project
         CreationDate datetime; %date of creation of project
@@ -12,36 +12,27 @@ classdef ProjectObj < super
     end
     
     methods (Access=public)
+        function obj=ProjectObj()
+        end
         %will create folder in SB folder, with specified unique name of
         %project
         function MakeProjectPath(obj)
-            obj.ProjectFolder=[obj.SBOrigFolder name];
+            obj.ProjectFolder=[obj.SBOrigFolder obj.Name '\'];
 
-            CurrFiles = dir();
+            CurrFiles = dir(obj.SBOrigFolder);
             CurrFiles(ismember( {CurrFiles.name}, {'.', '..'})) = []; 
             
-            if ~ismember({CurrFiles.name},name)
+            [A]=ismember({CurrFiles.name},obj.Name);
+            if sum(A)==0
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
                 mkdir(obj.ProjectFolder);
-                set.Status(obj,1);
+                SetStatus(obj,1);
             else
                 %folder does exist, promt the user to set different name
+                SetStatus(obj,4);
             end
         end
-        
-        %will delete 
-        function DeleteProject(obj)
-            
-        end
-        
-        %will save object itself
-        function sobj = saveobj(obj)
-            % Call superclass saveobj method
-            sobj = saveobj@super(obj); 
-            % Perform subclass save operations
-        end
-
     end
     
     methods 
@@ -49,12 +40,7 @@ classdef ProjectObj < super
         %state is work and data stored in it, its also used to recognize if
         %projectexplorer can load the data, or not ->this will be different
         %for different users
-        function set.Status(obj,phase)
-            arguments
-                obj;
-                phase uint32;
-            end
-            
+        function SetStatus(obj,phase)            
             if phase>0 && phase<4
                 switch phase
                     case 1
@@ -68,6 +54,10 @@ classdef ProjectObj < super
                     case 3
                         obj.Status.Label='hiden';
                         obj.Status.Value=3;
+                        obj.Status.LoadRule=false;
+                    case 4
+                        obj.Status.Label='error';
+                        obj.Status.Value=4;
                         obj.Status.LoadRule=false;
                 end
             end
