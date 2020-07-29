@@ -35,7 +35,8 @@ classdef Users
                 IDArr=double(obj.UserOptions.ID);
                 obj.CurrentUserID=max(IDArr)+1;
                 obj.UserOptions=[obj.UserOptions; CreateNewUserOptions(obj)];
-            end
+            end            
+            obj.MA.UserID=obj.CurrentUserID;
         end
                 
         %save user options into masterfolder

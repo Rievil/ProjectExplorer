@@ -1,21 +1,17 @@
-classdef ProjectObj < ProjectOverView
+classdef ProjectObj < handle
     properties (SetAccess=public)
         Name char; %name of project
-        UITreeNode; %tree node of object itself
         ProjectFolder string; %created path in sandbox folder, all MData will be stored there
         Status;
+        CreationDate datetime;
     end
     
     methods (Access=public)
-        function obj=ProjectObj()
-            
-        end
-        %will create folder in SB folder, with specified unique name of
-        %project
-        function MakeProjectPath(obj)
-            obj.ProjectFolder=[obj.SBOrigFolder obj.Name '\'];
+        function obj=ProjectObj(Name,SandBox)
+            obj.Name=Name;
+            obj.ProjectFolder=[SandBox Name '\'];
 
-            CurrFiles = dir(obj.SBOrigFolder);
+            CurrFiles = dir(obj.ProjectFolder);
             CurrFiles(ismember( {CurrFiles.name}, {'.', '..'})) = []; 
             
             [A]=ismember({CurrFiles.name},obj.Name);
@@ -29,14 +25,7 @@ classdef ProjectObj < ProjectOverView
                 SetStatus(obj,4);
             end
         end
-        
-        %will create new project in project overview
-        function CreateProject(app,Name)
-            if app.PR==[] %it wasnt created yet
-                app.NP=ProjectObj;
 
-            end
-        end
     end
     
     
