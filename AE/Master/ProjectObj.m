@@ -1,18 +1,14 @@
-classdef ProjectObj < handle
+classdef ProjectObj < ProjectOverView
     properties (SetAccess=public)
         Name char; %name of project
-        CreationDate datetime; %date of creation of project
-        ID uint32; %identification number of project
-        Meas MeasObj; %stacked objects of measurements
-        Users; %list of users, who is author | editor | visitor
         UITreeNode; %tree node of object itself
-        SBOrigFolder; %original SB folder retrived from useroptions
         ProjectFolder string; %created path in sandbox folder, all MData will be stored there
         Status;
     end
     
     methods (Access=public)
         function obj=ProjectObj()
+            
         end
         %will create folder in SB folder, with specified unique name of
         %project
@@ -33,9 +29,18 @@ classdef ProjectObj < handle
                 SetStatus(obj,4);
             end
         end
+        
+        %will create new project in project overview
+        function CreateProject(app,Name)
+            if app.PR==[] %it wasnt created yet
+                app.NP=ProjectObj;
+
+            end
+        end
     end
     
-    methods 
+    
+    methods (Access = private)
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if
         %projectexplorer can load the data, or not ->this will be different
@@ -62,5 +67,5 @@ classdef ProjectObj < handle
                 end
             end
         end %end of status funciton
-    end
+    end %end of private methods
 end

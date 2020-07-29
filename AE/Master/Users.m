@@ -53,7 +53,7 @@ classdef Users
             NewUser.ID=obj.CurrentUserID;
             NewUser.User=obj.CurrentUser;
             NewUser.MasterFolder=obj.MA.MasterFolder;
-            NewUser.SandBoxFolder=uigetdir(cd,'Select folder for saving all work');
+            NewUser.SandBoxFolder=[uigetdir(cd,'Select folder for saving all work') '\'];
             %obj.UserOptions=UserOptions;
         end
     end
