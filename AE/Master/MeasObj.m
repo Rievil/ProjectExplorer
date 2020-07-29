@@ -7,7 +7,8 @@ classdef MeasObj < handle
     
     methods (Access = public)
         %constructor of object
-        function obj=MeasObj()
+        function obj=MeasObj(BruteFolder)
+            obj.BruteFolder=BruteFolder;
         end
     end
     

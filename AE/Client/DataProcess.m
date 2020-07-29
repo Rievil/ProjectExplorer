@@ -9,7 +9,15 @@ clearvars  -except h;
 %%
 b=ProjectExplorer;
 %%
-h=C(5,2);
+DataCType='AE';
+switch DataCType
+    case 'AE'
+        Mea=AE('H:\Google drive\Škola\Mìøení\2020\Dalibor_ultrazvuk\Èlánek');
+    case 'UZ'
+    case 'IE'
+    otherwise
+end
+
 %%
 h=AEClassifier(1);
 %%
