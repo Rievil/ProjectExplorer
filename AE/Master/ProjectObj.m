@@ -1,15 +1,23 @@
 classdef ProjectObj < handle
     properties (SetAccess=public)
         Name char; %name of project
-        ProjectFolder string; %created path in sandbox folder, all MData will be stored there
+        ProjectFolder char; %created path in sandbox folder, all MData will be stored there
         Status;
         CreationDate datetime;
+        LastChange datetime;
+        Meas MeasObj; %list of measuremnts objects in the specific object
+        %each object is stored as a separate file in project folder, for
+        %clarity this is must - user bight want to manualy load data
+        %container of specific measuremnt to access the data, in a long
+        %term and debuging this is importnat
+        MTreeNode;
     end
     
-    methods (Access=public)
+    methods (Access=public) 
+        %creation of project objects
         function obj=ProjectObj(Name,SandBox)
             obj.Name=Name;
-            obj.ProjectFolder=[SandBox Name '\'];
+            obj.ProjectFolder=[Name '\'];
 
             CurrFiles = dir(obj.ProjectFolder);
             CurrFiles(ismember( {CurrFiles.name}, {'.', '..'})) = []; 
@@ -18,14 +26,15 @@ classdef ProjectObj < handle
             if sum(A)==0
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
-                mkdir(obj.ProjectFolder);
+                mkdir([SandBox Name '\']);
                 SetStatus(obj,1);
             else
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
             end
         end
-
+        
+        %creation of measuremnts of given object
     end
     
     
