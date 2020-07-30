@@ -1239,9 +1239,6 @@ classdef AEClassifier < handle
                 T=ConnTables(obj,TMPS);
                 Records(iCard).ConDetector=T;
             end
-            
-            
-
 
             ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
