@@ -52,6 +52,8 @@ classdef ProjectOverView < handle
                     obj.TReeNodes{i}=uitreenode(obj.UITree,...
                         'Text',obj.Projects(i).Name,...
                         'NodeData',i); 
+                        LoadMeas(obj.Projects(i),obj.SandBoxFolder);
+                        FillPTree(obj.Projects(i),obj.TReeNodes{i});
                     else
                         obj.TReeNodes{i}=[];
                     end

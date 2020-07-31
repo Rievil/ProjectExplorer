@@ -1,26 +1,11 @@
 classdef AEClassifier < handle
     %Public var
     properties (SetAccess = public)
-        %Main project structure
-        Measuremnts; 
-        %Default settings
-        Options;
-        %Classification variables
-        ClassData; 
-        %Output class library
-        TrainLib;
-        %Statistické zpracování všech extrahovaných featur a tøíd
-        ClassProfiles;
-        %Vytvoøení grafù a pøehledù z dat v measuremnets
-        Reports;
-        %Promenna pro ukládání promìnných        
-    end
-    
-    %privatni promenne
-    properties (SetAccess = private)
-        %složky dílèích mìøení dle datumu
+        Measuremnts;  %Main project structure
+        Options; %Default settings
+        ClassData;  %Classification variables
         MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
-        MeaFolder;
+        BruteFolder;
         BasicFolder;
         CL char; %zástupce pro command line
     end
@@ -31,32 +16,42 @@ classdef AEClassifier < handle
 
     methods (Access = public) %práce s daty a základní uživatelské funkce
         %vytvoøení objektu a vybrání mìøené složky
-        function obj = AEClassifier(OpenType)          
-            obj.Options=SetOption(obj,OpenType);
-        end
-        
-        %------------------------------------------------------------------
-        %Ukládání struktury
-        %------------------------------------------------------------------
-        function LoadMeasurement(obj)
-            %Measuremnts=struct;
-            %Vzbraní složkz a nahrání cesty k jednotlivým souborùm
-            [MeaFolder]=GetMeaFolder(obj);
-            if MeaFolder~="none"
-                %MeaFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-                obj.MeaFolder=[MeaFolder '\'];
-                %GetBasicTest(obj,obj.MeaFolder);
-                obj.Measuremnts.Basic=GetBasicTest(obj,obj.MeaFolder);                 
-                obj.Measuremnts.Count=length(obj.Measuremnts.Basic);                
-            else
-                InfoMessage(obj,'Info: The path was not set');                    
+        function obj = AEClassifier(OpenType) 
+            if nargin==0
+                OpenType=1;
             end
-            %vyckává na další akci> zmìna nastavení, spuštìní analýzy,
-            %výbìr inspekèních bodù
+                
+            switch OpenType
+                case 1
+                    obj.Options=SetOption(obj,1);
+                case 2
+                    %we can approach all data and do first sweep for
+                    %measruemnets
+                    obj.Options=SetOption(obj,2);
+            end
         end
-        %
         %------------------------------------------------------------------
-        %Ukládání struktury
+        %První data sweep v brute folderu
+        %------------------------------------------------------------------
+        function DataSweep(obj)
+            switch obj.Options.OpenType
+                case 1
+                    [BruteFolder]=GetBruteFolder(obj);
+                    if BruteFolder~="none"
+                        %BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+                        obj.BruteFolder=[BruteFolder '\'];
+                        %GetBasicTest(obj,obj.BruteFolder);
+                        obj.Measuremnts.Basic=GetBasicTest(obj,obj.BruteFolder);                 
+                        obj.Measuremnts.Count=length(obj.Measuremnts.Basic);                
+                    else
+                        InfoMessage(obj,'Info: The path was not set');                    
+                    end
+                case 2
+                    obj.Measuremnts.Basic=GetBasicTest(obj,obj.BruteFolder);
+            end
+        end
+        %------------------------------------------------------------------
+        %Ukládání struktury - pro manuální ovládání
         %------------------------------------------------------------------
         function SaveWork(obj)
             obj.BasicFolder = strrep(which('AEClassifier'),'AEClassifier.m','');
@@ -64,7 +59,7 @@ classdef AEClassifier < handle
             save ([obj.BasicFolder 'Work.mat'],'Work');
         end
         %------------------------------------------------------------------
-        %Ukládání struktury
+        %Ukládání struktury . pro manuální ovládání
         %------------------------------------------------------------------
         function [LObj]=LoadWork(obj)
             obj.BasicFolder = strrep(which('AEClassifier'),'AEClassifier.m','');
@@ -103,8 +98,8 @@ classdef AEClassifier < handle
         %------------------------------------------------------------------
         function NewMeaPath(obj)
             %D:\ZEDO_DATA_Export\200318_Melichar
-            [MeaFolder]=GetMeaFolder(obj);
-            obj.MeaFolder=[MeaFolder '\'];
+            [BruteFolder]=GetBruteFolder(obj);
+            obj.BruteFolder=[BruteFolder '\'];
         end %konec set a get methods
         
         %------------------------------------------------------------------
@@ -257,7 +252,7 @@ classdef AEClassifier < handle
 
                                 t=[];
                                 
-                                folder=[obj.MeaFolder char(FilesToProcess.folder(n)) '\'];
+                                folder=[obj.BruteFolder char(FilesToProcess.folder(n)) '\'];
                                 name=char(FilesToProcess.name(n));
                                 [hit]=ReadHit(obj,folder,name);
                                 %volání objektu pro extakci featur z akustického
@@ -599,7 +594,7 @@ classdef AEClassifier < handle
                 
                 F=table;
                 for n=1:size(TMPHits,1)
-                    [hit]=ReadHit([obj.MeaFolder TMPHits(n).folder '\'],TMPHits(n).name);
+                    [hit]=ReadHit([obj.BruteFolder TMPHits(n).folder '\'],TMPHits(n).name);
                     %volání objektu pro extakci featur z akustického
                     %signálu
                     E=SignalExtractor(hit.Signal,hit.SampleFreq);
@@ -747,7 +742,7 @@ classdef AEClassifier < handle
                 yyaxis right;
                 hold on;
                 ax(2)=gca;
-                pathTMP=[obj.MeaFolder obj.Measuremnts.Basic(sample).Name '\'];
+                pathTMP=[obj.BruteFolder obj.Measuremnts.Basic(sample).Name '\'];
                 [ZedoKey]=GetKeyOfMea(obj,pathTMP);
                 obj.Measuremnts.Basic(sample).ZKey=ZedoKey;
 
@@ -833,7 +828,7 @@ classdef AEClassifier < handle
                 %waitbar(poc/length(samples),f,['Processing ' num2str(nSampleLoop) '/' num2str(length(samples)) ' samples']);
                 %nSampleLoop=nSampleLoop+1;
                 
-                pathTMP=[obj.MeaFolder obj.Measuremnts.Basic(sample).Name '\'];
+                pathTMP=[obj.BruteFolder obj.Measuremnts.Basic(sample).Name '\'];
                 [ZedoKey]=GetKeyOfMea(obj,pathTMP);
                 obj.Measuremnts.Basic(sample).ZKey=ZedoKey;
                 
@@ -1025,13 +1020,13 @@ classdef AEClassifier < handle
         function [BaseTest]=GetBasicTest(obj,pathTMP)
             warning('off','all');
             try
-                path=char(pathTMP);
+                path=[char(pathTMP) '\'];
                 
                 all_files = dir(path);
                 all_dir = all_files([all_files(:).isdir]);
                 all_dir(1:2)=[];
                 MeaCount = numel(all_dir);
-                MeaFolderNames={all_dir.name};
+                BruteFolderNames={all_dir.name};
 
                 files =[dir([path '*.xls']); dir([path '*.xlsx']);  dir([path '*.csv'])];
                 fileNameTMP=[files(:).name];
@@ -1064,7 +1059,7 @@ classdef AEClassifier < handle
                     try
                         if ~isempty(Tab(3).T)
                             tmpName=char(strrep(string(Tab(3).T{i,1}),' ',''));
-                            BaseTest(i).Name=MeaFolderNames{i};
+                            BaseTest(i).Name=BruteFolderNames{i};
 
                             lenTMP=double(Tab(3).T{i,2});
                             BaseTest(i).Length=lenTMP;
@@ -1137,7 +1132,7 @@ classdef AEClassifier < handle
             warning('off','all');
             path=char(pathTMP);
             
-            MeaPath=obj.MeaFolder;
+            MeaPath=obj.BruteFolder;
             filesORG=dir([path '\*.txt']);
             tmp=strrep({filesORG.folder},MeaPath,'');
             folderTMP=string(tmp);%cell2struct(tmp,'folder');
@@ -1266,11 +1261,10 @@ classdef AEClassifier < handle
         %------------------------------------------------------------------
         %Vykresli jednotlivé hity v selektoru hitù
         %------------------------------------------------------------------
-        function [MeaFolder]=GetMeaFolder(obj)
-            
-            MeaFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-            if MeaFolder==0
-                MeaFolder="none";
+        function [BruteFolder]=GetBruteFolder(obj)
+            BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+            if BruteFolder==0
+                BruteFolder="none";
             end
         end
         %------------------------------------------------------------------

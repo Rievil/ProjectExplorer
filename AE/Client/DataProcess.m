@@ -10,7 +10,9 @@ clearvars  -except h;
 b=ProjectExplorer;
 %%
 %%
-h=AEClassifier(1);
+obj=AE(1,'Hanka\','H:\Google drive\GitHub\Matlab\AE\SandBox\');
+%%
+h=AEClassifier;
 %%
 LoadMeasurement(h);
 %%
