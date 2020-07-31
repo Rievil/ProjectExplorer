@@ -4,12 +4,14 @@ classdef ProjectOverView < handle
         SandBoxFolder char;
         ProjectCount;
         TReeNodes;
+        UITree; %handle to ui tree in project explorer
     end
     
     methods (Access = public)
         %constructor of overview
-        function obj=ProjectOverView(SandBoxFolder)
+        function obj=ProjectOverView(SandBoxFolder,UITree)
             obj.SandBoxFolder=SandBoxFolder;
+            obj.UITree=UITree;
             if isfile([obj.SandBoxFolder 'Projects.mat'])
                 %project overview already exists
                 load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');
@@ -22,14 +24,15 @@ classdef ProjectOverView < handle
         end
         
         %create new project
-        function CreateNewProject(obj,Name)
-            
+        function [status]=CreateNewProject(obj,Name)
             newID=numel(obj.Projects) + 1;
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
                 obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder);
-            else
-                %
+                status=obj.Projects(newID).Status.Value;
+                if status==4
+                    obj.Projects(newID)=[];
+                end
             end
             save(obj);
         end
@@ -40,14 +43,18 @@ classdef ProjectOverView < handle
             obj.ProjectCount=ProjectCount;
         end
         %fill tree node in main app
-        function FillTree(obj,UITree)
-        Nodes = UITree.Children;
+        function FillTree(obj)
+        Nodes = obj.UITree.Children;
         Nodes.delete;
             if Count(obj)>0
                 for i=1:Count(obj)
-                    obj.TReeNodes(i)=uitreenode(UITree,...
+                    if obj.Projects(i).Status.Value==1
+                    obj.TReeNodes{i}=uitreenode(obj.UITree,...
                         'Text',obj.Projects(i).Name,...
-                        'NodeData',[]); 
+                        'NodeData',i); 
+                    else
+                        obj.TReeNodes{i}=[];
+                    end
                 end
             else
                 
@@ -55,6 +62,20 @@ classdef ProjectOverView < handle
             save(obj);
         end
         
+        %delete the node and its children (actualy will leave the node
+        %intacked, but will set the project status to hidden)
+        function HideProject(obj, nProject)
+            SetStatus(obj.Projects(nProject),3);
+            obj.TReeNodes{nProject}.delete;
+            save(obj);
+        end
+        
+        function ShowProjects(obj)
+            for i=1:numel(obj.Projects)
+                SetStatus(obj.Projects(i),1);
+            end
+            FillTree(obj);
+        end
     end %end of public methods
     
     %private methods for controling project overview

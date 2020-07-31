@@ -19,11 +19,7 @@ classdef ProjectObj < handle
             obj.Name=Name;
             obj.ProjectFolder=[Name '\'];
 
-            CurrFiles = dir(obj.ProjectFolder);
-            CurrFiles(ismember( {CurrFiles.name}, {'.', '..'})) = []; 
-            
-            [A]=ismember({CurrFiles.name},obj.Name);
-            if sum(A)==0
+            if ~exist([SandBox obj.Name '\'],'dir')
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
                 mkdir([SandBox Name '\']);
@@ -35,16 +31,17 @@ classdef ProjectObj < handle
         end
         
         %creation of measuremnts of given object
-    end
-    
-    
-    methods (Access = private)
+        function CreateMeas(obj,Panel)
+            ef1 = uieditfield(Panel,'text','Position',[0 0 140 22],'Value','First Name');
+        end
+        
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if
         %projectexplorer can load the data, or not ->this will be different
         %for different users
+        
         function SetStatus(obj,phase)            
-            if phase>0 && phase<4
+            if phase>0 && phase<5
                 switch phase
                     case 1
                         obj.Status.Label='created';
@@ -65,5 +62,10 @@ classdef ProjectObj < handle
                 end
             end
         end %end of status funciton
-    end %end of private methods
+        
+        %class destructor of object
+        function delete(obj)
+            
+        end
+    end
 end
