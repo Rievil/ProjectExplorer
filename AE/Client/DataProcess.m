@@ -1,5 +1,5 @@
 disk='E:\Google drive';
-cd([disk '\Škola\Mìøení\2020\Zedo\']);
+cd([disk '\GitHub\Matlab\AE\']);
 %%
 %smaže všechny promìné
 clear all;
