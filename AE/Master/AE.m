@@ -5,7 +5,7 @@ classdef AE < MeasObj
     methods (Access = public)
         function obj=AE(ID,ProjectFolder,SandBox)
             obj@MeasObj(ID,ProjectFolder,SandBox);
-            obj.Data=AEClassifier(2);
+            obj.Data=AEZedo(2);
             
             obj.Data.BruteFolder=obj.BruteFolder;            
             DataSweep(obj.Data);       

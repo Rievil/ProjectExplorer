@@ -1,13 +1,14 @@
-classdef AEZedo < AE
+classdef AEZedo < handle
     %Public var
     properties (SetAccess = public)
         Measuremnts;  %Main project structure
         Options; %Default settings
         ClassData;  %Classification variables
-        MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
+        %MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
         BruteFolder;
         BasicFolder;
         CL char; %zástupce pro command line
+        Count (1,1) double;
     end
     
 %------------------------------------------------------------------
@@ -16,7 +17,7 @@ classdef AEZedo < AE
 
     methods (Access = public) %práce s daty a základní uživatelské funkce
         %vytvoøení objektu a vybrání mìøené složky
-        function obj = AEClassifier(OpenType) 
+        function obj = AEZedo(OpenType) 
             if nargin==0
                 OpenType=1;
             end
@@ -24,6 +25,7 @@ classdef AEZedo < AE
             switch OpenType
                 case 1
                     obj.Options=SetOption(obj,1);
+                    DataSweep(obj);
                 case 2
                     %we can approach all data and do first sweep for
                     %measruemnets
@@ -42,7 +44,7 @@ classdef AEZedo < AE
                         obj.BruteFolder=[BruteFolder '\'];
                         %GetBasicTest(obj,obj.BruteFolder);
                         obj.Measuremnts=GetBasicTest(obj,obj.BruteFolder);                 
-                        obj.Measuremnts.Count=length(obj.Measuremnts);                
+                        obj.Count=size(obj.Measuremnts,2);                
                     else
                         InfoMessage(obj,'Info: The path was not set');                    
                     end
@@ -124,7 +126,7 @@ classdef AEZedo < AE
                             obj.Options.Samples=varargin{2};            
                         else
                             if (lower(varargin{2})=='all')                                
-                                obj.Options.Samples=1:obj.Measuremnts.Count;
+                                obj.Options.Samples=1:obj.Count;
                             end
                         end
                         varargin(1:2)=[];
@@ -1191,8 +1193,9 @@ classdef AEZedo < AE
                     if ~isempty(Idx)
                         switch i
                             case 1 %parameters
+                                
                                 Records(iCard).Param.Name=paterrns{i};
-                                Records(iCard).Param.Data=readtable([MeaPath CardFiles(Idx).folder '\' CardFiles(Idx).name],'ReadVariableNames',true);
+                                Records(iCard).Param.Data=readtable([MeaPath CardFiles(Idx).folder '\' CardFiles(Idx).name],'ReadVariableNames',true);                                
                                 CardNames(Idx)=[];    
                                 CardFiles(Idx)=[]; 
                             case 2 %detector
@@ -1203,11 +1206,14 @@ classdef AEZedo < AE
                                 DecNum=extractAfter(DetectorsNames,paterrns{2});
 
                                 for s=1:length(DecNum) %n hitdetector
-                                
+                                    clear NHitDet;
                                     DetectorName=[SignalPatterns{2} num2str(DecNum(s))];
                                     %AEFiles(2).Detec(s).Name=DetectorName;                                        
                                     Records(iCard).Detector(s).Name=DetectorName;
                                     Records(iCard).Detector(s).Data=readtable([MeaPath DetectorsFiles(s).folder '\' DetectorsFiles(s).name],'ReadVariableNames',true,'HeaderLines', 2);
+                                    
+                                    NHitDet(1:size(Records(iCard).Detector(s).Data,1),1)=s;
+                                    Records(iCard).Detector(s).Data=[Records(iCard).Detector(s).Data table(NHitDet)];
                                     
                                     %if BoolSignals==true %signal
                                         IdxSignal=find(contains(CardNames,DetectorName));

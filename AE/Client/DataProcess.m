@@ -9,10 +9,9 @@ clearvars  -except h;
 %%
 b=ProjectExplorer;
 %%
+h=AEZedo;
 %%
-obj=AE(1,'Hanka\','H:\Google drive\GitHub\Matlab\AE\SandBox\');
-%%
-h=AEClassifier;
+PrepareAnalysis(h,'Samples','all','FullTime','hitdetector',0,'Signals','false')
 %%
 LoadMeasurement(h);
 %%

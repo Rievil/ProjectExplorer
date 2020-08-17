@@ -4,7 +4,7 @@ classdef MeasObj < handle
         Date datetime; %oficial name for measurement
         LastChange datetime;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
-        BruteFolder char; %folder with measured data, from which DataC construct itrs container
+        %BruteFolder char; %folder with measured data, from which DataC construct itrs container
         ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
         
