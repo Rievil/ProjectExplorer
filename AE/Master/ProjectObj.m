@@ -47,9 +47,11 @@ classdef ProjectObj < handle
             end
             
             for i=1:numel(obj.Meas)
+%                 tmp=char(datestr(obj.Meas{i}.Date));
+%                 tmp2=obj.Meas{i}.Name;
                 obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                        'Text',[char(num2str(i)) ' - ' char(datestr(obj.Meas{i}.Date))],...
-                        'NodeData',{i,obj.Meas{i}}); 
+                        'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Name],...
+                        'NodeData',{i,obj.Meas{i},TreeNode}); 
             end
         end
         
@@ -68,6 +70,7 @@ classdef ProjectObj < handle
             for i=1:size(Files,1)
                 load([Files(i).folder '\' Files(i).name],'meas');
                 obj.Meas{i}=meas;
+                obj.Meas{i}.SandBox=SandBox;
             end
             InitSelectorSets(obj);
         end

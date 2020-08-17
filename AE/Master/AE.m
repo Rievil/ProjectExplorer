@@ -15,8 +15,15 @@ classdef AE < MeasObj
             saveobj(obj);
         end
         
-        %initiate selector
-
+        %Again Load data
+        function ReLoadData(obj)
+            if ~exist(obj.Data.BruteFolder, 'dir')
+                GetBruteFolder(obj.Data);
+            end
+            
+            GetBasicTest(obj.Data,obj.Data.BruteFolder);
+            PrepareAnalysis(obj.Data,'Samples','all','FullTime','hitdetector',0,'Signals','true');
+        end
         
         %Saving of object
         function saveobj(obj)

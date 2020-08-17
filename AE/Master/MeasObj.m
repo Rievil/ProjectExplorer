@@ -1,5 +1,6 @@
 classdef MeasObj < handle
     properties (SetAccess = public)
+        
         ID double; %filename within the project folder
         Date datetime; %oficial name for measurement
         LastChange datetime;
@@ -15,6 +16,10 @@ classdef MeasObj < handle
         %this path may change between instances per users, its important 
         %for creation of new object
         Selector;
+    end
+    
+    properties (Dependent)
+        Name char;
     end
     
     methods (Access = public)
@@ -59,8 +64,19 @@ classdef MeasObj < handle
     end
     
     %save load delete operations
-    methods (Access = private)
-
+    methods
+        function Name=get.Name(obj)
+            BruteFolders=split(obj.Data.BruteFolder,'\');
+            Name=char(BruteFolders(end-1));
+%             obj.Name=Name;
+        end
+        
+%         function Name=set.Name(obj)
+%             BruteFolders=split(obj.Data.BruteFolder,'\');
+%             Name=char(BruteFolders(end-1));
+%             obj.Name=Name;
+%         end
+        
     end
     
     

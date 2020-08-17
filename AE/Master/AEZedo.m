@@ -39,18 +39,17 @@ classdef AEZedo < handle
         function DataSweep(obj)
             switch obj.Options.OpenType
                 case 1
-                    [BruteFolder]=GetBruteFolder(obj);
-                    if BruteFolder~="none"
+                    GetBruteFolder(obj);
+                    if obj.BruteFolder~="none"
                         %BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-                        obj.BruteFolder=[BruteFolder '\'];
                         %GetBasicTest(obj,obj.BruteFolder);
-                        obj.Measuremnts=GetBasicTest(obj,obj.BruteFolder);                 
+                        GetBasicTest(obj,obj.BruteFolder);                 
                         obj.Count=size(obj.Measuremnts,2);                
                     else
                         InfoMessage(obj,'Info: The path was not set');                    
                     end
                 case 2
-                    obj.Measuremnts=GetBasicTest(obj,obj.BruteFolder);
+                    GetBasicTest(obj,obj.BruteFolder);
             end
         end
         %------------------------------------------------------------------
@@ -102,8 +101,7 @@ classdef AEZedo < handle
         %------------------------------------------------------------------
         function NewMeaPath(obj)
             %D:\ZEDO_DATA_Export\200318_Melichar
-            [BruteFolder]=GetBruteFolder(obj);
-            obj.BruteFolder=[BruteFolder '\'];
+            GetBruteFolder(obj);
         end %konec set a get methods
         
         %------------------------------------------------------------------
@@ -161,11 +159,7 @@ classdef AEZedo < handle
                         varargin(1:2)=[];
                     otherwise
                 end
-%                 if length(varargin)>1
-%                     varargin(1:2)=[];
-%                 else
-%                     varargin(1:end)=[];
-%                 end
+
             end
             
             %mohu spustit výbìr
@@ -825,7 +819,6 @@ classdef AEZedo < handle
             
             f = waitbar(0,'Please wait...','Name','Fulltime selection');
             nSampleLoop=0;
-            nSampleLoop=0;
             for sample=[samples]
                 nSampleLoop=nSampleLoop+1;
                 waitbar(nSampleLoop/length(samples),f,['Processing ' num2str(nSampleLoop) '/' num2str(length(samples)) ' samples']);
@@ -1017,7 +1010,7 @@ classdef AEZedo < handle
         end
     end %konec vykreslení grafù
     
-    methods (Access = private) %nahrávání souborù apod.   
+    methods (Access = public) %nahrávání souborù apod.   
         %------------------------------------------------------------------
         %Ziskej sily, casy, deformaci z konkretni slozky mereni
         %------------------------------------------------------------------
@@ -1104,6 +1097,7 @@ classdef AEZedo < handle
             catch
                 InfoMessage(obj,'Error: Unable to load measurments, check the files ...');
             end
+            obj.Measuremnts=BaseTest;
             InfoMessage(obj,'Info: Successfuly loaded data!');
             warning('on','all');
         end
@@ -1307,11 +1301,14 @@ classdef AEZedo < handle
         %------------------------------------------------------------------
         %Vykresli jednotlivé hity v selektoru hitù
         %------------------------------------------------------------------
-        function [BruteFolder]=GetBruteFolder(obj)
-            BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-            if BruteFolder==0
-                BruteFolder="none";
+        function GetBruteFolder(obj)
+            obj.BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+            if obj.BruteFolder==0
+                obj.BruteFolder="none";
+            else
+                obj.BruteFolder=[obj.BruteFolder '\'];
             end
+            %obj.BruteFolder=BruteFolder;
         end
         %------------------------------------------------------------------
         %Pøeèti jeden hit
