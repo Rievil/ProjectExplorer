@@ -6,9 +6,10 @@ classdef AEZedo < handle
         ClassData;  %Classification variables
         %MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
         BruteFolder;
-        BasicFolder;
+        CatColumns table;
         CL char; %zástupce pro command line
         Count (1,1) double;
+        MeasurementDate datetime;        
     end
     
 %------------------------------------------------------------------
@@ -1050,8 +1051,14 @@ classdef AEZedo < handle
                             case 2
                                 T2=readtable([files(Index).folder '\' files(Index).name],'Sheet','Test Curve Data');
                                 Tab(i).T=ResamplePressData(obj,T2);
-                            case 3
-                                Tab(i).T=readtable([files(Index).folder '\' files(Index).name]);
+                            case 3 %pentest
+                                Filename=[files(Index).folder '\' files(Index).name];
+                                d = System.IO.File.GetCreationTime(Filename);
+                                creationDateTime = datetime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second,'Format','dd.MM.yyyy');
+                                obj.MeasurementDate=creationDateTime;
+                                Tab(i).T=readtable(Filename);
+                                GetCategoricalArr(obj,Tab(i).T);
+                                %Tab(i).T=GetCategoricalArr(obj,T);
                             otherwise                
                         end
                     end
@@ -1100,6 +1107,38 @@ classdef AEZedo < handle
             InfoMessage(obj,'Info: Successfuly loaded data!');
             warning('on','all');
         end
+        %------------------------------------------------------------------
+        %Load categorical variables
+        %------------------------------------------------------------------
+        function GetCategoricalArr(obj,T)
+            
+            VarNames=T.Properties.VariableNames;
+            
+            n=0;
+            Names(1:numel(VarNames))=string;
+            CatTable=table;
+            for i=1:numel(VarNames)
+                %tmp=string(VarNames{i});
+                %str=string(VarNames{i});
+                text=lower(string(VarNames{i}));
+                Index=find(contains(text,'cat'));
+                
+                
+                if ~isempty(Index)
+                    n=n+1;
+                    TMP(:,1)=categorical(string(table2array(T(:,i))));
+                    CatTable{:,n}=TMP;
+                    Names(n)=['Cat' char(num2str(n))];
+                end
+            end
+            
+            if n>0
+                Names(n+1:1:end)=[];  
+                CatTable.Properties.VariableNames=Names;
+                obj.CatColumns=CatTable;                
+            end
+        end
+        
         %------------------------------------------------------------------
         %Resample data
         %------------------------------------------------------------------        

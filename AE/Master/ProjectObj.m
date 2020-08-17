@@ -10,7 +10,8 @@ classdef ProjectObj < handle
         %clarity this is must - user might want to manualy load data
         %container of specific measuremnt to access the data, in a long
         %term and debuging this is importnat
-        MTreeNodes;
+        MTreeNodes;     
+        SelectorSets struct;
     end
     
     methods (Access=public) 
@@ -36,6 +37,7 @@ classdef ProjectObj < handle
             obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
 
             FillPTree(obj,TreeNode);
+            
         end
         
         function FillPTree(obj,TreeNode)
@@ -46,8 +48,17 @@ classdef ProjectObj < handle
             
             for i=1:numel(obj.Meas)
                 obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                        'Text',[char(num2str(obj.Meas{i}.ID)) ' - ' char(datestr(obj.Meas{i}.Date))],...
+                        'Text',[char(num2str(i)) ' - ' char(datestr(obj.Meas{i}.Date))],...
                         'NodeData',{i,obj.Meas{i}}); 
+            end
+        end
+        
+        function InitSelectorSets(obj)
+            for i=1:numel(obj.Meas)
+                if isempty(obj.SelectorSets)
+                    obj.SelectorSets(i).Sets=1;
+                    obj.SelectorSets(i).Description="Default set";
+                end
             end
         end
         
@@ -58,6 +69,7 @@ classdef ProjectObj < handle
                 load([Files(i).folder '\' Files(i).name],'meas');
                 obj.Meas{i}=meas;
             end
+            InitSelectorSets(obj);
         end
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if

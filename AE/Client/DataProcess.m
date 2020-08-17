@@ -21,6 +21,11 @@ b=ProjectObj;
 %%
 [h]=LoadWork(h);
 %%
+test=["A","B","C","D"];
+test2=categorical(test');
+test3=table(test2);
+
+%%
 %tyto pøíkazy již není potøeba používat
 UserInfo=struct;
     networkinterfaces = java.net.NetworkInterface.getNetworkInterfaces;

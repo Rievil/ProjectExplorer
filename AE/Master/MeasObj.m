@@ -14,6 +14,7 @@ classdef MeasObj < handle
         SandBox char; 
         %this path may change between instances per users, its important 
         %for creation of new object
+        Selector;
     end
     
     methods (Access = public)
@@ -21,9 +22,39 @@ classdef MeasObj < handle
         function obj=MeasObj(ID,ProjectFolder,SandBox)
             obj.ID=ID;
             obj.ProjectFolder=ProjectFolder;
-            obj.BruteFolder=uigetdir(cd,'Select folder with your measurmenets');
+            %obj.BruteFolder=uigetdir(cd,'Select folder with your measurmenets');
             obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
             obj.SandBox=SandBox; 
+        end
+        
+        %fill the table 
+        function FillUITable(obj,UITable)
+            T=table;
+            Names=string({obj.Data.Measuremnts.Name});
+            T.Name=Names';
+            
+            CatTab=obj.Data.CatColumns;
+            
+            T=[T, obj.Selector, CatTab];
+            UITable.Data=T;
+            %UITable.Selection=Selection;
+            UITable.ColumnEditable(2) = true;
+            UITable.ColumnEditable(~2) = false;
+            for i=1:size(T,2)
+                UITable.ColumnName{i}=T.Properties.VariableNames{i};
+            end
+        end
+        
+        %Initiate selector
+        function InitSel(obj)
+            Selection(1:obj.Data.Count,1)=false;
+            obj.Selector=table(Selection);            
+        end
+        
+        %Change Selector
+        function SetSelector(obj,Row,Val,Set)
+            obj.Selector{Row,Set}=Val;
+            %saveobj(obj);
         end
     end
     
@@ -31,6 +62,7 @@ classdef MeasObj < handle
     methods (Access = private)
 
     end
+    
     
     
 end
