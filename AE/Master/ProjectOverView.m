@@ -42,6 +42,7 @@ classdef ProjectOverView < handle
             ProjectCount=numel(obj.Projects);
             obj.ProjectCount=ProjectCount;
         end
+        
         %fill tree node in main app
         function FillTree(obj)
         Nodes = obj.UITree.Children;
@@ -51,7 +52,7 @@ classdef ProjectOverView < handle
                     if obj.Projects(i).Status.Value==1
                     obj.TReeNodes{i}=uitreenode(obj.UITree,...
                         'Text',obj.Projects(i).Name,...
-                        'NodeData',i); 
+                        'NodeData',{i,obj.Projects(i)}); 
                         LoadMeas(obj.Projects(i),obj.SandBoxFolder);
                         FillPTree(obj.Projects(i),obj.TReeNodes{i});
                     else

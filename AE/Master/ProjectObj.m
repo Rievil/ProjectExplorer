@@ -47,7 +47,7 @@ classdef ProjectObj < handle
             for i=1:numel(obj.Meas)
                 obj.MTreeNodes{i}=uitreenode(TreeNode,...
                         'Text',[char(num2str(obj.Meas{i}.ID)) ' - ' char(datestr(obj.Meas{i}.Date))],...
-                        'NodeData',i); 
+                        'NodeData',{i,obj.Meas{i}}); 
             end
         end
         

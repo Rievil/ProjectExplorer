@@ -1,4 +1,4 @@
-classdef AEClassifier < handle
+classdef AEClassifier < AE
     %Public var
     properties (SetAccess = public)
         Measuremnts;  %Main project structure
@@ -41,13 +41,13 @@ classdef AEClassifier < handle
                         %BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
                         obj.BruteFolder=[BruteFolder '\'];
                         %GetBasicTest(obj,obj.BruteFolder);
-                        obj.Measuremnts.Basic=GetBasicTest(obj,obj.BruteFolder);                 
-                        obj.Measuremnts.Count=length(obj.Measuremnts.Basic);                
+                        obj.Measuremnts=GetBasicTest(obj,obj.BruteFolder);                 
+                        obj.Measuremnts.Count=length(obj.Measuremnts);                
                     else
                         InfoMessage(obj,'Info: The path was not set');                    
                     end
                 case 2
-                    obj.Measuremnts.Basic=GetBasicTest(obj,obj.BruteFolder);
+                    obj.Measuremnts=GetBasicTest(obj,obj.BruteFolder);
             end
         end
         %------------------------------------------------------------------
@@ -84,13 +84,14 @@ classdef AEClassifier < handle
             switch OpenType
                 case 1 % manual ussage of AEClassifier
                     T.OpenType=1;
-                    T.OpenTypeLabel='manual ussage of AEClassifier';
+                    T.OpenTypeLabel='Manual ussage of AEClassifier';
                 case 2 % UsageByProjectExplorer
                     T.OpenType=2;
                     T.OpenTypeLabel='Project explorer usage of AEClassifier';
                 otherwise 
                     T.OpenType=1;
             end
+            
         end
         
         %------------------------------------------------------------------
@@ -195,17 +196,17 @@ classdef AEClassifier < handle
             for sample=[samples]
                 nSampleLoop=nSampleLoop+1;
                 waitbar(nSampleLoop/length(samples),f,['Processing ' num2str(nSampleLoop) '/' num2str(length(samples)) ' samples']);
-                IDSelection=obj.Measuremnts.Basic(sample).IDSelection;
+                IDSelection=obj.Measuremnts(sample).IDSelection;
                 TMain=[];
                 DetectorKey=[];
                     for i=1:size(IDSelection,1) %listování mezi kartami
                         for HD=1:length(obj.Options.HitDetector)%listování mezi hit detectory
                         
-                        if obj.Measuremnts.Basic(sample).ZKey.Records(i).Detector(HD).HaveSignals==true
-                            TMPHits=struct2table(obj.Measuremnts.Basic(sample).ZKey.Records(i).Detector(HD).Signals);
+                        if obj.Measuremnts(sample).ZKey.Records(i).Detector(HD).HaveSignals==true
+                            TMPHits=struct2table(obj.Measuremnts(sample).ZKey.Records(i).Detector(HD).Signals);
                         end
                         
-                        TMPDetector=obj.Measuremnts.Basic(sample).ZKey.Records(i).Detector(HD).Data;
+                        TMPDetector=obj.Measuremnts(sample).ZKey.Records(i).Detector(HD).Data;
 
                         clear Feature;
 
@@ -308,7 +309,7 @@ classdef AEClassifier < handle
                     close(f);
             
                 catch
-                    waitbar(0,f,sprintf(['An error occured! \n In specimen: ' obj.Measuremnts.Basic(sample).Name '(' num2str(sample) ');' ...
+                    waitbar(0,f,sprintf(['An error occured! \n In specimen: ' obj.Measuremnts(sample).Name '(' num2str(sample) ');' ...
                         ' card = ' num2str(i) '; row = ' num2str(n) '']));
             end
                 
@@ -346,7 +347,7 @@ classdef AEClassifier < handle
                 
                 scatter3(T{:,axX},T{:,axY},T{:,axZ},Prime/maxP*120+10,'MarkerEdgeColor',...
                 nColors(i,:),'MarkerFaceColor',nColors(i,:),...
-                'DisplayName',obj.Measuremnts.Basic(i).Name);
+                'DisplayName',obj.Measuremnts(i).Name);
             
                 lgd(1)=legend;
                 view(-49,38);
@@ -358,9 +359,9 @@ classdef AEClassifier < handle
                 axes(ax(2));
                 hold on;
                 grid on;
-                X=obj.Measuremnts.Basic(i).Time;
-                Y=obj.Measuremnts.Basic(i).Force;
-                plot(X,Y,'Color',nColors(i,:),'DisplayName',obj.Measuremnts.Basic(i).Name);
+                X=obj.Measuremnts(i).Time;
+                Y=obj.Measuremnts(i).Force;
+                plot(X,Y,'Color',nColors(i,:),'DisplayName',obj.Measuremnts(i).Name);
                 
                 xlabel('Time [s]');
                 ylabel('Force [N]');
@@ -390,7 +391,7 @@ classdef AEClassifier < handle
             for i=obj.Options.Samples
                 clear Tmp;
                 FeaturesSum=[FeaturesSum; obj.ClassData.TrainData(i).Features];
-                Tmp(1:size(obj.ClassData.TrainData(i).Features,1),1)=string(obj.Measuremnts.Basic(i).Name);
+                Tmp(1:size(obj.ClassData.TrainData(i).Features,1),1)=string(obj.Measuremnts(i).Name);
                 SampleNames=[SampleNames; Tmp];
             end
             obj.ClassData.TrainDataSum=FeaturesSum;
@@ -583,11 +584,11 @@ classdef AEClassifier < handle
         %-----------------------------------------------------
         function [Card]=ClassSample(obj,sample)
             Card=struct;
-            for i=1:size(obj.Measuremnts.Basic(sample).ZKey.Records,1)
+            for i=1:size(obj.Measuremnts(sample).ZKey.Records,1)
                 TMain=table;
                 
-                TMPHits=obj.Measuremnts.Basic(sample).ZKey.Records.Hits{i, 1};
-                TMPDetector=obj.Measuremnts.Basic(sample).ZKey.Records.Detector{i, 1};
+                TMPHits=obj.Measuremnts(sample).ZKey.Records.Hits{i, 1};
+                TMPDetector=obj.Measuremnts(sample).ZKey.Records.Detector{i, 1};
                 if i==1
                     TMPDetector(end,:) = [];
                 end
@@ -658,8 +659,8 @@ classdef AEClassifier < handle
                 ClassSample(obj,sample);
             end
 
-            Time=obj.Measuremnts.Basic(sample).Time;
-            Force=obj.Measuremnts.Basic(sample).Force;
+            Time=obj.Measuremnts(sample).Time;
+            Force=obj.Measuremnts(sample).Force;
             pl(3)=plot(Time,Force,'k-','DisplayName','Tensile test');
             
             xlabel('Time [s]');
@@ -669,14 +670,14 @@ classdef AEClassifier < handle
             znacka={'d';'v'};
             SumClassCount=[];
             
-            for i=1:length(obj.Measuremnts.Basic(sample).ZKey.Records.Channel)  
+            for i=1:length(obj.Measuremnts(sample).ZKey.Records.Channel)  
                 axes(ax(1));
                 yyaxis left;
                 hold on;
-                title(obj.Measuremnts.Basic(sample).Name);
+                title(obj.Measuremnts(sample).Name);
 
-                Hits(i).Name=char(obj.Measuremnts.Basic(sample).ZKey.Records.Cards{i,1});
-                T=obj.Measuremnts.Basic(sample).ZKey.Records.Detector{i, 1};
+                Hits(i).Name=char(obj.Measuremnts(sample).ZKey.Records.Cards{i,1});
+                T=obj.Measuremnts(sample).ZKey.Records.Detector{i, 1};
                 %.ZKey.Records.Parameters
                 TMPTime=T{:,4};
                 Hits(i).Time=TMPTime;
@@ -696,7 +697,7 @@ classdef AEClassifier < handle
 
                 scatter(X,Y,ClassColor(:,i)/obj.ClassData.nClases*125,...
                     ClassColor(:,i),'filled','Marker',znacka{i},...
-                    'DisplayName',obj.Measuremnts.Basic(sample).ZKey.Records.Cards(i));
+                    'DisplayName',obj.Measuremnts(sample).ZKey.Records.Cards(i));
                 
                 ax(3)=colorbar;
                 ax(3).Label.String='Classes';
@@ -736,15 +737,15 @@ classdef AEClassifier < handle
             for sample=[samples]
                 nSampleLoop=nSampleLoop+1;
                 clf(f);
-                X=obj.Measuremnts.Basic(sample).Time;
-                Y=obj.Measuremnts.Basic(sample).Force;  
+                X=obj.Measuremnts(sample).Time;
+                Y=obj.Measuremnts(sample).Force;  
 
                 yyaxis right;
                 hold on;
                 ax(2)=gca;
-                pathTMP=[obj.BruteFolder obj.Measuremnts.Basic(sample).Name '\'];
+                pathTMP=[obj.BruteFolder obj.Measuremnts(sample).Name '\'];
                 [ZedoKey]=GetKeyOfMea(obj,pathTMP);
-                obj.Measuremnts.Basic(sample).ZKey=ZedoKey;
+                obj.Measuremnts(sample).ZKey=ZedoKey;
 
                 [Hits]=DrawHitsInSelection(obj,sample,f,'begin');            
                 
@@ -789,7 +790,7 @@ classdef AEClassifier < handle
                 TimeStart(TimeStart<0)=0;
 
                 HitSel=[TimeStart, TimeStop];
-                obj.Measuremnts.Basic(sample).TimeHitSelection=HitSel;
+                obj.Measuremnts(sample).TimeHitSelection=HitSel;
 
                 yyaxis right;
                 hold on;
@@ -806,7 +807,7 @@ classdef AEClassifier < handle
                 scatter(x,y,'dk','Filled','HandleVisibility','off');
 
                 [IDSelection]=GetIDSelection(obj,sample);
-                obj.Measuremnts.Basic(sample).IDSelection=IDSelection;
+                obj.Measuremnts(sample).IDSelection=IDSelection;
                 pause(2);
             end
            msgbox('You have succesfuly created selective hits selecetion!');
@@ -828,15 +829,15 @@ classdef AEClassifier < handle
                 %waitbar(poc/length(samples),f,['Processing ' num2str(nSampleLoop) '/' num2str(length(samples)) ' samples']);
                 %nSampleLoop=nSampleLoop+1;
                 
-                pathTMP=[obj.BruteFolder obj.Measuremnts.Basic(sample).Name '\'];
+                pathTMP=[obj.BruteFolder obj.Measuremnts(sample).Name '\'];
                 [ZedoKey]=GetKeyOfMea(obj,pathTMP);
-                obj.Measuremnts.Basic(sample).ZKey=ZedoKey;
+                obj.Measuremnts(sample).ZKey=ZedoKey;
                 
-                HitSel=[obj.Measuremnts.Basic(sample).Time(1), obj.Measuremnts.Basic(sample).Time(end)];
-                obj.Measuremnts.Basic(sample).TimeHitSelection=HitSel;
+                HitSel=[obj.Measuremnts(sample).Time(1), obj.Measuremnts(sample).Time(end)];
+                obj.Measuremnts(sample).TimeHitSelection=HitSel;
 
                 [IDSelection]=GetIDSelection(obj,sample);
-                obj.Measuremnts.Basic(sample).IDSelection=IDSelection;
+                obj.Measuremnts(sample).IDSelection=IDSelection;
             end
             waitbar(1,f,sprintf('You have succesfuly created fulltime hits selection!\nSamples: %d Elapsed Time: %.4f s',nSampleLoop,toc));
             pause(2);
@@ -850,10 +851,10 @@ classdef AEClassifier < handle
             lines={'-','-.','--',':'};
             figure(f);
             
-            if ~isempty({obj.Measuremnts.Basic(sample).ZKey.Records.Cards})
-                Cards={obj.Measuremnts.Basic(sample).ZKey.Records.Cards};
+            if ~isempty({obj.Measuremnts(sample).ZKey.Records.Cards})
+                Cards={obj.Measuremnts(sample).ZKey.Records.Cards};
             else
-                Cards={obj.Measuremnts.Basic(sample).ZKey.Records.SampleCards};
+                Cards={obj.Measuremnts(sample).ZKey.Records.SampleCards};
             end
             
             for HD=1:length(obj.Options.HitDetector)
@@ -862,13 +863,13 @@ classdef AEClassifier < handle
                 for i=1:nCards
                     Hits(i).Name=Cards{i};
 
-                    %TMPS={obj.Measuremnts.Basic(sample).ZKey.Records(i).Detector.Data};
-                    Tfull=obj.Measuremnts.Basic(sample).ZKey.Records(i).ConDetector;
+                    %TMPS={obj.Measuremnts(sample).ZKey.Records(i).Detector.Data};
+                    Tfull=obj.Measuremnts(sample).ZKey.Records(i).ConDetector;
 
                     %IdHD=find(Tfull{:,3}==HD);
                     T=Tfull(Tfull{:,3}==obj.Options.HitDetector(HD),:);
                     %=T;
-                    %T=obj.Measuremnts.Basic(sample).ZKey.Records.Detector.Data;
+                    %T=obj.Measuremnts(sample).ZKey.Records.Detector.Data;
                     %.ZKey.Records.Parameters
                     TMPTime=T{:,4};
                     Hits(i).Time=TMPTime;
@@ -890,7 +891,7 @@ classdef AEClassifier < handle
                             ylabel('HitsCount');
     
                         case 'final'
-                            HitSel=obj.Measuremnts.Basic(sample).TimeHitSelection;
+                            HitSel=obj.Measuremnts(sample).TimeHitSelection;
                             Time=Hits(i).Time;
                             CumSum=Hits(i).hCumSum;
                             for j=1:size(HitSel,1)
@@ -912,8 +913,8 @@ classdef AEClassifier < handle
         %------------------------------------------------------------------
         function [IDSelection]=GetIDSelection(obj,sample)
             warning('off','all');
-            ZKey=obj.Measuremnts.Basic(sample).ZKey;
-            TimeArrHitSelection=obj.Measuremnts.Basic(sample).TimeHitSelection;
+            ZKey=obj.Measuremnts(sample).ZKey;
+            TimeArrHitSelection=obj.Measuremnts(sample).TimeHitSelection;
             
 
                    
@@ -996,11 +997,11 @@ classdef AEClassifier < handle
                 Parameter=lower(varargin{1});
                 switch Parameter
                     case 'all'
-                        handle=ClassStatPlot(obj.ClassData,{obj.Measuremnts.Basic.Name},'all');
+                        handle=ClassStatPlot(obj.ClassData,{obj.Measuremnts.Name},'all');
                         varargin(1)=[];
                     case 'sample'
                         if (isnumeric(varargin{2}))
-                            handle=ClassStatPlot(obj.ClassData,{obj.Measuremnts.Basic.Name},varargin{2});
+                            handle=ClassStatPlot(obj.ClassData,{obj.Measuremnts.Name},varargin{2});
                             varargin(1:2)=[];
                         end
                         

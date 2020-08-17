@@ -7,9 +7,9 @@ classdef AE < MeasObj
             obj@MeasObj(ID,ProjectFolder,SandBox);
             obj.Data=AEClassifier(2);
             
-            obj.Data.BruteFolder=obj.BruteFolder;
-            
-            DataSweep(obj.Data);
+            obj.Data.BruteFolder=obj.BruteFolder;            
+            DataSweep(obj.Data);       
+            PrepareAnalysis(obj.Data,'Samples','all','FullTime','hitdetector',0,'Signals','true')
             
             saveobj(obj);
         end
