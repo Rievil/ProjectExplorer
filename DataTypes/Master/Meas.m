@@ -1,13 +1,15 @@
-classdef Meas
-    %MEAS Summary of this class goes here
-    %   Detailed explanation goes here
-    
+classdef Meas < handle
     properties
-        Property1
+        DateOfMeasurement datetime;
+        BruteFolder char;
+        Filename char;
+        IsExcel logical;
+        Sheet double;
+        ColStart double;
     end
     
     methods
-        function obj = Meas(inputArg1,inputArg2)
+        function obj = Meas(filename)
             %MEAS Construct an instance of this class
             %   Detailed explanation goes here
             obj.Property1 = inputArg1 + inputArg2;
