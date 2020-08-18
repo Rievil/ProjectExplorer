@@ -1,7 +1,7 @@
 classdef MeasObj < handle
     properties (SetAccess = public)
-        
-        ID double; %filename within the project folder
+        FName char;  %filename within the project folder - important for deleting
+        ID double; %number
         Date datetime; %oficial name for measurement
         LastChange datetime;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
@@ -61,6 +61,17 @@ classdef MeasObj < handle
             obj.Selector{Row,Set}=Val;
             %saveobj(obj);
         end
+        
+        %prepare tab for inspection of signle specimen
+        function [Tab]=Inspect(obj,Row)
+            Specimen=obj.Data.Measuremnts(Row);
+            RowNames=fieldnames(Specimen);
+            for i=1:numel(RowNames)
+                MyValues{i} = getfield(Specimen,RowNames{i});
+            end           
+            %Tab=table(MyValues','RowNames',RowNames','VariableNames',{'Value'});
+            Tab=table(RowNames,MyValues','VariableNames',{'Parameters','Value'});
+        end
     end
     
     %save load delete operations
@@ -69,14 +80,7 @@ classdef MeasObj < handle
             BruteFolders=split(obj.Data.BruteFolder,'\');
             Name=char(BruteFolders(end-1));
 %             obj.Name=Name;
-        end
-        
-%         function Name=set.Name(obj)
-%             BruteFolders=split(obj.Data.BruteFolder,'\');
-%             Name=char(BruteFolders(end-1));
-%             obj.Name=Name;
-%         end
-        
+        end        
     end
     
     

@@ -27,23 +27,15 @@ test3=table(test2);
 
 %%
 %tyto pøíkazy již není potøeba používat
-UserInfo=struct;
-    networkinterfaces = java.net.NetworkInterface.getNetworkInterfaces;
-    nimacs = cell(0, 2);
-    while networkinterfaces.hasMoreElements
-         networkinterface = networkinterfaces.nextElement;
-         macstring = strjoin(cellstr(dec2hex(typecast(networkinterface.getHardwareAddress, 'uint8'))), ':');
-          nimacs = [nimacs; {char(networkinterface.getDisplayName), macstring}];
-    end
-    RT=cell2table(nimacs, 'VariableNames', {'Interface', 'MAC'});
-    
-    for i=1:size(RT,1)
-        if length(RT.MAC(i))
-            
-            break;
-        end
-    end
-    UserInfo.MAC=RT{i,2};
+Par={'Name','Height','Wheight','Sex'};
+sex=categorical(["M","F"]);
+Val={'John',178,78,sex(1)};
+T=table(Val','RowNames',Par','VariableNames',{'Value'})
+%%
+T = table(rand(10,1),categorical(cellstr(('rgbbrgrrbr').')))
+% Convert to double and extract with {}
+Td = varfun(@double,T)
+mat = Td{:,:}
 %%
 %vše lze zapsat pøímo do volání funkce
 %je jedno jestli se píšou malé nebo velké písmena

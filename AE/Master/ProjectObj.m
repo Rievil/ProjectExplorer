@@ -71,6 +71,7 @@ classdef ProjectObj < handle
                 load([Files(i).folder '\' Files(i).name],'meas');
                 obj.Meas{i}=meas;
                 obj.Meas{i}.SandBox=SandBox;
+                obj.Meas{i}.FName=[Files(i).folder '\' Files(i).name];
             end
             InitSelectorSets(obj);
         end
@@ -102,6 +103,13 @@ classdef ProjectObj < handle
             end
         end %end of status funciton
         
+        %delete measurment
+        function DeleteM(obj,i,Node)
+            Node.delete;
+            filename=obj.Meas{i}.FName;
+            delete(filename);  
+            obj.Meas{i}=[];                      
+        end
         %class destructor of object
         function delete(obj)
             

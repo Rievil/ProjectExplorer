@@ -62,7 +62,7 @@ classdef ProjectOverView < handle
             else
                 
             end
-            save(obj);
+            %save(obj);
         end
         
         %delete the node and its children (actualy will leave the node
@@ -86,7 +86,12 @@ classdef ProjectOverView < handle
         %save object
         function save(obj)
             Projects=obj.Projects;
+            for i=1:numel(obj.Projects)
+                Projects(i).Meas=[];
+                Projects(i).MTreeNodes=[];
+            end
             save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
+            %obj.Projects=ProjectsAll;
         end
     end
 end
