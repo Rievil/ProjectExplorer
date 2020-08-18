@@ -82,11 +82,14 @@ classdef ProjectOverView < handle
     end %end of public methods
     
     %private methods for controling project overview
-    methods (Access = private)
+    methods (Access = public)
         %save object
         function save(obj)
             Projects=obj.Projects;
             for i=1:numel(obj.Projects)
+                for j=1:numel(obj.Projects(i).Meas)
+                    saveobj(obj.Projects(i).Meas{j});
+                end
                 Projects(i).Meas=[];
                 Projects(i).MTreeNodes=[];
             end

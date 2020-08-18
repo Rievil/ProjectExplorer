@@ -55,12 +55,47 @@ classdef ProjectObj < handle
             end
         end
         
+        %work with selectors
         function InitSelectorSets(obj)
-            for i=1:numel(obj.Meas)
+            %for i=1:numel(obj.Meas)
                 if isempty(obj.SelectorSets)
-                    obj.SelectorSets(i).Sets=1;
-                    obj.SelectorSets(i).Description="Default set";
+                    obj.SelectorSets.Sets=1;
+                    obj.SelectorSets.Description="Default set";                    
                 end
+            %end
+        end
+        
+        %add selector
+        function AddSelector(obj)
+            if ~isempty(obj.SelectorSets)
+                n=size(obj.SelectorSets,2);
+                obj.SelectorSets(n+1).Sets=n+1;
+                obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
+                for i=1:numel(obj.Meas)
+                    AddSelRows(obj.Meas{i},n+1,obj.SelectorSets(n+1).Description);
+                end
+            else
+                InitSelectorSets(obj);
+            end
+        end
+        
+        %change name of selector group
+        function ChangeSelName(obj,nSet,NewName)
+            obj.SelectorSets(nSet).Description=string(NewName);
+            for i=1:numel(obj.Meas)
+                obj.Meas{i}.Selector.Properties.VariableNames{nSet}=char(NewName);
+            end
+        end
+        
+        %delete selecetor group
+        function DeleteSel(obj,nSet)
+            obj.SelectorSets(nSet)=[];
+            for i=1:size(obj.SelectorSets,2)
+                obj.SelectorSets(i).Sets=i;
+            end
+            
+            for i=1:numel(obj.Meas)
+                DeleteSelCol(obj.Meas{i},nSet)
             end
         end
         

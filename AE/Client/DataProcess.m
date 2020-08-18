@@ -27,10 +27,15 @@ test3=table(test2);
 
 %%
 %tyto pøíkazy již není potøeba používat
-Par={'Name','Height','Wheight','Sex'};
-sex=categorical(["M","F"]);
-Val={'John',178,78,sex(1)};
-T=table(Val','RowNames',Par','VariableNames',{'Value'})
+Set=struct;
+Set(1).Desc="Default";
+Set(2).Desc="Set 1";
+
+Set(1).Val=1;
+Set(2).Val=2;
+
+tst=string({Set.Desc});
+tst2=[Set.Val];
 %%
 T = table(rand(10,1),categorical(cellstr(('rgbbrgrrbr').')))
 % Convert to double and extract with {}

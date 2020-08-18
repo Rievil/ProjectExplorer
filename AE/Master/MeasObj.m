@@ -33,14 +33,14 @@ classdef MeasObj < handle
         end
         
         %fill the table 
-        function FillUITable(obj,UITable)
+        function FillUITable(obj,UITable,Sel)
             T=table;
             Names=string({obj.Data.Measuremnts.Name});
             T.Name=Names';
             
             CatTab=obj.Data.CatColumns;
             
-            T=[T, obj.Selector, CatTab];
+            T=[T, obj.Selector(:,Sel), CatTab];
             UITable.Data=T;
             %UITable.Selection=Selection;
             UITable.ColumnEditable(2) = true;
@@ -60,6 +60,18 @@ classdef MeasObj < handle
         function SetSelector(obj,Row,Val,Set)
             obj.Selector{Row,Set}=Val;
             %saveobj(obj);
+        end
+        
+        %add Selector rows
+        function AddSelRows(obj,nSet,Name)
+            Selector(1:1:obj.Data.Count,1)=false;
+            %obj.Selector=[obj.Selector, table(Selector)];
+            obj.Selector = addvars(obj.Selector,Selector,'NewVariableNames',char(Name));
+        end
+        
+        %delete sel column
+        function DeleteSelCol(obj,nSet)
+            obj.Selector(:,nSet)=[];
         end
         
         %prepare tab for inspection of signle specimen
