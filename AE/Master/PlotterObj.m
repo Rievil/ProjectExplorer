@@ -16,8 +16,8 @@ classdef PlotterObj < handle
         
         function Plot(obj,x,y)
             plot(obj.Ax,x,y);
-            %obj.Ax.YLabel.String ='Defformation';
-            %obj.Ax.XLabel.String ='Force';
+            obj.Ax.YLabel.String ='Defformation';
+            obj.Ax.XLabel.String ='Force';
         end
     end
 end
