@@ -21,8 +21,10 @@ classdef AE < MeasObj
                 GetBruteFolder(obj.Data);
             end
             
-            GetBasicTest(obj.Data,obj.Data.BruteFolder);
-            PrepareAnalysis(obj.Data,'Samples','all','FullTime','hitdetector',0,'Signals','true');
+            if obj.Data.BruteFolder~="none"
+                GetBasicTest(obj.Data,obj.Data.BruteFolder);
+                PrepareAnalysis(obj.Data,'Samples','all','FullTime','hitdetector',0,'Signals','true');
+            end
         end
         
         %Saving of object
