@@ -149,5 +149,17 @@ classdef ProjectObj < handle
         function delete(obj)
             
         end
+        
+        %pull data from meas
+        function [StructData]=PullData(obj,Set)
+            StructData=struct;
+            for i=1:numel(obj.Meas)
+                [Data,Cat]=PullData(obj.Meas{i},Set);
+                StructData(i).PulledData=Data;
+                StructData(i).Names=fieldnames(StructData(i).PulledData);
+                StructData(i).Size=size(StructData(i).PulledData);
+                StructData(i).Cat=Cat;
+            end
+        end
     end
 end

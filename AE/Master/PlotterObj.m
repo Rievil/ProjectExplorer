@@ -3,11 +3,21 @@ classdef PlotterObj < handle
     %together and prepare them for all kinds of operations
     
     properties (SetAccess = public)
+        Ax; %selected axis for plotting
+        UITable; %handle for ui Table
+        Tables;
     end
     
     methods (Access = public)
-        function obj=PlotterObj()
-            
+        function obj=PlotterObj(ax,tab)
+            obj.Ax=ax;
+            obj.UITable=tab;            
+        end
+        
+        function Plot(obj,x,y)
+            plot(obj.Ax,x,y);
+            %obj.Ax.YLabel.String ='Defformation';
+            %obj.Ax.XLabel.String ='Force';
         end
     end
 end

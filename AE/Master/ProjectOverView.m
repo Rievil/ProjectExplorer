@@ -86,6 +86,7 @@ classdef ProjectOverView < handle
         %save object
         function save(obj)
             Projects=obj.Projects;
+            
             for i=1:numel(obj.Projects)
                 for j=1:numel(obj.Projects(i).Meas)
                     saveobj(obj.Projects(i).Meas{j});
@@ -94,6 +95,7 @@ classdef ProjectOverView < handle
                 Projects(i).MTreeNodes=[];
             end
             save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
+            
             %obj.Projects=ProjectsAll;
         end
     end

@@ -84,7 +84,16 @@ classdef MeasObj < handle
             %Tab=table(MyValues','RowNames',RowNames','VariableNames',{'Value'});
             Tab=table(RowNames,MyValues','VariableNames',{'Parameters','Value'});
         end
+        
+        %get data for data core
+        function [Data,Cat]=PullData(obj,Set)     
+            Idx=table2array(obj.Selector(:,Set));
+            Data=obj.Data.Measuremnts(Idx);
+            Cat=obj.Data.CatColumns(Idx,:);
+        end
     end
+    
+    
     
     %save load delete operations
     methods
@@ -93,8 +102,7 @@ classdef MeasObj < handle
             Name=char(BruteFolders(end-1));
 %             obj.Name=Name;
         end        
-    end
-    
+    end   
     
     
 end
