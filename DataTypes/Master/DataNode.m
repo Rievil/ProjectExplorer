@@ -1,18 +1,13 @@
 classdef DataNode
-    %DATANODE Summary of this class goes here
-    %   Detailed explanation goes here
-    
+%data node will give unifical data package based on the RFile or RFolder
+%this will be drawn from the subclases
     properties
-        Property1
+        CreationDate datetime;
     end
-    
-    methods
-        function obj = DataNode(inputArg1,inputArg2)
-            %DATANODE Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+    methods (Abstract)
+        function Node=getData(obj)
+        Node=obj.Data;
         end
-        
     end
 end
 
