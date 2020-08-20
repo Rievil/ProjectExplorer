@@ -24,8 +24,8 @@ classdef DataCore < handle
         end
         
         function [x,y]=GetData(obj)
-            x=obj.Data.Time;
-            y=obj.Data.Force;
+            x={obj.Data.Time};
+            y={obj.Data.Force};
         end
     end
     

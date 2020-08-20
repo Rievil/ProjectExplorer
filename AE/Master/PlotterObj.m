@@ -6,6 +6,7 @@ classdef PlotterObj < handle
         Ax; %selected axis for plotting
         UITable; %handle for ui Table
         Tables;
+        GObj; %drawn graphical objects
     end
     
     methods (Access = public)
@@ -14,8 +15,12 @@ classdef PlotterObj < handle
             obj.UITable=tab;            
         end
         
+        %plot single x,y
         function Plot(obj,x,y)
-            plot(obj.Ax,x,y);
+            hold(obj.Ax,'on');
+            for i=1:numel(x)
+                obj.GObj(i)=plot(obj.Ax,x{i},y{i});
+            end
             obj.Ax.YLabel.String ='Defformation';
             obj.Ax.XLabel.String ='Force';
         end
