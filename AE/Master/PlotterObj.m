@@ -16,10 +16,17 @@ classdef PlotterObj < handle
         end
         
         %plot single x,y
-        function Plot(obj,x,y)
+        function Plot(obj,x,y,type)
             hold(obj.Ax,'on');
-            for i=1:numel(x)
-                obj.GObj(i)=plot(obj.Ax,x{i},y{i});
+            switch type
+                case 'line'
+                    for i=1:numel(x)
+                        obj.GObj(i)=plot(obj.Ax,x{i},y{i});
+                    end
+                case 'scatter'
+                    for i=1:numel(x)
+                        obj.GObj(i)=scatter(obj.Ax,x{i},y{i});
+                    end
             end
             obj.Ax.YLabel.String ='Defformation';
             obj.Ax.XLabel.String ='Force';
