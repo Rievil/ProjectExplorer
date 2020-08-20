@@ -5,42 +5,61 @@ classdef DTab < RFile
     %seisssion + small values, such as dimensions, wheight, or dimensions +
     %important categorical values, which are used for description of 
     properties
-        Data table;
+        RawData table;
         Categorical table;
+        NameKey (:,1) string;
+    end
+    properties 
+        VarNames cell;
     end
     
     methods
-        function obj = DTab(File)
-            obj@RFile(File);
+        function obj = DTab(Filename)
+            obj@RFile(Filename);
             
-            d = System.IO.File.GetCreationTime(Filename);
-            obj.CreationDate = datetime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second,'Format','dd.MM.yyyy');
-            obj.Data=readtable(Filename);
-            GetCategoricalArr(obj)
+            
+            obj.RawData=readtable(Filename,'PreserveVariableNames',true);
+            GetCategoricalArr(obj);
+            ScanColumns(obj);
+        end
+        
+        %scan cols for different types of data
+        function ScanColumns(obj)
+            obj.VarNames=obj.RawData.Properties.VariableNames;           
+            for i=1:numel(obj.VarNames)
+                text=string(obj.VarNames{i});
+                switch lower(text)
+                    case 'name'
+                        obj.NameKey=obj.RawData{:,i};
+                    case 'velocity'
+                        
+                    case 'aelength'
+                        
+                    otherwise
+                end
+            end
         end
         
         %get categorical vars from table
         function GetCategoricalArr(obj)
-            T=obj.Data;
-            VarNames=T.Properties.VariableNames;           
+            obj.VarNames=obj.RawData.Properties.VariableNames;   
             n=0;
-            Names(1:numel(VarNames))=string;
-            CatTable=table;
-            for i=1:numel(VarNames)
-                text=lower(string(VarNames{i}));
+            Names(1:numel(obj.VarNames))=string;
+            obj.Categorical=table;
+            for i=1:numel(obj.VarNames)
+                text=lower(string(obj.VarNames{i}));
                 Index=find(contains(text,'cat'));
                 if ~isempty(Index)
                     n=n+1;
-                    TMP(:,1)=categorical(string(table2array(T(:,i))));
-                    CatTable{:,n}=TMP;
+                    TMP(:,1)=categorical(string(table2array(obj.RawData(:,i))));
+                    obj.Categorical{:,n}=TMP;
                     Names(n)=['Cat' char(num2str(n))];
                 end
             end
             
             if n>0
                 Names(n+1:1:end)=[];  
-                CatTable.Properties.VariableNames=Names;
-                obj.Categorical=CatTable;                
+                obj.Categorical.Properties.VariableNames=Names;            
             end
         end
     end

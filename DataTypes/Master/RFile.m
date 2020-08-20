@@ -3,12 +3,14 @@ classdef RFile < DataNode
     %   Detailed explanation goes here
     
     properties
-        Filename;
+        Filename char;
     end
     
     methods
-        function obj = RFile(File)
-            obj.Filename=File;
+        function obj = RFile(Filename)
+            obj.Filename=Filename;
+            d = System.IO.File.GetCreationTime(Filename);
+            obj.CreationDate = datetime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second,'Format','dd.MM.yyyy');
         end
         
     end
