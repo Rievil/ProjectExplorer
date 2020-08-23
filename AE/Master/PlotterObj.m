@@ -28,6 +28,10 @@ classdef PlotterObj < handle
                         obj.GObj(i)=scatter(obj.Ax,x{i},y{i});
                     end
             end
+            
+            roi = drawcrosshair(obj.Ax);
+            addlistener(roi,'MovingROI',@(src,data)displayInfo(src,data,hAx,img));
+            
             obj.Ax.YLabel.String ='Defformation';
             obj.Ax.XLabel.String ='Force';
         end
