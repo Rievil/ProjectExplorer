@@ -44,8 +44,7 @@ classdef PlotterObj < handle
             PanelPos=obj.Panel.Position;
             Pos=[PanelPos(1)+5 PanelPos(4)-60 ...
                 PanelPos(3)-20 20];
-            
-            
+
             obj.Children{1}=uidropdown(obj.Panel,'Items',{'-',':','--'},...
                      'Value','-','Position',Pos,...
                      'ValueChangedFcn',@(src,event)DropDownChange(obj,event));                        
