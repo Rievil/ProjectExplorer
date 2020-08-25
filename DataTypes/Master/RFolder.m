@@ -3,7 +3,7 @@ classdef RFolder < DataNode
     %   Detailed explanation goes here
     
     properties
-       Folder;
+       Folder char;
     end
     
     methods
