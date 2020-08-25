@@ -22,11 +22,11 @@ classdef PlotterObj < handle
             switch type
                 case 'line'
                     for i=1:numel(x)
-                        obj.GObj{i}=plot(obj.Ax,x{i},y{i});
+                        obj.GObj(i)=plot(obj.Ax,x{i},y{i});
                     end
                 case 'scatter'
                     for i=1:numel(x)
-                        obj.GObj{i}=scatter(obj.Ax,x{i},y{i});
+                        obj.GObj(i)=scatter(obj.Ax,x{i},y{i});
                     end
             end
             
@@ -41,18 +41,15 @@ classdef PlotterObj < handle
         end
         
         function DrawDropDownMenu(obj)
-            PanelPos=obj.Panel.Position;
-            Pos=[PanelPos(1)+5 PanelPos(4)-60 ...
-                PanelPos(3)-20 20];
-            
-            obj.Children{1}=uidropdown(obj.Panel,'Items',{'Red','Yellow','Blue','Green'},...
-                     'Value','Blue','Position',Pos,...
-                     'ValueChangedFcn',@(src,event)DropDownChange(obj,event));                        
+            p=25;
+            obj.Children(1) = uidropdown(obj.Panel,'Items',{'Red','Yellow','Blue','Green'},...
+                     'Value','Blue',...
+                     'ValueChangedFcn',@(obj.Children(1),event) DropDownChange(obj.Children(1),p));                        
         end
         
-        function DropDownChange(obj,event)
-            test=event;
-            obj.GObj{1}.LineStyle=':';
+        function DropDownChange(obj, event)
+            test=auto;
+            %
         end
     end
 end

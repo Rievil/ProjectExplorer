@@ -37,6 +37,7 @@ classdef DataCore < handle
                 [FirstName] = intersect(FirstName,SecondName,'legacy');
             end
             MinimumNames=FirstName;
+            
             %i have minimum same amount of common fields, lets delete the
             %orphans
             for i=1:obj.Count
@@ -44,9 +45,7 @@ classdef DataCore < handle
                 
                 FName=obj.RawData(i).Names(~A);
                 obj.RawData(i).PulledData=rmfield(obj.RawData(i).PulledData,FName);
-                
                 obj.RawData(i).Names(B==0,:)=[];
-                
                 obj.Data=[obj.Data, obj.RawData(i).PulledData];
                 T=obj.RawData(i).Cat;
                 obj.Cat=[obj.Cat; T];
