@@ -51,7 +51,7 @@ classdef PlotterObj < handle
         end
         
         function DropDownChange(obj,event)
-            test=event;
+            
             obj.GObj{1}.LineStyle=':';
         end
     end
