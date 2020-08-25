@@ -4,6 +4,7 @@ classdef RFile < DataNode
     
     properties
         Filename char;
+        Data cell;
     end
     
     methods

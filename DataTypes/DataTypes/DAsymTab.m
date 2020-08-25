@@ -4,13 +4,30 @@ classdef DAsymTab < RFile
     
     properties
         RawData table;
+        ColSize (1,1) uint32;
     end
     
     methods
-        function obj = DAsymTab(Filename)
+        function obj = DAsymTab(Filename,ColSize)
             obj@RFile(Filename);
+            obj.ColSize=ColSize;
             
             obj.RawData=readtable(obj.Filename,'Sheet','Test Curve Data'); 
+            SplitData(obj);
+        end
+        
+        function SplitData(obj)
+            n=0;
+            for i=1:obj.ColSize:size(obj.RawData,2)-obj.ColSize+1
+                TMP=obj.RawData{:,i:i+obj.ColSize-1};
+                for j=1:obj.ColSize
+                    TMP2=TMP(:,j);
+                    TMP3(:,j)=TMP2(~isnan(TMP2));
+                end
+                n=n+1;
+                obj.Data{n}=TMP3;
+                clear TMP TMP2 TMP3;
+            end
         end
         
         function ResamplePressData(obj,inT)
@@ -21,9 +38,8 @@ classdef DAsymTab < RFile
                 OrgFreq=1/(Time(2)-Time(1));
                 if OrgFreq<TargetFreq
                     
-                    [N,D] = rat(TargetFreq/OrgFreq);                                       % Rational Fraction Approximation
+                    [N,D] = rat(TargetFreq/OrgFreq); % Rational Fraction Approximation
                     Check = [TargetFreq/OrgFreq, N/D] ;
-
 
                     tmpTime=resample(inT{:,i},N,D);
                     tmpArr=resample(inT{:,i+1},N,D);
