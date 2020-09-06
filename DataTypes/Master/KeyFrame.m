@@ -1,9 +1,11 @@
 classdef KeyFrame
     %KEYFRAME Summary of this class goes here
     %   Detailed explanation goes here
-    
+    %table 
     properties
-        Property1
+        SelectedTypes; %selected objects for each data type
+        ContainerType; %file folder
+        Keyword; %specific keyword for each file = datatype
     end
     
     methods
