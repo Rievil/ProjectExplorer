@@ -20,6 +20,7 @@ classdef SignalExtractor < handle
         FPeaks;
         SPeaks;
         CutIndex;
+        Anotate
     end
     
     methods (Access = public)
@@ -39,7 +40,23 @@ classdef SignalExtractor < handle
         %------------------------------------------------------------------
         %Rozhodovací iniciace extraktoru
         %------------------------------------------------------------------
-        function obj = SignalExtractor
+        function obj = SignalExtractor(varargin)
+            if numel(varargin)
+                obj.Anotate=false;
+                while numel(varargin)>0
+                    switch lower(varargin{1})
+                        case 'signal'
+                            obj.Signal=varargin{2};
+                            obj.SampleCount=numel(obj.Signal);
+                        case 'fs'
+                            obj.SampFreq=varargin{2};
+                        otherwise
+                    end
+                    varargin([1:2])=[];
+                end
+                SigExtract(obj,obj.Signal,obj.SampFreq);                
+            else
+            end
             %set all variables and count rest of variables  
         end
         %------------------------------------------------------------------
@@ -176,7 +193,7 @@ classdef SignalExtractor < handle
             'MinPeakHeight',maxY*0.3);
             peaks=struct('FPeaks',pks,'FLocs',locs,'FWidth',w,'FProminence',p);
 
-            if anotate==true
+            if obj.Anotate==true
                 findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
                 'extents','MinPeakDistance',minFreqDistance,'NPeaks',10,...
                 'MinPeakHeight',maxY*0.3);
