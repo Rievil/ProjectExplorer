@@ -6,18 +6,19 @@ classdef DataFrame < GUILib & OperLib
         Property1
     end
     
+    %Interface of class
+    methods (Abstract)
+        Read(obj,varargin);
+    end
+    
     methods
-        function obj = DataFrame(inputArg1,inputArg2)
-            %DATAFRAME Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        %constructor
+        function obj = DataFrame(varargin)
+            obj@GUILib;
+            obj@OperLib;
+            
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
-        end
     end
 end
 

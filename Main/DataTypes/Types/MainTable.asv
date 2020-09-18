@@ -7,7 +7,12 @@ classdef MainTable < DataFrame
     end
     
     methods
-        function obj = MainTable(inputArg1,inputArg2)
+        function obj = MainTable(varargin)
+            if numel(varargin)>0
+                
+            else
+                
+            end
             %MAINTABLE Construct an instance of this class
             %   Detailed explanation goes here
             obj.Property1 = inputArg1 + inputArg2;
