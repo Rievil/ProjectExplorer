@@ -12,6 +12,10 @@ classdef ProjectObj < handle
         %term and debuging this is importnat
         MTreeNodes;     
         SelectorSets struct;
+        
+        MasterDataTypesTable; 
+        %master data table, which all measruemnts will or will not clone for
+        %their ussage
     end
     
     methods (Access=public) 
@@ -160,6 +164,16 @@ classdef ProjectObj < handle
                 StructData(i).Size=size(StructData(i).PulledData);
                 StructData(i).Cat=Cat;
             end
+        end
+        
+        %set master data table for project
+        function SetDataTypesTable(obj,TypeTable)
+            obj.MasterDataTypesTable=TypeTable;
+        end
+        
+        %will copy options for data loading to its measobj
+        function CloneDataType(obj,n)
+            
         end
     end
 end

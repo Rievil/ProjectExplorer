@@ -16,6 +16,7 @@ classdef MeasObj < handle
         %this path may change between instances per users, its important 
         %for creation of new object
         Selector;
+        DataTypesTable;
     end
     
     properties (Dependent)
@@ -91,6 +92,13 @@ classdef MeasObj < handle
             Data=obj.Data.Measuremnts(Idx);
             Cat=obj.Data.CatColumns(Idx,:);
         end
+        
+        %will set options for data loading
+        function SetDataTypesTable(obj,TypeTable)
+            obj.DataTypesTable=TypeTable;
+        end
+        
+        
     end
     
     
@@ -100,7 +108,6 @@ classdef MeasObj < handle
         function Name=get.Name(obj)
             BruteFolders=split(obj.Data.BruteFolder,'\');
             Name=char(BruteFolders(end-1));
-%             obj.Name=Name;
         end        
     end   
     
