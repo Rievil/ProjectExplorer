@@ -16,7 +16,6 @@ classdef DataFrame < GUILib & OperLib
         function obj = DataFrame(varargin)
             obj@GUILib;
             obj@OperLib;
-            
         end
         
     end
