@@ -1,4 +1,4 @@
-classdef OperLib
+classdef OperLib < handle
     %OPERLIB Summary of this class goes here
     %   Detailed explanation goes here
     

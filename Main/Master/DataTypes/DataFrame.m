@@ -8,13 +8,12 @@ classdef DataFrame < GUILib & OperLib
     %Interface of class
     methods (Abstract)
         Read(obj,varargin);
-        
     end
     
     methods
         %constructor
-        function obj = DataFrame(~)
-            obj@GUILib;
+        function obj = DataFrame(GuiParent)
+            obj@GUILib(GuiParent);
             obj@OperLib;
         end
     end   
