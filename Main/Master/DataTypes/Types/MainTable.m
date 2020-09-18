@@ -3,31 +3,29 @@ classdef MainTable < DataFrame
     %   Detailed explanation goes here
     
     properties
-        Property1
+        Name char;
+
     end
     
     methods
-        function obj = MainTable(varargin)
+        function obj = MainTable(Name)
             obj@DataFrame;
-            if numel(varargin)>0
-                Tab(i).T=readtable([files(Index).folder '\' files(Index).name]);
-            else
-                
-            end
-            %MAINTABLE Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+            obj.Name=Name;
+            
+
         end
         
+        %will read data started from dataloader
         function Read(obj,varargin)
             
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+        %will draw options for current data type
+        function DrawTypeOption(obj,parent)
+            DrawDropDownMenu(obj,parent,{'-',':','ss'});
+            DrawDropDownMenu(obj,parent,{'Ahoj','Nee','Dobrý'});
         end
+        
     end
 end
 

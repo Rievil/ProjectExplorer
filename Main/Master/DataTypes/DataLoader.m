@@ -10,7 +10,7 @@ classdef DataLoader < handle
     end
     
     methods
-        %konsruktor
+        %consruktor
         function obj = DataLoader(MasterFolder)
             obj.MasterFolder=MasterFolder;
         end
@@ -27,9 +27,8 @@ classdef DataLoader < handle
     methods (Access = public) %set get methods
         %Get Types
         function CTypes=GetTypes(obj)
-            STRTypes=strings;
-            STRTypes=[];
-            CTypes = categorical(colors,'Ordinal',true);
+            STRTypes=strings(["MainTable","Press","Zedo"]);
+            CTypes = categorical(STRTypes,'Ordinal',true);
         end
         
         %Set input data types from typetable
@@ -43,7 +42,5 @@ classdef DataLoader < handle
             obj.BruteFolder=BruteFolder;
         end
     end
-        
-
 end
 

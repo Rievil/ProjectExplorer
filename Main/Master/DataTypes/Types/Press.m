@@ -3,7 +3,6 @@ classdef Press < DataFrame
     %   Detailed explanation goes here
     
     properties
-        Property1
     end
     
     methods
