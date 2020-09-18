@@ -78,8 +78,9 @@ classdef PlotterObj < handle
             end
         end
         
-        function CloseClick(obj,event)
-            cla(obj.Ax);            
+        function CloseClick(obj,~)
+            cla(obj.Ax), reset(obj.Ax);
+            
             delete( obj.Children(obj.Children > 0) );
         end
     end
