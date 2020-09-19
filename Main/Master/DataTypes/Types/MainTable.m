@@ -42,7 +42,6 @@ classdef MainTable < DataFrame
         function InitializeOption(obj)
             GuiInit(obj);
             DrawDropDownMenu(obj,{'-',':','ss'},@SetVal);
-            obj.val='-';
             %DrawDropDownMenu(obj,{'Ahoj','Nee','Dobrı'},'second');
         end
 

@@ -40,20 +40,26 @@ classdef GUILib < handle
         
         %New row in panel
         function GuiInit(obj)
+            obj.Count=0;
             obj.Init=true;
         end
 
         %dropdown
         function han=DrawDropDownMenu(obj,Items,Key)
+            Clear(obj);
             obj.Count=obj.Count+1;
             Pos=obj.GuiParent.InnerPosition;
             
             Pos=[10,Pos(4)-20-(obj.Count*23),120,20];
-
+            
             han=uidropdown(obj.GuiParent,'Items',Items,...
                      'Value',Items{1},'Position',Pos,...
                      'UserData',Key,...
                      'ValueChangedFcn',@(src,event)DropDownChange(obj,event));   
+             if ~obj.Init
+                Key(obj,Items{1});
+             end
+            
             obj.Children{obj.Count}=han;
         end
 
