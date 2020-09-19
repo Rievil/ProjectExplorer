@@ -27,7 +27,7 @@ classdef DataLoader < handle
     methods (Access = public) %set get methods
         %Get Types
         function CTypes=GetTypes(obj)
-            STRTypes=strings(["MainTable","Press","Zedo"]);
+            STRTypes=["MainTable","Press","Zedo"];
             CTypes = categorical(STRTypes,'Ordinal',true);
         end
         

@@ -12,8 +12,8 @@ classdef DataFrame < GUILib & OperLib
     
     methods
         %constructor
-        function obj = DataFrame(GuiParent)
-            obj@GUILib(GuiParent);
+        function obj = DataFrame(~)
+            obj@GUILib;
             obj@OperLib;
         end
     end   

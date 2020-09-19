@@ -7,7 +7,10 @@ clear all;
 %smaže všechny promìné kromì ...
 clearvars  -except h;
 %%
-b=ProjectExplorer;
+            ColNames=categorical(["Name","DateTime","Number","Category"],'ordinal',true);
+            Key=false;
+            Label="Name of column";
+            T=table(ColNames(1),Key,Label,'VariableNames',{'ColType','Key','Label'});
 %%
 h=AEZedo;
 %%
