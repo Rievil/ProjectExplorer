@@ -3,11 +3,12 @@ classdef DataFrame < GUILib & OperLib
     %   Detailed explanation goes here
     
     properties
+        Data; %universal container, Data might be table, array, structure
     end
     
     %Interface of class
     methods (Abstract)
-        Read(obj,varargin);
+        Read(obj);
     end
     
     methods

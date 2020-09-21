@@ -4,16 +4,8 @@ classdef MainTable < DataFrame
     %clear structure of loaded data. PILOT type means, that it will guid
     %all other types which are present id datatypetable. PILOT has the key variable,
     %by which all other types will be sorted out. This design 
-    
-    
-    
-    
     properties
        
-    end
-    
-    properties (Access = private)
-        
     end
     
     methods
@@ -22,12 +14,19 @@ classdef MainTable < DataFrame
         end
         
         %will read data started from dataloader
-        function Read(obj,varargin)
-            
-        end
-        
-        function T=GetTypeSpec(obj)
-            T=obj.TypeSet{1, 1};  
+        function Data=Read(obj,filename)
+            T=readtable(filename);
+            Data=table;
+            for i=1:size(obj.TypeSet{1},1)
+                type=char(obj.TypeSet{1}.ColType(i));
+                
+                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
+                SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
+                
+                Data=[Data, SmallTable];
+                %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
+            end
+            obj.Data=Data;
         end
     end
 
@@ -53,7 +52,6 @@ classdef MainTable < DataFrame
         end
         %will initalize gui for first time
         function InitializeOption(obj)
-            
             Clear(obj);
 
             Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);

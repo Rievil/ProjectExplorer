@@ -32,6 +32,9 @@ classdef GUILib < handle
             end
         end
         
+        function T=GetTypeSpec(obj)
+            T=obj.TypeSet{1, 1};  
+        end
         
         function obj=GUILib(~)
             obj.Init=false;
@@ -58,10 +61,12 @@ classdef GUILib < handle
         %clear GUI COntainer
         function Clear(obj)
             obj.Count=0;
+            delete(obj.GuiParent.Children);
             if numel(obj.Children)>0
                 for i=1:numel(obj.Children)
                 delete(obj.Children{i});
                 end
+                obj.Children=[];
             end
             obj.Pos=[10,obj.GuiParent.InnerPosition(4),obj.GuiParent.InnerPosition(3),20];
         end
@@ -164,6 +169,56 @@ classdef GUILib < handle
             obj.Children{obj.Count}=han;
         end
         
+        %------------------------------------------------------------------
+        %uitree
+        function han=DrawUITree(obj,Key)
+            obj.Count=obj.Count+1;
+            %obj.Pos=obj.GuiParent.InnerPosition;
+            H=200;
+            yP=obj.Pos(2)-H-(obj.Count*20);
+            Pos=[10,yP,obj.Pos(3)-100,H];
+            obj.Pos(2)=yP;
+            
+            han=uitree(obj.GuiParent,'Position',Pos,...
+                     'UserData',{Key, obj.Count},...
+                     'SelectionChangedFcn',@(src,event)UITreeChange(obj,event));   
+                 
+             obj.Children{obj.Count}=han;
+        end
+        
+        %uitree node 
+        function node=DrawUITreeNode(obj,Parent,Type,Key)
+            obj.Count=obj.Count+1;
+            
+            node=uitreenode(Parent,'Text',Type,...
+                     'NodeData',{Key, obj.Count});
+        end
+        
+        %uitree callback
+        function UITreeChange(obj,event)
+            event.Source.SelectedNodes.NodeData{1}(obj,event.Source.SelectedNodes.NodeData{2},event.Source.SelectedNodes);
+        end
+        
+        %uieditfield-------------------------------------------------------
+        function han=DrawUIEditField(obj,Type,Key)
+            obj.Count=obj.Count+1;
+            
+            yP=obj.Pos(2)-20;
+            Pos=[10,yP,obj.Pos(3)-15,20];
+            obj.Pos(2)=yP;
+            
+            han=uieditfield(obj.GuiParent,'Position',Pos,...
+                'Value',Type,...
+                'UserData',{Key, obj.Count},...
+                'ValueChangedFcn',@(src,event)UIEditFieldChange(obj,event));
+            
+            obj.Children{obj.Count}=han;
+        end
+        
+        %uieditfield callback
+        function UIEditFieldChange(obj,event)
+            
+        end
         %data asociasing---------------------------------------------------
         %will update gui according to row in tabletype selector
         function CheckOptions(obj)

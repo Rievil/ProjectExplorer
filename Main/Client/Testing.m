@@ -9,4 +9,8 @@ A=["Name";"DateTime";"Number";"Name";
  %%
  B=DataFrame.MTBlueprint
  %%
-  ColNames=categorical(["StrName","DateTime","Number","Category"],{'StrName','DateTime','Number','Category'},'ordinal',true);
+all_files = dir('K:\ZEDO_DATA_Export\190913_Melichar\');
+all_dir = all_files([all_files(:).isdir]);
+all_dir(1:2)=[];
+%%
+folders=OperLib.DirFolder('K:\ZEDO_DATA_Export\190913_Melichar');

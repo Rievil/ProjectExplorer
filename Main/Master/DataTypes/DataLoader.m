@@ -40,51 +40,69 @@ classdef DataLoader < OperLib
                 %yes, this profile has main maintable
                 obj.MainTable=GetTypeSpec(obj.TypeTable.TypesObj{Lia});
                 if sum(obj.MainTable.Key)>0
+                    %yes, this profile has key column
                     obj.Key=true;                    
                 end
-                ReadWithTable(obj);
             else
                 %no, this profile does not has maintable
-                ReadWithoutTable(obj);
-            end            
-        end
-        
-        function ReadWithTable(obj)
+                
+            end   
+            
             for i=1:size(obj.TypeTable,1)
-                items=ReadDir(obj,i);
+                filename=ReadDir(obj,i);
+                Shard=Read(obj.TypeTable.TypesObj{i},filename);
+                
+                if i==1
+                    if obj.Key
+                        obj.Data(i).('Key') = Shard(:,OperLib.GeKeyCol(obj.MainTable));
+                    end
+                end
+                
+                obj.Data(i).(char(obj.TypeTable.DataType(i))) = Shard;
             end
         end
-        
-        function ReadWithoutTable(obj)
-            
-        end
-        
-        function items=ReadDir(obj,n)
+          
+        function filename=ReadDir(obj,n)
             switch lower(char(obj.TypeTable.Container(n)))
                 case 'file'
                     items=dir([obj.BruteFolder '*' char(obj.TypeTable.Sufix(n))]);
-                    fileNameTMP=string([items(:).name]);
-                    fileName=strrep(fileNameTMP,string(obj.TypeTable.Sufix(n)),"");
+                    Names=OperLib.SeparateFileName(items);
                     
-                    if strcmp(obj.TypeTable.KeyWord(n),"")
+                    if ~strcmp(obj.TypeTable.KeyWord(n),"")
                                                
-                        Index=find(contains(fileName,paterrn));
-                        
+                        Index=find(contains(Names,obj.TypeTable.KeyWord(n)));
+                        if numel(Index)>1
+                            %there is more maintables, which is forbidden
+                            %-> error
+
+                        else
+                            %this is right output
+                            %i have desired FILE, and now I can read it
+                            %according to the typetable and its datatype
+                            filename=[items(Index).folder '\' items(Index).name];
+                            return;
+                        end
                     else
                         Index=find(contains(fileName,paterrn));
                     end
                     
                 case 'folder'
+                    items=OperLib.DirFolder(obj.BruteFolder);
                     
                 otherwise
             end
         end
         
         
+        
         function Idx=FindPattern(obj,arr,pattern)
         end
     end
     
+    %static methods
+    methods (Static)
+        
+    end
     %set get methods
     methods (Access = public) 
         
