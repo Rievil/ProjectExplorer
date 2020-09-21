@@ -1,13 +1,19 @@
 classdef MainTable < DataFrame
-    %MAINTABLE Summary of this class goes here
-    %   Detailed explanation goes here
+    %MainTable is a PILOT type for all other possible measurments, ts
+    %doesnt has to be present, but is higly recomended for the clarity and
+    %clear structure of loaded data. PILOT type means, that it will guid
+    %all other types which are present id datatypetable. PILOT has the key variable,
+    %by which all other types will be sorted out. This design 
+    
+    
+    
     
     properties
-       Name char;
        
     end
     
     properties (Access = private)
+        
     end
     
     methods
@@ -18,6 +24,10 @@ classdef MainTable < DataFrame
         %will read data started from dataloader
         function Read(obj,varargin)
             
+        end
+        
+        function T=GetTypeSpec(obj)
+            T=obj.TypeSet{1, 1};  
         end
     end
 
@@ -33,7 +43,7 @@ classdef MainTable < DataFrame
             dim=size(Target.Data);
             if dim(1)~=Value
                 if Value>dim(1)
-                    Target.Data=[Target.Data; MTBlueprint(obj)];
+                    Target.Data=[Target.Data; OperLib.MTBlueprint];
                     Target.Data{end,4}=Value;
                 else
                     Target.Data(end,:)=[];
@@ -46,7 +56,7 @@ classdef MainTable < DataFrame
             
             Clear(obj);
 
-            Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
+            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);
             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
             DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...

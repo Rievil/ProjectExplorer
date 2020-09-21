@@ -14,22 +14,23 @@ classdef OperLib < handle
         function obj = OperLib(~)
         
         end
-        
-    
     end
     
-    %Data helpers
-    methods (Access = public)
-        function T=MTBlueprint(obj)
-            ColNames=categorical(["Name","DateTime","Number","Category"],'ordinal',true);
+    %Static methods for basic frames and variables
+    methods (Static)
+        function T=MTBlueprint
+            ColNames=categorical(["StrName","DateTime","Number","Category"],{'StrName','DateTime','Number','Category'},'ordinal',true);
             Key=false;
             Label="Name of column";
             Num=1;
             T=table(ColNames(1),Key,Label,Num,'VariableNames',{'ColType','Key','Label','ColNumber'});
         end
         
-    end
-    
-
+        %Get All types that are present in datatype library
+        function CTypes=GetTypes
+            STRTypes=["MainTable","Press","Zedo"];
+            CTypes = categorical(STRTypes,{'MainTable','Press','Zedo'},'Ordinal',true);
+        end        
+    end    
 end
 
