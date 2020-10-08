@@ -219,6 +219,13 @@ classdef GUILib < handle
         function UIEditFieldChange(obj,event)
             
         end
+        
+        %setting for dimensions--------------------------------------------
+        %Save current settings
+        function SetDimensions(obj,idx,dim)
+            
+        end
+        
         %data asociasing---------------------------------------------------
         %will update gui according to row in tabletype selector
         function CheckOptions(obj)

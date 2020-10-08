@@ -55,10 +55,12 @@ classdef DataLoader < OperLib
                 if i==1
                     if obj.Key
                         obj.Data(i).('Key') = Shard(:,OperLib.GeKeyCol(obj.MainTable));
+                    else 
+                        obj.Data(i).(char(obj.TypeTable.DataType(i))) = Shard;
                     end
+                else
+                    obj.Data(i).(char(obj.TypeTable.DataType(i))) = Shard;
                 end
-                
-                obj.Data(i).(char(obj.TypeTable.DataType(i))) = Shard;
             end
         end
           
@@ -87,7 +89,11 @@ classdef DataLoader < OperLib
                     end
                     
                 case 'folder'
+                    %i got all folders from brute folder
+                    %is key option on? if so, then go through the list of
+                    %folders by name, if not, then by loaded order
                     items=OperLib.DirFolder(obj.BruteFolder);
+                    
                     
                 otherwise
             end
