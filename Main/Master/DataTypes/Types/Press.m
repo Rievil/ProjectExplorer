@@ -24,7 +24,6 @@ classdef Press < DataFrame
             for i=1:2:DCount
                 Arr=table2array(INData(:,[i i+1]));
                 Arr(isnan(Arr(:,1)),:)=[];
-                
                 PR=Press;
                 PR.Data=table(Arr(:,1),Arr(:,2),'VariableNames',{'Time','Force'});
                 n=n+1;
@@ -97,6 +96,17 @@ classdef Press < DataFrame
             DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...
                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+        end
+    end
+    
+    %Gui for plotter
+    methods 
+        function han=PlotType(obj,ax)
+            yyaxis(ax,'left');
+            hold(ax,'on');
+            plot(ax,obj.Data{:,1},obj.Data{:,2});
+            xlabel(ax,'Time \it t \rm [s]');
+            ylabel(ax,'Force \it F \rm [N]');
         end
     end
 end

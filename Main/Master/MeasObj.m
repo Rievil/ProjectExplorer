@@ -103,9 +103,7 @@ classdef MeasObj < handle
         
         
     end
-    
-    
-    
+
     %save load delete operations
     methods
         function Name=get.Name(obj)

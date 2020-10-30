@@ -14,6 +14,7 @@ classdef GUILib < handle
     %interface
     methods (Abstract)
         InitializeOption(obj);
+        PlotType(obj);
     end
     
     methods (Access = public)

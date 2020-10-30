@@ -287,5 +287,18 @@ classdef Zedo < DataFrame
                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
     end
+    
+    %Gui for plotter
+    methods 
+        function han=PlotType(obj,ax)
+            yyaxis(ax,'right');
+            hold(ax,'on');
+            x=obj.Data.Records.ConDetector{:,4};
+            y=cumsum(obj.Data.Records.ConDetector{:,17});
+            plot(ax,x,y);
+            ylabel(ax,'Cummulative hits \it AE_{hits} \rm [hit]');
+            
+        end
+    end
 end
 

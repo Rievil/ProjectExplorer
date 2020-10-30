@@ -84,5 +84,12 @@ classdef MainTable < DataFrame
                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
     end
+    
+    %Gui for plotter
+    methods 
+        function han=PlotType(obj,ax)
+
+        end
+    end
 end
 

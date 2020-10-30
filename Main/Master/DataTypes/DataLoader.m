@@ -164,5 +164,18 @@ classdef DataLoader < OperLib & MeasObj
     %Methods for loading
     methods (Access = private)
     end
+    
+    %Gui for plotter
+    methods 
+        function Test(obj,ax,Sel)
+            idx=obj.Selector{:,Sel};
+            CData=obj.Data(idx,:);
+            for i=1:size(CData,1)
+                CData.Press(i)
+                PlotType(CData.Press(i),ax);
+                PlotType(CData.Zedo(i),ax);
+            end
+        end
+    end
 end
 
