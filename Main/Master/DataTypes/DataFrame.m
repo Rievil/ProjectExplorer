@@ -9,6 +9,7 @@ classdef DataFrame < GUILib & OperLib
     %Interface of class
     methods (Abstract)
         Read(obj);
+        TabRows(obj);
     end
     
     methods

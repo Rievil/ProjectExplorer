@@ -76,11 +76,10 @@ classdef OperLib < handle
             switch lower(char(ClassName))
                 case 'maintable'
                         Out=MainTable;
-
                 case 'zedo'
                         Out=Zedo;
                 case 'press'
-                    Out=Press;
+                        Out=Press;
                 otherwise
             end
         end
@@ -95,7 +94,9 @@ classdef OperLib < handle
             StrArr=strings(Dim(1),1);
             for i=1:size(Files,1)
                 TMP=strsplit(Files(i).name,'.');
-                StrArr(i)=TMP(1);
+                TMP(end)=[];
+                TMP2=join(TMP);
+                StrArr(i)=TMP2;
             end
         end
     end    

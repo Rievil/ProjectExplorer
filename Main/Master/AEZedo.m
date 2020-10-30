@@ -1277,7 +1277,6 @@ classdef AEZedo < handle
 
             ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
-           
         end
         
         function [IDFiles]=AddID(obj,IDFiles,Names)

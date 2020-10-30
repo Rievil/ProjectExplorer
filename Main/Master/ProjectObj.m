@@ -14,6 +14,7 @@ classdef ProjectObj < handle
         SelectorSets struct;
         
         MasterDataTypesTable; 
+        DataTypesTable;
         %master data table, which all measruemnts will or will not clone for
         %their ussage
     end
@@ -33,15 +34,23 @@ classdef ProjectObj < handle
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
             end
+            InitSelectorSets(obj);
         end
         
         %creation of meas
         function CreateMeas(obj,SandBox,TreeNode)
             ID=numel(obj.Meas)+1;
-            obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
-
-            FillPTree(obj,TreeNode);
+            %Nyní se musí spustit data loader s souèasným nastavením
+            %projektu
             
+            Loader=DataLoader(ID,obj.ProjectFolder,SandBox);
+            SetDataTypes(Loader,obj.DataTypesTable);
+            ReadData(Loader);
+            obj.Meas{ID}=Loader;
+            %obj.Meas{ID}=StoreData(Loader,ID,obj.ProjectFolder,SandBox);
+            %obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
+            
+            FillPTree(obj,TreeNode);    
         end
         
         function FillPTree(obj,TreeNode)
@@ -62,16 +71,16 @@ classdef ProjectObj < handle
         %work with selectors
         function InitSelectorSets(obj)
             %for i=1:numel(obj.Meas)
-                if isempty(obj.SelectorSets)
-                    obj.SelectorSets.Sets=1;
-                    obj.SelectorSets.Description="Default set";                    
-                end
+            SelectorSets=struct;
+            SelectorSets.Sets=1;
+            SelectorSets.Description="Default set";                    
+            obj.SelectorSets=SelectorSets;
             %end
         end
         
         %add selector
         function AddSelector(obj)
-            if ~isempty(obj.SelectorSets)
+            if ~isempty(fieldnames(obj.SelectorSets))
                 n=size(obj.SelectorSets,2);
                 obj.SelectorSets(n+1).Sets=n+1;
                 obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
@@ -168,7 +177,7 @@ classdef ProjectObj < handle
         
         %set master data table for project
         function SetDataTypesTable(obj,TypeTable)
-            obj.MasterDataTypesTable=TypeTable;
+            obj.DataTypesTable=TypeTable;
         end
         
         %will copy options for data loading to its measobj

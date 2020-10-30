@@ -85,20 +85,22 @@ classdef ProjectOverView < handle
     methods (Access = public)
         %save object
         function save(obj)
-            Projects=obj.Projects;
-            Meas=Projects.Meas;
-            MTreeNodes=Projects.MTreeNodes;
-            for i=1:numel(obj.Projects)
-                for j=1:numel(obj.Projects(i).Meas)
-                    saveobj(obj.Projects(i).Meas{j});
+            if ~isempty(obj.Projects)
+                Projects=obj.Projects;
+                Meas=Projects.Meas;
+                MTreeNodes=Projects.MTreeNodes;
+                for i=1:numel(obj.Projects)
+                    for j=1:numel(obj.Projects(i).Meas)
+                        saveobj(obj.Projects(i).Meas{j});
+                    end
+                    Projects(i).Meas=[];
+                    Projects(i).MTreeNodes=[];
                 end
-                Projects(i).Meas=[];
-                Projects(i).MTreeNodes=[];
+                save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
+                obj.Projects(i).Meas=Meas;
+                obj.Projects(i).MTreeNodes=MTreeNodes;
+                %obj.Projects=ProjectsAll;
             end
-            save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
-            obj.Projects(i).Meas=Meas;
-            obj.Projects(i).MTreeNodes=MTreeNodes;
-            %obj.Projects=ProjectsAll;
         end
     end
 end

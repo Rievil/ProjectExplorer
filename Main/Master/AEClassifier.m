@@ -1,12 +1,12 @@
 classdef AEClassifier < AE
     %Public var
     properties (SetAccess = public)
-        Measuremnts;  %Main project structure
-        Options; %Default settings
-        ClassData;  %Classification variables
-        MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
-        BruteFolder;
-        BasicFolder;
+        %Measuremnts;  %Main project structure
+        %Options; %Default settings
+        %ClassData;  %Classification variables
+        %MeaPrefixFolder; %má smysl pøi nahrání dat z jiné sesny
+        %BruteFolder;
+        %BasicFolder;
         CL char; %zástupce pro command line
     end
     

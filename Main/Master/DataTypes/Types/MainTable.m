@@ -15,7 +15,7 @@ classdef MainTable < DataFrame
         
         %will read data started from dataloader
         function Data=Read(obj,filename)
-            T=readtable(filename);
+            T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
             Data=table;
             for i=1:size(obj.TypeSet{1},1)
                 type=char(obj.TypeSet{1}.ColType(i));
@@ -28,7 +28,30 @@ classdef MainTable < DataFrame
             end
             obj.Data=Data;
         end
+%         
+        function Tab=TabRows(obj)
+            T=table;
+            for i=1:size(obj.Data,1)
+                Data=obj.Data(i,:);
+                MT=MainTable;
+                MT.Data=Data;
+                T.MainTable(i)=MT;
+            end
+            Tab=T;
+        end
+        
+        function Cat=GetCat(obj)
+            Cat=table;
+            for i=1:size(obj.Data,2)
+                ClassName=lower(class(obj.Data{1,i}));
+                if strcmp(ClassName,'categorical')
+                    Cat=[Cat, obj.Data(:,i)];
+                end
+            end
+        end
     end
+    
+
 
     %Gui for data type selection 
     methods (Access = public)   

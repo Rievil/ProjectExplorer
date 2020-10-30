@@ -8,16 +8,40 @@ classdef Press < DataFrame
     end
     
     methods
-        function obj = MainTable(~)
+        function obj = Press(~)
             obj@DataFrame;
         end
         
         %will read data started from dataloader
-        function Read(obj,varargin)
+        function Out=Read(obj,filename)
+            INData=readtable(filename,'Sheet','Test Curve Data');    
+            INData=ResamplePressData(obj,INData);
             
+            DCount=size(INData,2);
+            
+            T=table;
+            n=0;
+            for i=1:2:DCount
+                Arr=table2array(INData(:,[i i+1]));
+                Arr(isnan(Arr(:,1)),:)=[];
+                
+                PR=Press;
+                PR.Data=table(Arr(:,1),Arr(:,2),'VariableNames',{'Time','Force'});
+                n=n+1;
+                T.Press(n)=PR;
+            end
+            obj.Data=T;
+            Out=T;
         end
         
-        %resample press data
+        function Tab=TabRows(obj)
+            Tab=obj.Data;
+        end
+     
+    end
+    
+    %private methods for operating the variables
+    methods (Access = private) 
         function [T]=ResamplePressData(obj,inT)
             T=table;
             TargetFreq=2;
@@ -41,9 +65,8 @@ classdef Press < DataFrame
                 end
             end
         end
-
     end
-
+    
     %Gui for data type selection 
     methods (Access = public)   
         %set property
@@ -69,9 +92,9 @@ classdef Press < DataFrame
             
             Clear(obj);
 
-            Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
-            DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
+            %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
+            %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
+            DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...
                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
