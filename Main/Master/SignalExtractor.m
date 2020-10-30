@@ -20,7 +20,9 @@ classdef SignalExtractor < handle
         FPeaks;
         SPeaks;
         CutIndex;
-        Anotate
+        Anotate;
+        FLimits; 
+        FLimitsBool=false;
     end
     
     methods (Access = public)
@@ -28,13 +30,15 @@ classdef SignalExtractor < handle
         %set the inputs
         %------------------------------------------------------------------
         function GetEmptyFeature(obj)
-            DomAmp=0;
-            DomFreq=0;
-            DomWidth=0;
-            DomProm=0;
-            Energy=0;
-            Duration=0;
-            obj.Feature=table(DomAmp, DomFreq, DomWidth, DomProm, Energy, Duration);
+            DomAmp=NaN;
+            DomFreq=NaN;
+            DomWidth=NaN;
+            DomProm=NaN;
+            Energy=NaN;
+            Duration=NaN;
+            SignalAtt=NaN;
+            FFTAtt=NaN;
+            obj.Feature=table(DomAmp, DomFreq, DomWidth, DomProm, Energy, Duration,SignalAtt,FFTAtt);
         end
         
         %------------------------------------------------------------------
@@ -50,11 +54,14 @@ classdef SignalExtractor < handle
                             obj.SampleCount=numel(obj.Signal);
                         case 'fs'
                             obj.SampFreq=varargin{2};
+                        case 'flimits'
+                            obj.FLimits=varargin{2};
+                            obj.FLimitsBool=true;
                         otherwise
                     end
                     varargin([1:2])=[];
                 end
-                SigExtract(obj,obj.Signal,obj.SampFreq);                
+                %SigExtract(obj,obj.Signal,obj.SampFreq);                
             else
             end
             %set all variables and count rest of variables  
@@ -140,8 +147,12 @@ classdef SignalExtractor < handle
             SignalAtt=obj.SignalPeaks.AttDir;
             FFTAtt=DomProm/DomWidth;
             
+            if numel(DomAmp)>0
             obj.Feature=table(DomAmp, DomFreq, DomWidth, DomProm, Energy,Duration, SignalAtt,FFTAtt,....
                 'VariableNames',{'DomAmp','DomFreq','DomWidth','DomProm','Energy','Duration','SignalAtt','FFTAtt'});
+            else
+                GetEmptyFeature(obj)
+            end
         end
     end %end of private methods
     
@@ -187,10 +198,15 @@ classdef SignalExtractor < handle
 
             minProm=max(y)*0.1;
             minFreqDistance=x(end)/2*0.01;
-
+            if obj.FLimitsBool==true
+                idx=find(x>obj.FLimits(1) & x<obj.FLimits(2));
+                x=x(idx);
+                y=y(idx);
+            end
+            
             [pks,locs,w,p]=findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
             'extents','MinPeakDistance',minFreqDistance,'NPeaks',10,...
-            'MinPeakHeight',maxY*0.3);
+            'MinPeakHeight',maxY*0.03);
             peaks=struct('FPeaks',pks,'FLocs',locs,'FWidth',w,'FProminence',p);
 
             if obj.Anotate==true
@@ -213,7 +229,7 @@ classdef SignalExtractor < handle
             [idxLeft,idxRight]=SignalTrsh(obj);
             obj.CutIndex=[idxLeft,idxRight];
             
-            meanY=mean([Y(idxLeft) Y(idxRight)]);
+            meanY=mean([Y(idxLeft) Y(idxRight)])*0.5;
             dur=X(idxRight)-X(idxLeft);
             
             CutTime=X(idxLeft:1:idxRight);

@@ -1124,7 +1124,6 @@ classdef Zedo_old < handle
                 end
             end
         end
-
         %------------------------------------------------------------------
         %Nacti zaznam ze zeda
         %------------------------------------------------------------------
@@ -1259,15 +1258,7 @@ classdef Zedo_old < handle
                 ConTab=[ConTab; TMPT];
             end
         end
-        %------------------------------------------------------------------
-        %Vykresli jednotlivé hity v selektoru hitù
-        %------------------------------------------------------------------
-        function [BruteFolder]=GetBruteFolder(obj)
-            BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
-            if BruteFolder==0
-                BruteFolder="none";
-            end
-        end
+        
         %------------------------------------------------------------------
         %Pøeèti jeden hit
         %------------------------------------------------------------------
@@ -1320,6 +1311,17 @@ classdef Zedo_old < handle
             hit.Signal = fread(fileID,hit.nSamples,'int16');
             fclose(fileIDBin);
         end
+        
+        %------------------------------------------------------------------
+        %Vykresli jednotlivé hity v selektoru hitù
+        %------------------------------------------------------------------
+        function [BruteFolder]=GetBruteFolder(obj)
+            BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+            if BruteFolder==0
+                BruteFolder="none";
+            end
+        end
+
         %------------------------------------------------------------------
         %Pøeèti jeden hit
         %------------------------------------------------------------------
