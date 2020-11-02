@@ -55,8 +55,8 @@ classdef MeasObj < handle
         
         %Initiate selector
         function InitSel(obj)
-            Selection(1:obj.Count,1)=false;
-            obj.Selector=table(Selection);            
+            Default_set(1:obj.Count,1)=false;
+            obj.Selector=table(Default_set);            
         end
         
         %Change Selector

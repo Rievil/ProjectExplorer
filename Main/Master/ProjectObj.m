@@ -70,11 +70,13 @@ classdef ProjectObj < handle
         
         %work with selectors
         function InitSelectorSets(obj)
-            for i=1:numel(obj.Meas)
-            SelectorSets=struct;
-            SelectorSets.Sets=1;
-            SelectorSets.Description="Default set";                    
-            obj.SelectorSets=SelectorSets;
+            if isempty(fieldnames(obj.SelectorSets))
+                for i=1:numel(obj.Meas)
+                    SelectorSets=struct;
+                    SelectorSets.Sets=1;
+                    SelectorSets.Description="Default_set";                    
+                    obj.SelectorSets=SelectorSets;
+                end
             end
         end
         
