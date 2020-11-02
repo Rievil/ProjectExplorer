@@ -24,7 +24,7 @@ classdef ProjectOverView < handle
         end
         
         %create new project
-        function [status]=CreateNewProject(obj,Name)
+        function [status,newID]=CreateNewProject(obj,Name)
             newID=numel(obj.Projects) + 1;
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
