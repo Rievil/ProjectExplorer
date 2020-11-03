@@ -317,6 +317,16 @@ classdef Zedo < DataFrame
             ylabel(ax,'Cummulative hits \it AE_{hits} \rm [hit]');
             
         end
+        
+        function Out=GetParams(obj)
+            R=obj.Data.Records;
+            Out=table;
+            
+            for card=1:size(R,1)
+                Names=strings([size(R(card).Param.Data,1),1]);
+                %Names(:,1)=
+            end
+        end
     end
 end
 

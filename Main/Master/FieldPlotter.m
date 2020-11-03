@@ -1,22 +1,25 @@
-classdef FieldPlotter
+classdef FieldPlotter < handle
     %FIELDPLOTTER Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        Property1
+        Data;
     end
     
     methods
-        function obj = FieldPlotter(inputArg1,inputArg2)
-            %FIELDPLOTTER Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        function obj = FieldPlotter(Data)
+            obj.Data=Data;
+            PlotBasic(obj);
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+    end
+    
+    methods %Plotting methods
+        function PlotBasic(obj)
+            for i=1:size(obj.Data,1)
+                M=obj.Data.Zedo(i);
+                Out=GetParams(M);
+            end
         end
     end
 end

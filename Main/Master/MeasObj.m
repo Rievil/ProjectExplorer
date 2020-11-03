@@ -131,7 +131,6 @@ classdef MeasObj < handle
         end
         
         function delete(obj)
-            auto="red";
         end
     end   
     

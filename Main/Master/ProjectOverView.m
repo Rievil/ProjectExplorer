@@ -91,11 +91,13 @@ classdef ProjectOverView < handle
                 Meas=Projects.Meas;
                 MTreeNodes=Projects.MTreeNodes;
                 for i=1:numel(obj.Projects)
-                    for j=1:numel(obj.Projects(i).Meas)
-                        saveobj(obj.Projects(i).Meas{j});
+                    if obj.Projects(i).MeasCount>0
+                        for j=1:numel(obj.Projects(i).Meas)
+                            saveobj(obj.Projects(i).Meas{j}.Data);
+                        end
+                        Projects(i).Meas=[];
+                        Projects(i).MTreeNodes=[];
                     end
-                    Projects(i).Meas=[];
-                    Projects(i).MTreeNodes=[];
                 end
                 save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
                 obj.Projects(i).Meas=Meas;

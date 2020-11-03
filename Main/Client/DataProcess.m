@@ -19,7 +19,18 @@ PrepareAnalysis(h,'Samples','all','FullTime','hitdetector',0,'Signals','false')
 LoadMeasurement(h);
 %%
 SaveWork(h);
+%%
+Data=struct('Data',[],'ID',[],'Row',[]);
+%%
+test=struct;
+test.A=2;
+test.B=3;
+test.C=5;
 
+test(2).A=4;
+test(2).B=5;
+%test(2)=[];
+sz=size(test);
 %%
 b=ProjectObj;
 %%

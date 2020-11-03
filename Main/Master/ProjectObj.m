@@ -5,7 +5,7 @@ classdef ProjectObj < handle
         Status;
         CreationDate datetime;
         LastChange datetime;
-        Meas; %list of measuremnts objects in the specific object
+        Meas struct; %list of measuremnts objects in the specific object
         %each object is stored as a separate file in project folder, for
         %clarity this is must - user might want to manualy load data
         %container of specific measuremnt to access the data, in a long
@@ -27,6 +27,7 @@ classdef ProjectObj < handle
         function obj=ProjectObj(Name,SandBox)
             obj.Name=Name;
             obj.ProjectFolder=[Name '\'];
+            obj.Meas=struct('Data',[],'ID',[],'Row',[]);
             
             if ~exist([SandBox obj.Name '\'],'dir')
                 %folder doesnt exist we can create folder for project
@@ -45,22 +46,49 @@ classdef ProjectObj < handle
         function CreateMeas(obj,app,SandBox,TreeNode)
             obj.MeasCount=obj.MeasCount+1;
             ID=obj.MeasCount;
+            Row=size(obj.Meas,2)+1;
             %Nyní se musí spustit data loader s souèasným nastavením
             %projektu
             
             Loader=DataLoader(ID,obj.ProjectFolder,SandBox);
-            %obj.EListener=addlistener(Loader,'TotalTableChange',@obj.GetTotalTable);
-            if Loader.BruteFolderSet==true
-                SetDataTypes(Loader,obj.DataTypesTable);
-                ReadData(Loader);
-                obj.Meas{ID}=Loader;
+            try
+                if Loader.BruteFolderSet==true
+                    SetDataTypes(Loader,obj.DataTypesTable);
+                    ReadData(Loader);
 
-                FillPTree(obj,TreeNode);    
-            else
-                delete(Loader);
-                InfoUser(app,'warning','measurement wasnt created');
+                    obj.Meas(Row).Data=Loader;
+                    obj.Meas(Row).ID=ID;
+                    obj.Meas(Row).Row=Row;
+
+                    obj.Meas(Row).Data.DataTypesTable=obj.DataTypesTable;
+                    FillPTree(obj,TreeNode);    
+                else
+                    delete(Loader);
+                    InfoUser(app,'warning','measurement wasnt created');
+                end
+
+            catch ME
+                Row=Row-1;
+                obj.MeasCount=obj.MeasCount-1;
             end
         end
+        
+        function LoadMeas(obj,SandBox)
+            obj.Meas=[];
+            Files = dir([SandBox obj.ProjectFolder '*.mat']);
+            if size(Files,1)>0
+                for i=1:size(Files,1)
+                    load([Files(i).folder '\' Files(i).name],'meas');
+
+
+                    obj.Meas{i}=meas;
+                    obj.Meas{i}.SandBox=SandBox;
+                    obj.Meas{i}.FName=[Files(i).folder '\' Files(i).name];
+                end
+                InitSelectorSets(obj);
+            end
+        end
+        
         
         function FillPTree(obj,TreeNode)
             if numel(obj.MTreeNodes)>0
@@ -68,13 +96,15 @@ classdef ProjectObj < handle
                 Nodes.delete;
             end
             
-            for i=1:numel(obj.Meas)
-%                 tmp=char(datestr(obj.Meas{i}.Date));
-%                 tmp2=obj.Meas{i}.Name;
-                if ~isempty(obj.Meas{i})
-                    obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                            'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Name],...
-                            'NodeData',{i,obj.Meas{i},TreeNode}); 
+            if obj.MeasCount>0
+                for i=1:size(obj.Meas.Data,2)
+    %                 tmp=char(datestr(obj.Meas{i}.Date));
+    %                 tmp2=obj.Meas{i}.Name;
+                    if ~isempty(obj.Meas{i})
+                        obj.MTreeNodes{i}=uitreenode(TreeNode,...
+                                'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Data.Name],...
+                                'NodeData',{i,obj.Meas{i}.Data,TreeNode}); 
+                    end
                 end
             end
         end
@@ -97,8 +127,8 @@ classdef ProjectObj < handle
                 n=size(obj.SelectorSets,2);
                 obj.SelectorSets(n+1).Sets=n+1;
                 obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
-                for i=1:numel(obj.Meas)
-                    AddSelRows(obj.Meas{i},n+1,obj.SelectorSets(n+1).Description);
+                for i=1:numel(obj.Meas.Data,2)
+                    AddSelRows(obj.Meas{i}.Data,n+1,obj.SelectorSets(n+1).Description);
                 end
             else
                 InitSelectorSets(obj);
@@ -108,9 +138,9 @@ classdef ProjectObj < handle
         %change name of selector group
         function ChangeSelName(obj,nSet,NewName)
             obj.SelectorSets(nSet).Description=string(NewName);
-            for i=1:numel(obj.Meas)
-                if ~isempty(obj.Meas{i})
-                    obj.Meas{i}.Selector.Properties.VariableNames{nSet}=char(NewName);
+            for i=1:size(obj.Meas,2)
+                if ~isempty(obj.Meas{i}.Data)
+                    obj.Meas{i}.Data.Selector.Properties.VariableNames{nSet}=char(NewName);
                 end
             end
         end
@@ -122,22 +152,12 @@ classdef ProjectObj < handle
                 obj.SelectorSets(i).Sets=i;
             end
             
-            for i=1:numel(obj.Meas)
-                DeleteSelCol(obj.Meas{i},nSet)
+            for i=1:size(obj.Meas.Data,1)
+                DeleteSelCol(obj.Meas{i}.Data,nSet)
             end
         end
         
-        function LoadMeas(obj,SandBox)
-            obj.Meas=[];
-            Files = dir([SandBox obj.ProjectFolder '*.mat']);
-            for i=1:size(Files,1)
-                load([Files(i).folder '\' Files(i).name],'meas');
-                obj.Meas{i}=meas;
-                obj.Meas{i}.SandBox=SandBox;
-                obj.Meas{i}.FName=[Files(i).folder '\' Files(i).name];
-            end
-            InitSelectorSets(obj);
-        end
+        
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if
         %projectexplorer can load the data, or not ->this will be different
@@ -230,14 +250,14 @@ classdef ProjectObj < handle
         end
         
         function Stack(obj,Sel)
-            
+            FilterStack=table;
             OutStack=table;
             for i=1:numel(obj.Meas)
                 M=obj.Meas{1,i};
                 if ~isempty(M)
                     idx=M.Selector{:,Sel};
                     Filter=M.Data(idx,:);
-                    
+                    FilterStack=[FilterStack; Filter];
                     
                     for j=1:size(Filter,1)
                         Row=table;
@@ -249,9 +269,8 @@ classdef ProjectObj < handle
                     end
                 end
             end
-            obj.TotalTable=OutStack;
-            
-            
+            obj.TotalTable=FilterStack;
+            %obj.TotalTable=OutStack;
         end
     end
 end
