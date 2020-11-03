@@ -4,12 +4,15 @@ classdef DataFrame < GUILib & OperLib
     
     properties
         Data; %universal container, Data might be table, array, structure
+        Filename; %for files type
+        Folder; %for folder types
     end
     
     %Interface of class
     methods (Abstract)
         Read(obj);
         TabRows(obj);
+        Copy(obj);
     end
     
     methods
@@ -18,6 +21,7 @@ classdef DataFrame < GUILib & OperLib
             obj@GUILib;
             obj@OperLib;
         end
+        
     end   
 end
 

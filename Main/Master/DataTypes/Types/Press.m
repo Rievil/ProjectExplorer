@@ -7,13 +7,25 @@ classdef Press < DataFrame
     properties (Access = private)
     end
     
-    methods
+    methods %main methods
         function obj = Press(~)
             obj@DataFrame;
         end
         
-        %will read data started from dataloader
+
+        function Tab=TabRows(obj)
+            Tab=obj.Data;
+        end
+        
+        function obj2=Copy(obj)
+            obj2=Press;
+        end
+    end
+    
+    methods %reading methods
+                %will read data started from dataloader
         function Out=Read(obj,filename)
+            obj.Filename=filename;
             INData=readtable(filename,'Sheet','Test Curve Data');    
             INData=ResamplePressData(obj,INData);
             
@@ -33,12 +45,7 @@ classdef Press < DataFrame
             Out=T;
         end
         
-        function Tab=TabRows(obj)
-            Tab=obj.Data;
-        end
-     
     end
-    
     %private methods for operating the variables
     methods (Access = private) 
         function [T]=ResamplePressData(obj,inT)

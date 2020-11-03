@@ -14,11 +14,13 @@ classdef DataLoader < OperLib & MeasObj
     properties
         TypeTable table;
         %Data table;
+        SpecimenCount;
     end
     
     properties 
         Key logical;
         MainTable table;
+        BruteFolderSet=false;
     end
     
     methods
@@ -37,8 +39,10 @@ classdef DataLoader < OperLib & MeasObj
             obj.BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
             if obj.BruteFolder==0
                 obj.BruteFolder="none";
+                obj.BruteFolderSet=0;
             else
                 obj.BruteFolder=[obj.BruteFolder '\'];
+                obj.BruteFolderSet=1;
             end
             %obj.BruteFolder=BruteFolder;
         end
@@ -51,6 +55,7 @@ classdef DataLoader < OperLib & MeasObj
             ChTypes=sort(obj.TypeTable.DataType);
             
             Lia = ismember(ChTypes,TP(1));
+            f1 = waitbar(0,'Please wait...','Name','Feature extraction');
             
             %èekni jestli má MainTable
             if sum(Lia)>0
@@ -64,15 +69,18 @@ classdef DataLoader < OperLib & MeasObj
                 %no, this profile does not has maintable
             end   
             %--------------------------------------------------------------
-            for i=1:size(obj.TypeTable,1)
-                switch lower(char(obj.TypeTable.Container(i)))
+            F1Lim=size(obj.TypeTable,1);
+            for i=1:F1Lim
+                CharDataType=lower(char(obj.TypeTable.Container(i)));
+                waitbar(i/F1Lim,f1,['Processing ''' CharDataType ''' ...']);
+                switch CharDataType
                     case 'file'
                         items=dir([obj.BruteFolder '*' char(obj.TypeTable.Sufix(i))]);
                         Names=OperLib.SeparateFileName(items);
 
                         if ~strcmp(obj.TypeTable.KeyWord(i),"")
 
-                            Index=find(contains(Names,obj.TypeTable.KeyWord(i)));
+                            Index=find(contains(lower(Names),lower(obj.TypeTable.KeyWord(i))));
                             if numel(Index)>1
                                 %there is more maintables, which is forbidden
                                 %-> error
@@ -96,6 +104,7 @@ classdef DataLoader < OperLib & MeasObj
                             obj.Data=[obj.Data, Name];
                             %obj.Data.RowNames='Name';
                         end
+                        Test="auto";
                         obj.Data=[obj.Data, TabRows(obj.TypeTable.TypesObj{i})];
 %                         obj.Data.DataTypeName{i}=char(obj.TypeTable.DataType(i));
 %                         obj.Data.Data{i}=obj.TypeTable.TypesObj{i};
@@ -105,19 +114,36 @@ classdef DataLoader < OperLib & MeasObj
                         %is key option on? if so, then go through the list of
                         %folders by name, if not, then by loaded order
                         items=OperLib.DirFolder(obj.BruteFolder);
-                        F2File=table;
+                        
                         %F2File=cell2table(cell(0,size(items,1)));
-                        for j=1:numel(items)
-                            folder=[char(items(j).folder) '\' char(items(j).name) '\'];
-                            Read(obj.TypeTable.TypesObj{i},folder);
-                            F2File=[F2File; table(obj.TypeTable.TypesObj{i},...
-                                'VariableNames',{char(obj.TypeTable.DataType(i))})];
+                        f1pos=f1.Position;
+                        f2 = waitbar(0,'Please wait...','Name','Feature extraction');
+                        f2.Position(2)=f1pos(2)-f2.Position(4)-40;
+                        
+                        F2Lim=numel(items);
+                        F2File=table;
+                        
+                        for j=1:F2Lim
+                            waitbar(j/F2Lim,f2,['Processing: ''' char(items(j).name) '''']);
+                            KeyNames=string({items.name}');
+                            [TF]=contains(lower(KeyNames(j)),lower(obj.Data.Name));
+                            if TF>0
+                                folder=[char(items(j).folder) '\' char(items(j).name) '\'];
+                                %'obj2 = copy(obj1)'
+                                obj2=Copy(obj.TypeTable.TypesObj{i});
+                                Read(obj2,folder);
+                                F2File=[F2File; table(obj2,...
+                                    'VariableNames',{char(obj.TypeTable.DataType(i))})];
+                            end
                         end
+                        close(f2);
                         obj.Data=[obj.Data, F2File];
                     otherwise
                 end
             %--------------------------------------------------------------
+            
             end
+            close(f1);
             obj.Count=size(obj.Data,1);
             
             InitSel(obj);
@@ -140,6 +166,10 @@ classdef DataLoader < OperLib & MeasObj
                     Cat=[Cat; GetCat(obj.Data.MainTable(i))];
                 end
             end
+        end
+        
+        function delete(obj)
+            
         end
     end
     
@@ -171,7 +201,7 @@ classdef DataLoader < OperLib & MeasObj
             idx=obj.Selector{:,Sel};
             CData=obj.Data(idx,:);
             for i=1:size(CData,1)
-                CData.Press(i)
+
                 PlotType(CData.Press(i),ax);
                 PlotType(CData.Zedo(i),ax);
             end

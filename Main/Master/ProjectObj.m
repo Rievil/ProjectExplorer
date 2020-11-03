@@ -10,11 +10,14 @@ classdef ProjectObj < handle
         %clarity this is must - user might want to manualy load data
         %container of specific measuremnt to access the data, in a long
         %term and debuging this is importnat
+        MeasCount=0;
         MTreeNodes;     
         SelectorSets struct;
         
         MasterDataTypesTable; 
         DataTypesTable;
+        TotalTable;
+        EvListener;
         %master data table, which all measruemnts will or will not clone for
         %their ussage
     end
@@ -24,7 +27,7 @@ classdef ProjectObj < handle
         function obj=ProjectObj(Name,SandBox)
             obj.Name=Name;
             obj.ProjectFolder=[Name '\'];
-
+            
             if ~exist([SandBox obj.Name '\'],'dir')
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
@@ -37,20 +40,28 @@ classdef ProjectObj < handle
             InitSelectorSets(obj);
         end
         
+        
         %creation of meas
-        function CreateMeas(obj,SandBox,TreeNode)
-            ID=numel(obj.Meas)+1;
+        function CreateMeas(obj,app,SandBox,TreeNode)
+            obj.MeasCount=obj.MeasCount+1;
+            ID=obj.MeasCount;
             %Nyní se musí spustit data loader s souèasným nastavením
             %projektu
             
             Loader=DataLoader(ID,obj.ProjectFolder,SandBox);
-            SetDataTypes(Loader,obj.DataTypesTable);
-            ReadData(Loader);
-            obj.Meas{ID}=Loader;
-            %obj.Meas{ID}=StoreData(Loader,ID,obj.ProjectFolder,SandBox);
-            %obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
-            
-            FillPTree(obj,TreeNode);    
+            %obj.EListener=addlistener(Loader,'TotalTableChange',@obj.GetTotalTable);
+            if Loader.BruteFolderSet==true
+                SetDataTypes(Loader,obj.DataTypesTable);
+                ReadData(Loader);
+                obj.Meas{ID}=Loader;
+                %obj.Meas{ID}=StoreData(Loader,ID,obj.ProjectFolder,SandBox);
+                %obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
+
+                FillPTree(obj,TreeNode);    
+            else
+                delete(Loader);
+                InfoUser(app,'warning','measurement wasnt created');
+            end
         end
         
         function FillPTree(obj,TreeNode)
@@ -62,9 +73,11 @@ classdef ProjectObj < handle
             for i=1:numel(obj.Meas)
 %                 tmp=char(datestr(obj.Meas{i}.Date));
 %                 tmp2=obj.Meas{i}.Name;
-                obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                        'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Name],...
-                        'NodeData',{i,obj.Meas{i},TreeNode}); 
+                if ~isempty(obj.Meas{i})
+                    obj.MTreeNodes{i}=uitreenode(TreeNode,...
+                            'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Name],...
+                            'NodeData',{i,obj.Meas{i},TreeNode}); 
+                end
             end
         end
         
@@ -154,15 +167,18 @@ classdef ProjectObj < handle
         end %end of status funciton
         
         %delete measurment
-        function DeleteM(obj,i,Node)
+        function DeleteM(obj,i,Meas,Node)
+%             Node.delete;
+%             filename=obj.Meas{i}.FName;
+%             delete(filename);  
+%             obj.Meas{i}=[];    
             Node.delete;
-            filename=obj.Meas{i}.FName;
-            delete(filename);  
-            obj.Meas{i}=[];                      
+            delete(Meas);
+            obj.Meas(i)=[];
         end
         %class destructor of object
         function delete(obj)
-            
+            obj.TotalTable=[];
         end
         
         %pull data from meas
@@ -185,6 +201,20 @@ classdef ProjectObj < handle
         %will copy options for data loading to its measobj
         function CloneDataType(obj,n)
             
+        end
+    end
+    
+    methods 
+        function Stack(obj,Sel)
+            TMP=table;
+            for i=1:numel(obj.Meas)
+                M=obj.Meas{1,i};
+                if ~isempty(M)
+                    idx=M.Selector{:,Sel};
+                    TMP=[TMP; M.Data(idx,:)];
+                end
+            end
+            obj.TotalTable=TMP;
         end
     end
 end

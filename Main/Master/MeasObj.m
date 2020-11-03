@@ -19,10 +19,15 @@ classdef MeasObj < handle
         Selector;
         DataTypesTable;
         ClonedTypes=0;
+        TotalTable;
     end
     
     properties (Dependent)
         Name char;
+    end
+    
+    events
+        TotalTableChange;
     end
     
     methods (Access = public)
@@ -37,6 +42,18 @@ classdef MeasObj < handle
         
         %fill the table 
         function FillUITable(obj,UITable,Sel)
+            %if isempty(obj.TotalTable)
+                MakeTotalTable(obj,Sel);
+            %end
+            UITable.Data=obj.TotalTable;
+            UITable.ColumnEditable(2) = true;
+            UITable.ColumnEditable(~2) = false;
+            for i=1:size(obj.TotalTable,2)
+                UITable.ColumnName{i}=obj.TotalTable.Properties.VariableNames{i};
+            end
+        end
+        
+        function MakeTotalTable(obj,Sel)
             T=table;
             T.Name=obj.Data.Name;
             
@@ -44,14 +61,9 @@ classdef MeasObj < handle
                 CatTab=StackCat(obj);
             end
             T=[T, obj.Selector(:,Sel), CatTab];
-            
-            UITable.Data=T;
-            UITable.ColumnEditable(2) = true;
-            UITable.ColumnEditable(~2) = false;
-            for i=1:size(T,2)
-                UITable.ColumnName{i}=T.Properties.VariableNames{i};
-            end
+            obj.TotalTable=T;
         end
+        
         
         %Initiate selector
         function InitSel(obj)
@@ -89,10 +101,9 @@ classdef MeasObj < handle
         end
         
         %get data for data core
-        function [Data,Cat]=PullData(obj,Set)     
+        function [Data]=PullData(obj,Set)     
             Idx=table2array(obj.Selector(:,Set));
-            Data=obj.Data.Measuremnts(Idx);
-            Cat=obj.Data.CatColumns(Idx,:);
+            Data=obj.Data(Idx,:);
         end
         
         %will set options for data loading
@@ -119,6 +130,9 @@ classdef MeasObj < handle
             warning ('on','all');
         end
         
+        function delete(obj)
+            auto="red";
+        end
     end   
     
     

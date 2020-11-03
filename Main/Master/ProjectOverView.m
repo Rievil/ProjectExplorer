@@ -2,9 +2,10 @@ classdef ProjectOverView < handle
     properties (SetAccess = public)
         Projects ProjectObj; %list of projects present in sandbox
         SandBoxFolder char;
-        ProjectCount;
+        ProjectCount=0;
         TReeNodes;
         UITree; %handle to ui tree in project explorer
+        
     end
     
     methods (Access = public)

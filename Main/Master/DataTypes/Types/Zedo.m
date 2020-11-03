@@ -12,13 +12,33 @@ classdef Zedo < DataFrame
         
     end
     
-    methods
+    methods %main methods with abstract interpretations
         function obj = Zedo(~)
             obj@DataFrame;
         end
         
-        %will read data started from dataloader
+        function Tab=TabRows(obj,InT)
+            Tab=obj.Data;
+        end
+
+        function obj2=Copy(obj)
+            obj2=Zedo;  
+            obj2.Data=obj.Data;
+            obj2.Filename=obj.Filename;
+            obj2.Folder=obj.Folder;
+            obj2.GuiParent=obj.GuiParent;
+            obj2.Count=obj.Count;
+            obj2.Children=obj.Children;
+            obj2.TypeSet=obj.TypeSet;
+            obj2.Init=obj.Init;
+            obj2.Pos=obj.Pos;
+        end
+    end
+    
+    methods %reading
+       %will read data started from dataloader
         function Data=Read(obj,folder)
+            obj.Folder=folder;
             alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             warning('off','all');
             path=folder;
@@ -134,11 +154,6 @@ classdef Zedo < DataFrame
             %ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
         end
-        
-        function Tab=TabRows(obj,InT)
-            Tab=obj.Data;
-        end
-        
         %------------------------------------------------------------------
         %Nacti zaznam ze zeda
         %------------------------------------------------------------------        
@@ -230,7 +245,6 @@ classdef Zedo < DataFrame
                 ConTab=[ConTab; TMPT];
             end
         end
-        
     end
 
     %Gui for data type selection 

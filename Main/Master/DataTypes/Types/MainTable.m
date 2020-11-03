@@ -5,30 +5,16 @@ classdef MainTable < DataFrame
     %all other types which are present id datatypetable. PILOT has the key variable,
     %by which all other types will be sorted out. This design 
     properties
-       
+       SpecimensCount;
+       KeyNames;
     end
     
-    methods
+    methods %main methods
         function obj = MainTable(~)
             obj@DataFrame;
         end
         
-        %will read data started from dataloader
-        function Data=Read(obj,filename)
-            T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
-            Data=table;
-            for i=1:size(obj.TypeSet{1},1)
-                type=char(obj.TypeSet{1}.ColType(i));
-                
-                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
-                SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
-                
-                Data=[Data, SmallTable];
-                %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
-            end
-            obj.Data=Data;
-        end
-%         
+
         function Tab=TabRows(obj)
             T=table;
             for i=1:size(obj.Data,1)
@@ -40,6 +26,38 @@ classdef MainTable < DataFrame
             Tab=T;
         end
         
+        
+        function obj2=Copy(obj)
+            obj2=MainTable;
+            
+            
+        end
+    end
+    
+    %reading methods
+    methods 
+                %will read data started from dataloader
+        function Data=Read(obj,filename)
+            obj.Filename=filename;
+            T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
+            Data=table;
+            for i=1:size(obj.TypeSet{1},1)
+                type=char(obj.TypeSet{1}.ColType(i));
+                
+                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
+                SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
+                
+                Data=[Data, SmallTable];
+                %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
+                
+            end
+            
+            KeyRow=obj.TypeSet{1,1}(obj.TypeSet{1,1}.Key>0,:);
+            obj.SpecimensCount=size(Data,1);
+            obj.KeyNames=Data{:,KeyRow.ColNumber};
+            
+            obj.Data=Data;
+        end
         function Cat=GetCat(obj)
             Cat=table;
             for i=1:size(obj.Data,2)
@@ -49,9 +67,8 @@ classdef MainTable < DataFrame
                 end
             end
         end
+        
     end
-    
-
 
     %Gui for data type selection 
     methods (Access = public)   
