@@ -32,6 +32,25 @@ classdef MainTable < DataFrame
             
             
         end
+        function Data=PackUp(obj)
+            TMP=obj.Data;
+            P=TMP.Properties;
+            idx=[];
+            TMP2=table;
+            for col=1:size(TMP,2)
+                
+                ClName=class(TMP{1,col});
+                if strcmp(ClName,'categorical')
+                    Var=string(TMP{1,col});
+                    Name=TMP.Properties.VariableNames(col);
+                    idx=[idx; col];
+                    TMP2=[TMP2, table(Var,'VariableNames',Name)];
+                end
+            end
+            TMP(:,idx)=[];
+            TMP=[TMP, TMP2];
+            Data=TMP;
+        end
     end
     
     %reading methods

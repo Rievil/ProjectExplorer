@@ -20,6 +20,18 @@ classdef Press < DataFrame
         function obj2=Copy(obj)
             obj2=Press;
         end
+        
+        function Data=PackUp(obj)
+            VarNames=obj.Data.Properties.VariableNames;
+            Data=table;
+            n=1;
+            for Name=VarNames
+                Data{1,n}={obj.Data{:,n}};
+                Data.Properties.VariableNames(n)=Name;
+                n=n+1; 
+            end
+        end
+        
     end
     
     methods %reading methods

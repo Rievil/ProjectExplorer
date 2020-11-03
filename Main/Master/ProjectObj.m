@@ -54,8 +54,6 @@ classdef ProjectObj < handle
                 SetDataTypes(Loader,obj.DataTypesTable);
                 ReadData(Loader);
                 obj.Meas{ID}=Loader;
-                %obj.Meas{ID}=StoreData(Loader,ID,obj.ProjectFolder,SandBox);
-                %obj.Meas{ID}=AE(ID,obj.ProjectFolder,SandBox);
 
                 FillPTree(obj,TreeNode);    
             else
@@ -111,7 +109,9 @@ classdef ProjectObj < handle
         function ChangeSelName(obj,nSet,NewName)
             obj.SelectorSets(nSet).Description=string(NewName);
             for i=1:numel(obj.Meas)
-                obj.Meas{i}.Selector.Properties.VariableNames{nSet}=char(NewName);
+                if ~isempty(obj.Meas{i})
+                    obj.Meas{i}.Selector.Properties.VariableNames{nSet}=char(NewName);
+                end
             end
         end
         
@@ -205,16 +205,53 @@ classdef ProjectObj < handle
     end
     
     methods 
+        function ReLoadData(obj)
+            f3 = waitbar(0,'Please wait...','Name','Feature extraction');
+            f3.Position(2)=f3.Position(2)+60;
+            
+            count=0;
+            for i=1:numel(obj.Meas)
+                M=obj.Meas{i};
+                if ~isempty(M)
+                    count=count+1;
+                end
+            end
+            
+            j=0;
+            for i=1:numel(obj.Meas)
+                M=obj.Meas{i};
+                if ~isempty(M)
+                    j=j+1;
+                    waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
+                    ReLoadData(M);
+                end
+            end
+            close(f3);
+        end
+        
         function Stack(obj,Sel)
-            TMP=table;
+            
+            OutStack=table;
             for i=1:numel(obj.Meas)
                 M=obj.Meas{1,i};
                 if ~isempty(M)
                     idx=M.Selector{:,Sel};
-                    TMP=[TMP; M.Data(idx,:)];
+                    Filter=M.Data(idx,:);
+                    
+                    
+                    for j=1:size(Filter,1)
+                        Row=table;
+                        for k=2:size(Filter,2)
+                            Row=[Row, PackUp(Filter{j,k})];
+                            
+                        end
+                        OutStack=[OutStack; Row];
+                    end
                 end
             end
-            obj.TotalTable=TMP;
+            obj.TotalTable=OutStack;
+            
+            
         end
     end
 end

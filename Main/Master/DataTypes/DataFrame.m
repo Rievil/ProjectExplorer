@@ -13,6 +13,7 @@ classdef DataFrame < GUILib & OperLib
         Read(obj);
         TabRows(obj);
         Copy(obj);
+        PackUp(obj);
     end
     
     methods

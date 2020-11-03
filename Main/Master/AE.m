@@ -16,7 +16,7 @@ classdef AE < MeasObj
         end
         
         %Again Load data
-        function ReLoadData(obj)
+        function ReSSLoadData(obj)
             if ~exist(obj.Data.BruteFolder, 'dir')
                 GetBruteFolder(obj.Data);
             end

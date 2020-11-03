@@ -47,8 +47,14 @@ classdef DataLoader < OperLib & MeasObj
             %obj.BruteFolder=BruteFolder;
         end
         
+        function ReLoadData(obj)
+            obj.Data=[];
+            ReadData(obj);
+        end
+        
         %funkce pro ètení
         function ReadData(obj)
+            try
             Types=obj.TypeTable.DataType;
             TP=DataFrame.GetTypes;
             
@@ -141,13 +147,18 @@ classdef DataLoader < OperLib & MeasObj
                     otherwise
                 end
             %--------------------------------------------------------------
-            
+
             end
             close(f1);
             obj.Count=size(obj.Data,1);
             
             InitSel(obj);
             saveobj(obj);
+            catch ME
+                close(f1);
+                close(f2);
+                msgbox('Error while loading of data');
+            end
         end
         
         %function for final saving of data
@@ -163,9 +174,11 @@ classdef DataLoader < OperLib & MeasObj
             Cat=table;
             if obj.Key==true
                 for i=1:size(obj.Data,1)
+                    
                     Cat=[Cat; GetCat(obj.Data.MainTable(i))];
                 end
             end
+            
         end
         
         function delete(obj)

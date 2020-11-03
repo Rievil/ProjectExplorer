@@ -33,6 +33,10 @@ classdef Zedo < DataFrame
             obj2.Init=obj.Init;
             obj2.Pos=obj.Pos;
         end
+        
+        function Data=PackUp(obj)
+            Data=table({obj.Data},'VariableNames',{'ZedoKey'});
+        end
     end
     
     methods %reading
