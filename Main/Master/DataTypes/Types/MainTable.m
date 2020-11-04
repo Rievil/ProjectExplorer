@@ -126,6 +126,10 @@ classdef MainTable < DataFrame
         function han=PlotType(obj,ax)
 
         end
+        
+        function Out=GetParams(obj,Name)
+            Out=obj.Data;
+        end
     end
 end
 

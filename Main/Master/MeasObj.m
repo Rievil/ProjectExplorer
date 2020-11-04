@@ -7,6 +7,7 @@ classdef MeasObj < handle
         Count;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         %BruteFolder char; %folder with measured data, from which DataC construct itrs container
+        Row;
         ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
         BruteFolder char;
@@ -32,8 +33,9 @@ classdef MeasObj < handle
     
     methods (Access = public)
         %constructor of object
-        function obj=MeasObj(ID,ProjectFolder,SandBox)
+        function obj=MeasObj(ID,ProjectFolder,SandBox,Row)
             obj.ID=ID;
+            obj.Row=Row;
             obj.ProjectFolder=ProjectFolder;
             %obj.BruteFolder=uigetdir(cd,'Select folder with your measurmenets');
             obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
@@ -122,13 +124,13 @@ classdef MeasObj < handle
             Name=char(BruteFolders(end-1));
         end       
         
-        function saveobj(obj)
-            %sobj = saveobj@MeasObj(obj); 
-            warning ('off','all');
-            meas=obj;
-            save([obj.SandBox obj.ProjectFolder 'Meas_' char(num2str(obj.ID)) '.mat'],'meas');
-            warning ('on','all');
-        end
+%         function saveobj(obj)
+%             %sobj = saveobj@MeasObj(obj); 
+%             warning ('off','all');
+%             meas=obj;
+%             save([obj.SandBox obj.ProjectFolder 'Meas_' char(num2str(obj.ID)) '.mat'],'meas');
+%             warning ('on','all');
+%         end
         
         function delete(obj)
         end

@@ -76,7 +76,10 @@ classdef Zedo < DataFrame
             IdxE=find(contains(fileName,'event'));
             if length(IdxE)>0
                 filename=[files(IdxE).folder '\' files(IdxE).name];
-                Events = readtable(filename,'ReadVariableNames',true,'HeaderLines', 5);
+                [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
+                
+                Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine);
+                Events=AdjustEvents(obj,Events);
                 [speed,Cards]=GetSpeed(obj,filename);     
             else
                 Events=[];
@@ -157,6 +160,14 @@ classdef Zedo < DataFrame
             obj.Data=Zedo;
             %ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
+        end
+        
+        function Events=AdjustEvents(obj,Events)
+            
+            HitsID=cellfun(@(y) str2double(y),split(Events{:,6},','));
+            TMPCards=[strrep(Events{:,4},',',''), Events{:,5}];
+            Cards=string(cellfun(@(s) char(s),TMPCards,'UniformOutput',false));
+            Events=[Events, table(HitsID), table(Cards)];
         end
         %------------------------------------------------------------------
         %Nacti zaznam ze zeda
@@ -249,6 +260,43 @@ classdef Zedo < DataFrame
                 ConTab=[ConTab; TMPT];
             end
         end
+        
+        function GetXDeltas(obj,length,velocity,orientation)
+            %length=279;
+            %velocity=1808;
+            E=obj.Data.Events;
+            obj.Data.Speed=velocity;
+            obj.Data.Records(1).Position=0;
+            obj.Data.Records(2).Position=length;
+
+            ECount=size(E,1);
+            XDelta=zeros([ECount, 1]);
+            %tst=E{i,14}(1);
+            FirstCard=string(obj.Data.Records(orientation).Cards);
+            for i=1:ECount
+                if strcmp(E{i,15}(1),FirstCard)
+                    TDiff=abs(E{i,7}-E{i,9});
+                    LDiff=TDiff*velocity;
+                    LDiff=length-(LDiff+(length-LDiff)/2);
+                    XDelta(i)=LDiff;   
+                else
+                    TDiff=abs(E{i,9}-E{i,7});
+                    LDiff=TDiff*velocity;
+                    LDiff=LDiff+(length-LDiff)/2;
+                    XDelta(i)=LDiff;   
+                end
+            end
+            %histogram(XDelta);
+            %VarNames=string(E.Properties.VariableNames);
+            %tst=ismember(VarNames,"XDelta");
+            %tst=contains(E.Properties.VariableNames,'XDelta');
+            if sum(contains(E.Properties.VariableNames,'XDelta'))>0
+                E.XDelta=XDelta;
+            else
+                E=[E, table(XDelta)];
+            end
+            obj.Data.Events=E;
+        end
     end
 
     %Gui for data type selection 
@@ -318,14 +366,23 @@ classdef Zedo < DataFrame
             
         end
         
-        function Out=GetParams(obj)
+        function Out=GetParams(obj,Name)
             R=obj.Data.Records;
             Out=table;
             
-            for card=1:size(R,1)
-                Names=strings([size(R(card).Param.Data,1),1]);
-                %Names(:,1)=
+            for card=1:size(R,2)
+                
+                Names=strings([size(R(card).ConDetector,1),1]);
+                Card=strings([size(R(card).ConDetector,1),1]);
+                Names(:,1)=Name;
+                Card(:,1)=R(card).Cards;
+                Out=[Out; table(Names,Card), R(card).ConDetector];                
+                %Out{end,:}=[];
             end
+        end
+        
+        function Out=GetEvents(obj,Name)
+            Out=obj.Data.Events;
         end
     end
 end

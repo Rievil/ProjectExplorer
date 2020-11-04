@@ -12,7 +12,36 @@ clearvars  -except h;
             Label="Name of column";
             T=table(ColNames(1),Key,Label,'VariableNames',{'ColType','Key','Label'});
 %%
-h=AEZedo;
+filename='K:\ZEDO_DATA_Export\200318_Melichar\A1\lg1.lg1-events.txt';
+Z=Zedo;
+
+Read(Z,'K:\ZEDO_DATA_Export\200318_Melichar\A1\');
+E=Z.Data.Events;
+length=279;
+velocity=1808;
+Z.Data.Speed=velocity;
+Z.Data.Records(1)=0;
+Z.Data.Records(2)=BPos;
+
+ECount=size(E,1);
+XDelta=zeros([ECount, 1]);
+tst=E{i,14}(1);
+for i=1:ECount
+    if strcmp(E{i,15}(1),"65.1A")
+        TDiff=abs(E{i,7}-E{i,9});
+        LDiff=TDiff*velocity;
+        LDiff=length-(LDiff+(length-LDiff)/2);
+        XDelta(i)=LDiff;   
+    else
+        TDiff=abs(E{i,9}-E{i,7});
+        LDiff=TDiff*velocity;
+        LDiff=LDiff+(length-LDiff)/2;
+        XDelta(i)=LDiff;   
+    end
+end
+%histogram(XDelta);
+E=[E, table(XDelta)];
+
 %%
 PrepareAnalysis(h,'Samples','all','FullTime','hitdetector',0,'Signals','false')
 %%

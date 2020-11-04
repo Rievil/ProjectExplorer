@@ -25,9 +25,9 @@ classdef DataLoader < OperLib & MeasObj
     
     methods
         %consruktor
-        function obj = DataLoader(ID,ProjectFolder,SandBox)
+        function obj = DataLoader(ID,ProjectFolder,SandBox,Row)
             obj@OperLib;
-            obj@MeasObj(ID,ProjectFolder,SandBox);
+            obj@MeasObj(ID,ProjectFolder,SandBox,Row);
             
             GetBruteFolder(obj);
             

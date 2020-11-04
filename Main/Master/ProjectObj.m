@@ -24,7 +24,7 @@ classdef ProjectObj < handle
     
     methods (Access=public) 
         %creation of project objects
-        function obj=ProjectObj(Name,SandBox)
+        function obj=ProjectObj(Name,SandBox,App)
             obj.Name=Name;
             obj.ProjectFolder=[Name '\'];
             obj.Meas=struct('Data',[],'ID',[],'Row',[]);
@@ -38,7 +38,7 @@ classdef ProjectObj < handle
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
             end
-            InitSelectorSets(obj);
+            InitSelectorSets(obj,App);
         end
         
         
@@ -50,7 +50,7 @@ classdef ProjectObj < handle
             %Nyní se musí spustit data loader s souèasným nastavením
             %projektu
             
-            Loader=DataLoader(ID,obj.ProjectFolder,SandBox);
+            Loader=DataLoader(ID,obj.ProjectFolder,SandBox,Row);
             try
                 if Loader.BruteFolderSet==true
                     SetDataTypes(Loader,obj.DataTypesTable);
@@ -68,6 +68,7 @@ classdef ProjectObj < handle
                 end
 
             catch ME
+                obj.Meas(Row)=[];
                 Row=Row-1;
                 obj.MeasCount=obj.MeasCount-1;
             end
@@ -79,11 +80,14 @@ classdef ProjectObj < handle
             if size(Files,1)>0
                 for i=1:size(Files,1)
                     load([Files(i).folder '\' Files(i).name],'meas');
-
-
-                    obj.Meas{i}=meas;
-                    obj.Meas{i}.SandBox=SandBox;
-                    obj.Meas{i}.FName=[Files(i).folder '\' Files(i).name];
+                    
+                    row=meas.Row;
+                    obj.Meas(row).Data=meas.Data;
+                    obj.Meas(row).ID=meas.ID;
+                    obj.Meas(row).Row=meas.Row;
+                    
+                    obj.Meas(row).Data.SandBox=SandBox;
+                    obj.Meas(row).Data.FName=[Files(i).folder '\' Files(i).name];
                 end
                 InitSelectorSets(obj);
             end
@@ -97,27 +101,28 @@ classdef ProjectObj < handle
             end
             
             if obj.MeasCount>0
-                for i=1:size(obj.Meas.Data,2)
+                for i=1:size(obj.Meas,2)
     %                 tmp=char(datestr(obj.Meas{i}.Date));
     %                 tmp2=obj.Meas{i}.Name;
-                    if ~isempty(obj.Meas{i})
                         obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                                'Text',[char(num2str(i)) ' - ' obj.Meas{i}.Data.Name],...
-                                'NodeData',{i,obj.Meas{i}.Data,TreeNode}); 
-                    end
+                                'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
+                                'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
                 end
             end
         end
         
         %work with selectors
-        function InitSelectorSets(obj)
+        function InitSelectorSets(obj,App)
             if isempty(fieldnames(obj.SelectorSets))
                 %for i=1:numel(obj.Meas)
                     SelectorSets=struct;
                     SelectorSets.Sets=1;
-                    SelectorSets.Description="Default_set";                    
+                    SelectorSets.Description='Default_set';                    
                     obj.SelectorSets=SelectorSets;
                 %end
+                App.DropDownSelector.Value='Default_set';
+                App.DropDownSelector.Items={'Default_set'};
+                App.DropDownSelector.ItemsData=1;
             end
         end
         
@@ -127,8 +132,8 @@ classdef ProjectObj < handle
                 n=size(obj.SelectorSets,2);
                 obj.SelectorSets(n+1).Sets=n+1;
                 obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
-                for i=1:numel(obj.Meas.Data,2)
-                    AddSelRows(obj.Meas{i}.Data,n+1,obj.SelectorSets(n+1).Description);
+                for i=1:size(obj.Meas,2)
+                    AddSelRows(obj.Meas(i).Data,n+1,obj.SelectorSets(n+1).Description);
                 end
             else
                 InitSelectorSets(obj);
@@ -139,8 +144,8 @@ classdef ProjectObj < handle
         function ChangeSelName(obj,nSet,NewName)
             obj.SelectorSets(nSet).Description=string(NewName);
             for i=1:size(obj.Meas,2)
-                if ~isempty(obj.Meas{i}.Data)
-                    obj.Meas{i}.Data.Selector.Properties.VariableNames{nSet}=char(NewName);
+                if ~isempty(obj.Meas(i).Data)
+                    obj.Meas(i).Data.Selector.Properties.VariableNames{nSet}=char(NewName);
                 end
             end
         end
@@ -219,8 +224,10 @@ classdef ProjectObj < handle
         end
         
         %will copy options for data loading to its measobj
-        function CloneDataType(obj,n)
-            
+        function CloneDataType(obj,TypeTable)
+            for i=1:size(obj.Meas,2)
+                obj.Meas(i).Data.DataTypesTable=TypeTable;
+            end
         end
     end
     
@@ -248,12 +255,29 @@ classdef ProjectObj < handle
             end
             close(f3);
         end
+        function Out=MakeOverView(obj)
+            Out=table;
+            for i=1:size(obj.Meas,2)
+                M=obj.Meas(i).Data;
+                MeaName=strings([size(M.Data,1),1]);
+                MeaName(:,1)=string(M.Name);
+                MTab=table;
+                for j=1:size(M.Data,1)
+                    MTab=[MTab; M.Data.MainTable(j).Data];
+                end
+                
+                Out=[Out; table(MeaName), MTab];
+            end
+            [file,path,indx] = uiputfile('OverViewTable.xlsx');
+            filename=[path file];
+            writetable(Out,filename);
+        end
         
         function Stack(obj,Sel)
             FilterStack=table;
             OutStack=table;
             for i=1:numel(obj.Meas)
-                M=obj.Meas{1,i};
+                M=obj.Meas(i).Data;
                 if ~isempty(M)
                     idx=M.Selector{:,Sel};
                     Filter=M.Data(idx,:);
@@ -271,6 +295,26 @@ classdef ProjectObj < handle
             end
             obj.TotalTable=FilterStack;
             %obj.TotalTable=OutStack;
+        end
+        
+        function SaveMeas(obj,SandBox)
+            %sobj = saveobj@MeasObj(obj);
+            f1=waitbar(0,'Saving meas: ...');
+            try
+                MSize=size(obj.Meas,2);
+                for i=1:MSize
+                    
+                    warning ('off','all');
+                    meas=obj.Meas(i);
+                    
+                    save([SandBox obj.ProjectFolder 'Meas_' char(num2str(meas.ID)) '.mat'],'meas');
+                    waitbar(i/MSize,f1,['Saving meas: ''' char(meas.Data.Name) '''']);
+                    warning ('on','all');
+                end
+            catch ME
+                close(f1);
+            end
+            close(f1);
         end
     end
 end

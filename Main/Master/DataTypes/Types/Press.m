@@ -127,6 +127,19 @@ classdef Press < DataFrame
             xlabel(ax,'Time \it t \rm [s]');
             ylabel(ax,'Force \it F \rm [N]');
         end
+        
+        function Out=GetParams(obj,Name)
+            Out=struct;
+            idx=round(find(obj.Data.Force==max(obj.Data.Force),1)*1.1,0);
+            if idx>numel(obj.Data.Force)
+                idx=numel(obj.Data.Force);
+            end
+            
+            Out.Time=obj.Data.Time(1:idx);
+            
+            Out.Force=obj.Data.Force(1:idx);
+            Out.EndTime=obj.Data.Time(idx);
+        end
     end
 end
 

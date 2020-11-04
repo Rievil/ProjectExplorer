@@ -5,14 +5,16 @@ classdef ProjectOverView < handle
         ProjectCount=0;
         TReeNodes;
         UITree; %handle to ui tree in project explorer
+        App;
         
     end
     
     methods (Access = public)
         %constructor of overview
-        function obj=ProjectOverView(SandBoxFolder,UITree)
+        function obj=ProjectOverView(SandBoxFolder,UITree,App)
             obj.SandBoxFolder=SandBoxFolder;
             obj.UITree=UITree;
+            obj.App=App;
             if isfile([obj.SandBoxFolder 'Projects.mat'])
                 %project overview already exists
                 load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');
@@ -29,7 +31,7 @@ classdef ProjectOverView < handle
             newID=numel(obj.Projects) + 1;
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
-                obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder);
+                obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj.App);
                 status=obj.Projects(newID).Status.Value;
                 if status==4
                     obj.Projects(newID)=[];
@@ -90,15 +92,19 @@ classdef ProjectOverView < handle
                 Projects=obj.Projects;
                 Meas=Projects.Meas;
                 MTreeNodes=Projects.MTreeNodes;
+                f1=waitbar(0,'Saving Projects ...');
                 for i=1:numel(obj.Projects)
+                    waitbar(i/numel(obj.Projects),f1,'Saving Projects ...');
                     if obj.Projects(i).MeasCount>0
-                        for j=1:numel(obj.Projects(i).Meas)
-                            saveobj(obj.Projects(i).Meas{j}.Data);
-                        end
-                        Projects(i).Meas=[];
-                        Projects(i).MTreeNodes=[];
+                        SaveMeas(obj.Projects(i),obj.SandBoxFolder)
+%                         for j=1:numel(obj.Projects(i).Meas)
+%                             saveobj(obj.Projects(i).Meas(j).Data);
+%                         end
+                         Projects(i).Meas=[];
+                         Projects(i).MTreeNodes=[];
                     end
                 end
+                close(f1);
                 save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
                 obj.Projects(i).Meas=Meas;
                 obj.Projects(i).MTreeNodes=MTreeNodes;

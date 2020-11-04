@@ -19,6 +19,19 @@ classdef OperLib < handle
     %Static methods for basic frames and variables
     methods (Static)
         
+        function [HeaderLine]=GetHeadersLine(filename,StrCell)
+            fid=fopen(filename);% to open the file (a test for success is strongly recommended)
+            Data = strings([10,1]); %: Pre-allocate the output
+            for i=1:10 % = from 1 to 10
+                Data(i,1)=fgets(fid ); %to read one line, store it in Data cell.
+                if contains(Data(i,1),StrCell)% || contains(Data(i,1),{'??'})
+                    HeaderLine=i-1;
+                    fclose(fid);% to close the file
+                    break;
+                end
+            end
+        end
+        
         %výpoèet 
         function [x,y]=Hypotenuse(XMax,YMax,Alpha)
         %Funkce pro výpoèet souøadnice vrcholu pravoúhlého trojúhelníka v
