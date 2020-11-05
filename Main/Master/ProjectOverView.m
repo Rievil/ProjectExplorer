@@ -111,5 +111,9 @@ classdef ProjectOverView < handle
                 %obj.Projects=ProjectsAll;
             end
         end
+        
+        function delete(obj)
+            save(obj);
+        end
     end
 end

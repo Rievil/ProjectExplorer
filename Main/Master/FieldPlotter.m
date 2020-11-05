@@ -6,27 +6,77 @@ classdef FieldPlotter < handle
         Data;
         GraphFolder char;
         Interpreter char;
+        Result struct;
+        PlotTypes;
     end
     
     methods
-        function obj = FieldPlotter(Data,GraphFolder,Interpreter,Type)
+        function obj = FieldPlotter(Data,GraphFolder)
             obj.Data=Data;
             obj.GraphFolder=GraphFolder;
+            
+            obj.PlotTypes={'basic','events','velocity'};
+        end
+        
+        function Plot(obj,Type,Interpreter)
             obj.Interpreter=Interpreter;
             switch lower(Type)
                 case 'basic'
                     PlotBasic(obj);
                 case 'events'
-                    PlotEvents(obj)
+                    PlotEvents(obj);
                 case 'velocity'
-                    PlotVelocity(obj)
+                    PlotVelocity(obj);
+                case 'tensile_shear'
+                    PlotShearTensile(obj);
+            end
+            SaveFigures(obj);
+        end
+        
+        
+        
+        function SaveFigures(obj)
+            GetLimits(obj);
+            SaveFiles(obj);
+        end
+        
+        function [x,y,z]=GetLimits(obj)
+            x=[];
+            y=[];
+            z=[];
+            n=0;
+            for i=1:size(obj.Result,2)
+                for a=1:size(obj.Result(i).Axes,2)
+                    n=n+1;
+                    x(n,:,a)=obj.Result(i).Axes(a).XLim;
+                    y(n,:,a)=obj.Result(i).Axes(a).YLim;
+                    z(n,:,a)=obj.Result(i).Axes(a).ZLim;
+                end
             end
             
-            
+
+            for i=1:size(obj.Result,2)
+                for a=1:size(obj.Result(i).Axes)
+                    obj.Result(i).Axes(a).XLim=[min(x(:,1,a)) max(x(:,2,a))];
+                    obj.Result(i).Axes(a).YLim=[min(y(:,1,a)) max(y(:,2,a))];
+                    obj.Result(i).Axes(a).ZLim=[min(z(:,1,a)) max(z(:,2,a))];
+                end
+            end
+        end
+        
+        function SaveFiles(obj)
+            for i=1:size(obj.Result,2)
+                saveas(obj.Result(i).FigHan,obj.Result(i).SaveFilename);
+            end
         end
         
     end
     
+    methods %settings for plots, fonts, sizes, colros etc.
+        function SetAxes(obj,ax)
+            set(ax,'FontName','Arial','FontSize',12,'LineWidth',1.2);
+        end
+    end
     methods %Plotting methods
         function FT=GetFilter(obj)
             FT=table;
@@ -37,11 +87,14 @@ classdef FieldPlotter < handle
         
         function PlotBasic(obj)
             
+            FigNum=0;
             FT=GetFilter(obj);
             Carousel=DataCarusel(FT,[9 10 12]);
             
             for j=1:Carousel.RealCombCount
-                figure(j);
+                
+                FigNum=FigNum+1;
+                obj.Result(FigNum).FigHan=figure(j);
                 
                 [FTable,Idx]=GetCombinations(Carousel,j);
                 yyaxis right;
@@ -93,19 +146,24 @@ classdef FieldPlotter < handle
 
                 end
                 legend('location','northwest');
-                set(ax,'FontName','Arial','FontSize',12,'LineWidth',1.2)
+                SetAxes(obj,ax);
                 set(gcf,'Position',[20 20 820 450]);
-                saveas(j,[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Cumulative.png']);
+                %saveas(j,[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Cumulative.png']);
+                obj.Result(FigNum).Axes=ax;
+                obj.Result(FigNum).SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Cumulative.png'];
             end
         end
         
         function PlotEvents(obj)
             
+            FigNum=0;
             FT=GetFilter(obj);
             Carousel=DataCarusel(FT,[9 10 11]);
             
             for j=1:Carousel.RealCombCount
-                figure(j);
+                
+                FigNum=FigNum+1;
+                obj.Result(FigNum).FigHan=figure(j);
                 
                 [FTable,Idx]=GetCombinations(Carousel,j);
                 ax(1)=gca;
@@ -174,9 +232,13 @@ classdef FieldPlotter < handle
                 lgd=legend('location','northwest');
                 lgd.NumColumns =2;
                 ax(1).ZAxis.Scale='log';
-                set(ax,'FontName','Arial','FontSize',12,'LineWidth',1.2)
+                SetAxes(obj,ax);
                 set(gcf,'Position',[20 20 1100 600]);
-                saveas(j,[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Events.png']);
+                
+                obj.Result(FigNum).Axes=ax;
+                obj.Result(FigNum).SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Events.png'];
+                %SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Events.png'];
+                %saveas(j,[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Events.png']);
             end
         end
         function PlotVelocity(obj)
@@ -242,6 +304,81 @@ classdef FieldPlotter < handle
                 set(gcf,'Position',[20 20 650 400]);
                 saveas(j,[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_M_Velocity.png']);
             end
+        end
+        
+        function PlotShearTensile(obj)
+            FigNum=0;
+            FT=GetFilter(obj);
+            Carousel=DataCarusel(FT,[9 10]);
+            
+            for j=1:Carousel.RealCombCount
+                FigNum=FigNum+1;
+                obj.Result(FigNum).FigHan=figure(j);
+                [FTable,Idx]=GetCombinations(Carousel,j);
+                
+                ax(1)=gca;
+                hold(ax(1),'on');
+                box(ax(1),'on');
+                grid(ax(1),'on');
+                
+                for k=1:numel(Idx)
+                    i=Idx(k);
+                    Name=obj.Data.Name(i);
+                    Zo=obj.Data.Zedo(i);
+                    Po=obj.Data.Press(i);
+                    Mo=obj.Data.MainTable(i);
+
+                    %Z=GetParams(Zo,Name);
+                    P=GetParams(Po,Name);
+                    M=GetParams(Mo,Name);
+                    Z=Zo.Data.Records(1).ConDetector;
+                    Z=Z(Z.Energy_V_2_Hz_>2e-10,:);
+                    clear AvgFreq;
+                    
+                    Dur=Z.Duration_ns_;
+                    HCount=Z.HCount_N_;
+                    AvgFreq=Dur./HCount;
+
+                    RiseTime=Z.Risetime_ns_;
+                    MaxAmplitude=Z.Max_Amplitude_V_;
+
+                    RAVal=(RiseTime*1e-8)./MaxAmplitude;
+
+                    colormap(jet(100));
+                    Size=abs(Z{:,6}.*1e+12);
+                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
+                    scatter(RAVal,AvgFreq,10,'filled','DisplayName',Name);
+                    col=colorbar;
+                    col.Label.String='AE Classes [-]';
+                end
+                
+                legend;
+                Alpha=63;
+
+
+                YMax=ax(1).YLim(2);
+                XMax=ax(1).XLim(2);
+
+                [XCoor,YCoor]=OperLib.Hypotenuse(XMax,YMax,Alpha);
+
+                XLine=[0 XCoor];
+                YLine=[0 YCoor];
+                B=0;
+
+                plot(XLine,YLine+B,'-k','HandleVisibility','off');
+
+                xlabel('RA values [ms/V]');
+                ylabel('Average frequency [Hz]');
+
+                red=[0.75 0.8];
+                STR={'\leftarrow Tensile crack','Shear crack \rightarrow'};
+                text(XCoor*red(1),YCoor*red(2),STR{1},'HorizontalAlignment','right','Rotation',Alpha-90,'FontSize',10);
+                text(XCoor*red(2),YCoor*red(1),STR{2},'Rotation',Alpha-90,'FontSize',10);
+                SetAxes(obj,ax);
+                set(gcf,'Position',[20 20 650 450]);
+                obj.Result(FigNum).Axes=ax;
+                obj.Result(FigNum).SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_ShearTensile.png'];
+            end      
         end
     end
 end
