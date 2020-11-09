@@ -74,7 +74,7 @@ classdef FieldPlotter < handle
     
     methods %settings for plots, fonts, sizes, colros etc.
         function SetAxes(obj,ax)
-            set(ax,'FontName','Arial','FontSize',12,'LineWidth',1.2);
+            set(ax,'FontName','Palatino linotype','FontSize',12,'LineWidth',1.2);
         end
     end
     methods %Plotting methods
@@ -87,9 +87,16 @@ classdef FieldPlotter < handle
         
         function PlotBasic(obj)
             
+            line={'-','--',':','-.',...
+                '-','--',':','-.',...
+                '-','--',':','-.'};
+            count=0;
+            thicnk=[1, 1, 1, 1, ...
+                2, 2, 2, 2,...
+                3, 3, 3, 3];
             FigNum=0;
             FT=GetFilter(obj);
-            Carousel=DataCarusel(FT,[9 10 12]);
+            Carousel=DataCarusel(FT,[9]);
             
             for j=1:Carousel.RealCombCount
                 
@@ -107,6 +114,7 @@ classdef FieldPlotter < handle
                 hold(ax(2),'on');
                 for k=1:numel(Idx)
                     i=Idx(k);
+                    count=count+1;
                     Name=obj.Data.Name(i);
                     Zo=obj.Data.Zedo(i);
                     Po=obj.Data.Press(i);
@@ -117,19 +125,23 @@ classdef FieldPlotter < handle
                     M=GetParams(Mo,Name);
 
 
-                    GetXDeltas(Zo,M.Length,M.Velocity,1);
+                    %GetXDeltas(Zo,M.Length,M.Velocity,1);
 
 
                     %Z=Z(Z{:,2}=="65.1A" & Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
                     Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
                     Z = sortrows(Z,Z.Properties.VariableNames(6));
                     %---------------------------------
-
-
+                    TenTMP=2/3*(M.VzdPodpor*0.001)/((M.B*0.001)*(M.T*0.001)^2);
+                    Tension=P.Force.*TenTMP*1e-6;
+                    
+                    EqDeff=interp1(P.Time,P.Deff,Z{:,6});
+                    
                     yyaxis left;
                     CHits=cumsum(Z{:,19});
-                    plot(ax(1),Z{:,6},CHits,'HandleVisibility','off');
-                    xlabel(ax(1),'Time \it T \rm [s]');
+                    plot(ax(1),EqDeff,CHits,'HandleVisibility','off',...
+                        'LineStyle',line{count},'LineWidth',thicnk(count),'Marker','none');
+                    xlabel(ax(1),'Defformation \it \Deltah \rm [mm]');
                     ylabel(ax(1),'Cumulative hits [-]');
 
                     if ax(1).YLim(2)<max(CHits)*1.02
@@ -137,13 +149,14 @@ classdef FieldPlotter < handle
                     end
                     
                     yyaxis right;
-                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age))];
-                    plot(ax(2),P.Time,P.Force,'DisplayName',Name);
-                    ylabel(ax(2),'Force \it F \rm [N]');
-                    if ax(2).YLim(2)<max(P.Force)*1.02
-                        ylim(ax(2),[0 max(P.Force)*1.02]);
-                    end
-
+                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
+                    plot(ax(2),P.Deff,Tension,'DisplayName',Name,...
+                        'LineStyle',line{count},'LineWidth',thicnk(count),'Marker','none');
+                    ylabel(ax(2),'Tensile strength \it F_{t} \rm [MPA]');
+%                     if ax(2).YLim(2)<max(P.Force)*1.02
+%                         ylim(ax(2),[0 max(Tension)*1.02]);
+%                     end
+                
                 end
                 legend('location','northwest');
                 SetAxes(obj,ax);
@@ -158,7 +171,7 @@ classdef FieldPlotter < handle
             
             FigNum=0;
             FT=GetFilter(obj);
-            Carousel=DataCarusel(FT,[9 10 11]);
+            Carousel=DataCarusel(FT,[9]);
             
             for j=1:Carousel.RealCombCount
                 
@@ -198,9 +211,16 @@ classdef FieldPlotter < handle
                     Z=Z(Z{:,9}<P.EndTime,:);
                     Fint=zeros([size(Z,1),1]);
                     for i=1:size(Z,1)
-                        Fint(i,1)= interp1(P.Time,P.Force,Z{i,9});
+                        TenTMP=2/3*(M.VzdPodpor*0.001)/((M.B*0.001)*(M.T*0.001)^2);
+                        Tension=P.Force.*TenTMP*1e-6;
+                        Fint(i,1)= interp1(P.Time,Tension,Z{i,9});
                     end
-                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
+                    
+                    
+                    
+                    %EqDeff=interp1(P.Time,P.Deff,Z{:,6});
+                    
+                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
                     %Energy=log((Z{:,11}*10^13).^2);
                     Energy=Z{:,11};
                     b=scatter3(Z.XDelta+50,Fint,Energy,Z{:,13},'DisplayName',Name);
@@ -215,19 +235,20 @@ classdef FieldPlotter < handle
                 
                 senZ=ax(1).ZLim;
                 zlim(ax(1),senZ);
-                scatter3(senX(1),senY(1),senZ(1),'Marker','d','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor A');
-                scatter3(senX(2),senY(2),senZ(1),'Marker','^','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor B');
-                plot3([senX(1) senX(1)],[senY(1) senY(1)],senZ,'-k','HandleVisibility','off');
-                plot3([senX(2) senX(2)],[senY(2) senY(2)],senZ,'-k','HandleVisibility','off');
                 
+%                 scatter3(senX(1),senY(1),senZ(1),'Marker','d','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor A');
+%                 scatter3(senX(2),senY(2),senZ(1),'Marker','^','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor B');
+%                 plot3([senX(1) senX(1)],[senY(1) senY(1)],senZ,'-k','HandleVisibility','off');
+%                 plot3([senX(2) senX(2)],[senY(2) senY(2)],senZ,'-k','HandleVisibility','off');
+%                 
                 
                 %sf = fit([x, y],z,'poly33');
                 %plot(sf,[x,y],z);
                 legend;
                 xlabel(ax(1),'Delta x [mm]');
-                ylabel(ax(1),'Force \it F \rm [N]');
+                ylabel(ax(1),'Tensile strength \it T_{t} \rm [MPa]');
                 zlabel(ax(1),'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                xlim(ax(1),[0 380]);
+                xlim(ax(1),[60 320]);
                 view(-21,37);
                 lgd=legend('location','northwest');
                 lgd.NumColumns =2;

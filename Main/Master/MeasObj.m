@@ -86,6 +86,19 @@ classdef MeasObj < handle
             obj.Selector = addvars(obj.Selector,Selector,'NewVariableNames',char(Name));
         end
         
+        function CheckSel(obj,MSelector)
+            ThisNames=string(obj.Selector.Properties.VariableNames);
+            MNames=string({MSelector.Description});
+            [L,B]=intersect(ThisNames,MNames);
+            AddIdx=find(MNames~=L);
+            TMP=obj.Selector(:,end);
+            
+            for i=[AddIdx]
+                TMP.Properties.VariableNames={char(MNames(i))};
+                obj.Selector=[obj.Selector, TMP];
+            end
+        end
+        
         %delete sel column
         function DeleteSelCol(obj,nSet)
             obj.Selector(:,nSet)=[];

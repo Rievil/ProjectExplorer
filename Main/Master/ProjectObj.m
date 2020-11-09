@@ -61,6 +61,7 @@ classdef ProjectObj < handle
                     obj.Meas(Row).Row=Row;
 
                     obj.Meas(Row).Data.DataTypesTable=obj.DataTypesTable;
+                    CheckSel(obj.Meas(Row).Data,obj.SelectorSets);
                     FillPTree(obj,TreeNode);    
                 else
                     delete(Loader);
@@ -71,7 +72,7 @@ classdef ProjectObj < handle
                 obj.Meas(Row)=[];
                 Row=Row-1;
                 obj.MeasCount=obj.MeasCount-1;
-            end
+            end         
         end
         
         function LoadMeas(obj,SandBox)
@@ -146,9 +147,11 @@ classdef ProjectObj < handle
             for i=1:size(obj.Meas,2)
                 if ~isempty(obj.Meas(i).Data)
                     obj.Meas(i).Data.Selector.Properties.VariableNames{nSet}=char(NewName);
+                    
                 end
             end
         end
+        
         
         %delete selecetor group
         function DeleteSel(obj,nSet)
@@ -238,7 +241,7 @@ classdef ProjectObj < handle
             
             count=0;
             for i=1:numel(obj.Meas)
-                M=obj.Meas{i};
+                M=obj.Meas(i).Data;
                 if ~isempty(M)
                     count=count+1;
                 end
@@ -246,7 +249,7 @@ classdef ProjectObj < handle
             
             j=0;
             for i=1:numel(obj.Meas)
-                M=obj.Meas{i};
+                M=obj.Meas(i).Data;
                 if ~isempty(M)
                     j=j+1;
                     waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
@@ -255,6 +258,7 @@ classdef ProjectObj < handle
             end
             close(f3);
         end
+        
         function Out=MakeOverView(obj)
             Out=table;
             for i=1:size(obj.Meas,2)

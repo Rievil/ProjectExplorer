@@ -5,11 +5,13 @@ classdef Press < DataFrame
     end
     
     properties (Access = private)
+        ColNumbers=0;
     end
     
     methods %main methods
         function obj = Press(~)
             obj@DataFrame;
+            
         end
         
 
@@ -37,24 +39,48 @@ classdef Press < DataFrame
     methods %reading methods
                 %will read data started from dataloader
         function Out=Read(obj,filename)
+            obj.ColNumbers=3;
             obj.Filename=filename;
-            INData=readtable(filename,'Sheet','Test Curve Data');    
-            INData=ResamplePressData(obj,INData);
+            opts=detectImportOptions(filename,'NumHeaderLines',2,...
+                'Sheet','Test Curve Data');
+            
+            %K:\ZEDO_DATA_Export\200408_Melichar_THIS
+            INData=readtable(filename,opts);    
+            %INData=ResamplePressData(obj,INData);
             
             DCount=size(INData,2);
-            
+            VarNames={'Time','Force','Deff'};
             T=table;
             n=0;
-            for i=1:2:DCount
-                Arr=table2array(INData(:,[i i+1]));
-                Arr(isnan(Arr(:,1)),:)=[];
-                PR=Press;
-                PR.Data=table(Arr(:,1),Arr(:,2),'VariableNames',{'Time','Force'});
-                n=n+1;
-                T.Press(n)=PR;
+            try
+                for i=1:obj.ColNumbers:DCount
+                    Arr2=INData(:,i:i+obj.ColNumbers-1);
+                    Arr=zeros([size(Arr2,1), obj.ColNumbers]);
+                    for j=1:size(Arr,2)
+                        TMP2=[];
+                        TMP2=Arr2{:,j};
+                        if class(TMP2)=="double"
+                            Arr(:,j)=TMP2;
+                        else
+                            Arr(:,j)=0;
+                        end
+                    end
+                    
+                    Arr(isnan(Arr(:,1)),:)=[];
+                    PR=Press;
+                    for j=1:obj.ColNumbers
+                        PR.Data=[PR.Data, table(Arr(:,j),'VariableNames',VarNames(j))];
+                    end
+                    n=n+1;
+                    T.Press(n)=PR;
+                end
+                obj.Data=T;
+                Out=T;
+            catch ME
+                error(['Error with file: ''' filename, ...
+                    ''' with specimen: ''' char(num2str(n)) '''\n', ...
+                    'on column: ''' char(num2str(i)) '''']);
             end
-            obj.Data=T;
-            Out=T;
         end
         
     end
@@ -138,6 +164,7 @@ classdef Press < DataFrame
             Out.Time=obj.Data.Time(1:idx);
             
             Out.Force=obj.Data.Force(1:idx);
+            Out.Deff=obj.Data.Deff(1:idx);
             Out.EndTime=obj.Data.Time(idx);
         end
     end
