@@ -49,8 +49,8 @@ classdef ProjectObj < handle
             Row=size(obj.Meas,2)+1;
             %Nyní se musí spustit data loader s souèasným nastavením
             %projektu
-            
             Loader=DataLoader(ID,obj.ProjectFolder,SandBox,Row);
+            
             try
                 if Loader.BruteFolderSet==true
                     SetDataTypes(Loader,obj.DataTypesTable);
@@ -60,7 +60,7 @@ classdef ProjectObj < handle
                     obj.Meas(Row).ID=ID;
                     obj.Meas(Row).Row=Row;
 
-                    obj.Meas(Row).Data.DataTypesTable=obj.DataTypesTable;
+                    obj.Meas(Row).Data.TypeTable=obj.DataTypesTable;
                     CheckSel(obj.Meas(Row).Data,obj.SelectorSets);
                     FillPTree(obj,TreeNode);    
                 else
@@ -157,11 +157,12 @@ classdef ProjectObj < handle
         function DeleteSel(obj,nSet)
             obj.SelectorSets(nSet)=[];
             for i=1:size(obj.SelectorSets,2)
+                %pøeèísluje do správného poøadí jednotlivé selektory
                 obj.SelectorSets(i).Sets=i;
             end
             
-            for i=1:size(obj.Meas.Data,1)
-                DeleteSelCol(obj.Meas{i}.Data,nSet)
+            for i=1:size(obj.Meas,2)
+                DeleteSelCol(obj.Meas(i).Data,nSet)
             end
         end
         
@@ -229,7 +230,7 @@ classdef ProjectObj < handle
         %will copy options for data loading to its measobj
         function CloneDataType(obj,TypeTable)
             for i=1:size(obj.Meas,2)
-                obj.Meas(i).Data.DataTypesTable=TypeTable;
+                obj.Meas(i).Data.TypeTable=TypeTable;
             end
         end
     end

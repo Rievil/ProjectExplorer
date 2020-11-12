@@ -104,13 +104,15 @@ classdef OperLib < handle
         %convert type
         function Arr=ConvertType(InArr,OutType)
         end
+        
         %blueprint for maintable
         function T=MTBlueprint
             ColNames=categorical(["string","datetime","double","category"],{'string','datetime','double','category'},'ordinal',true);
             Key=false;
             Label="Name of column";
+            IsDescriptive=false;
             Num=1;
-            T=table(ColNames(1),Key,Label,Num,'VariableNames',{'ColType','Key','Label','ColNumber'});
+            T=table(ColNames(1),Key,Label,IsDescriptive,Num,'VariableNames',{'ColType','Key','Label','IsDescriptive','ColNumber'});
         end
         
         %Get All types that are present in datatype library

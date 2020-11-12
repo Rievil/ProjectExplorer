@@ -19,8 +19,11 @@ classdef MainTable < DataFrame
             T=table;
             for i=1:size(obj.Data,1)
                 Data=obj.Data(i,:);
-                MT=MainTable;
+                MT=Copy(obj);
                 MT.Data=Data;
+                MT.KeyNames=[];
+                MT.KeyNames=Data.Name;
+                MT.SpecimensCount=1;
                 T.MainTable(i)=MT;
             end
             Tab=T;
@@ -29,8 +32,17 @@ classdef MainTable < DataFrame
         
         function obj2=Copy(obj)
             obj2=MainTable;
-            
-            
+            obj2.SpecimensCount=obj.SpecimensCount;
+            obj2.KeyNames=obj.KeyNames;
+            obj2.Data=obj.Data;
+            obj2.Filename=obj.Filename;
+            obj2.Folder=obj.Folder;
+            obj2.GuiParent=obj.GuiParent;
+            obj2.Count=obj.Count;
+            obj2.Children=obj.Children;
+            obj2.TypeSet=obj.TypeSet;
+            obj2.Init=obj.Init;
+            obj2.Pos=obj.Pos;
         end
         function Data=PackUp(obj)
             TMP=obj.Data;
@@ -60,16 +72,26 @@ classdef MainTable < DataFrame
             obj.Filename=filename;
             T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
             Data=table;
-            for i=1:size(obj.TypeSet{1},1)
+            TypeSet=obj.TypeSet{1,1};
+            SpecNum=size(obj.TypeSet{1},1);
+            Desc=strings([SpecNum 1]);
+            Desc(TypeSet.IsDescriptive,1)="Descriptive";
+            
+            for i=1:SpecNum
                 type=char(obj.TypeSet{1}.ColType(i));
                 
                 SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
                 SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
                 
                 Data=[Data, SmallTable];
+                if TypeSet.IsDescriptive(i)==1
+                    
+                end
                 %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
                 
             end
+            Data.Properties.VariableDescriptions=Desc;
+            
             
             KeyRow=obj.TypeSet{1,1}(obj.TypeSet{1,1}.Key>0,:);
             obj.SpecimensCount=size(Data,1);
@@ -81,7 +103,8 @@ classdef MainTable < DataFrame
             Cat=table;
             for i=1:size(obj.Data,2)
                 ClassName=lower(class(obj.Data{1,i}));
-                if strcmp(ClassName,'categorical')
+                Desc=obj.TypeSet{1, 1}.IsDescriptive;
+                if Desc(i,1)==true
                     Cat=[Cat, obj.Data(:,i)];
                 end
             end

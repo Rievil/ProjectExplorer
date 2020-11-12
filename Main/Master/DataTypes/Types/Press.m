@@ -2,10 +2,7 @@ classdef Press < DataFrame
    
     properties
        Name char;
-    end
-    
-    properties (Access = private)
-        ColNumbers=0;
+       ColNumbers=0;
     end
     
     methods %main methods
@@ -16,22 +13,37 @@ classdef Press < DataFrame
         
 
         function Tab=TabRows(obj)
-            Tab=obj.Data;
+            T=table;
+            for i=1:size(obj.Data,1)
+                PR=Copy(obj);
+                PR.Data=obj.Data{i,1}.Data;
+                T.Press(i)=PR;
+            end
+            Tab=T;
         end
         
         function obj2=Copy(obj)
             obj2=Press;
+            obj2.Name=obj.Name;
+            obj2.ColNumbers=obj.ColNumbers;
+            obj2.Data=obj.Data;
+            obj2.Filename=obj.Filename;
+            obj2.Folder=obj.Folder;
+            obj2.GuiParent=obj.GuiParent;
+            obj2.Count=obj.Count;
+            obj2.Children=obj.Children;
+            obj2.TypeSet=obj.TypeSet;
+            obj2.Init=obj.Init;
+            obj2.Pos=obj.Pos;
         end
         
         function Data=PackUp(obj)
-            VarNames=obj.Data.Properties.VariableNames;
-            Data=table;
-            n=1;
-            for Name=VarNames
-                Data{1,n}={obj.Data{:,n}};
-                Data.Properties.VariableNames(n)=Name;
-                n=n+1; 
+            T=table;
+            for i=1:size(obj.Data,2)
+                T{1,i}={obj.Data(:,i)};
+                T.Properties.VariableNames{i}=obj.Data.Properties.VariableNames{i};
             end
+            Data=T;
         end
         
     end
@@ -83,6 +95,17 @@ classdef Press < DataFrame
             end
         end
         
+        function T=GetTension(obj,MT)
+            TenTMP=3/2*(MT.Data.VzdPodpor*0.001)/((MT.Data.B*0.001)*(MT.Data.T*0.001)^2);
+            Strength=obj.Data.Force.*TenTMP*1e-6;
+            T=obj.Data;
+            
+            if sum(contains(obj.Data.Properties.VariableNames,'Strength'))>0
+                obj.Data.Strength=Strength;
+            else
+                obj.Data=[obj.Data, table(Strength,'VariableNames',{'Strength'})];
+            end
+        end
     end
     %private methods for operating the variables
     methods (Access = private) 
@@ -161,11 +184,11 @@ classdef Press < DataFrame
                 idx=numel(obj.Data.Force);
             end
             
-            Out.Time=obj.Data.Time(1:idx);
-            
-            Out.Force=obj.Data.Force(1:idx);
-            Out.Deff=obj.Data.Deff(1:idx);
+            for i=1:size(obj.Data,2)
+                Out.(obj.Data.Properties.VariableNames{i})=table2array(obj.Data(1:idx,i));
+            end
             Out.EndTime=obj.Data.Time(idx);
+            
         end
     end
 end

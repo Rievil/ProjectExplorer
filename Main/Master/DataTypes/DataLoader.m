@@ -30,8 +30,6 @@ classdef DataLoader < OperLib & MeasObj
             obj@MeasObj(ID,ProjectFolder,SandBox,Row);
             
             GetBruteFolder(obj);
-            
-
         end
         
         %Výbìr adresáøe s mìøeními
@@ -61,7 +59,7 @@ classdef DataLoader < OperLib & MeasObj
             ChTypes=sort(obj.TypeTable.DataType);
             
             Lia = ismember(ChTypes,TP(1));
-            f1 = waitbar(0,'Please wait...','Name','Feature extraction');
+            f1 = waitbar(0,'Please wait...','Name','Loading data');
             
             %èekni jestli má MainTable
             if sum(Lia)>0
@@ -102,7 +100,8 @@ classdef DataLoader < OperLib & MeasObj
                         end
                         
                         %filename=ReadDir(obj,i);
-                        OutPut=Read(obj.TypeTable.TypesObj{i},filename);
+                        obj1=Copy(obj.TypeTable.TypesObj{i});
+                        OutPut=Read(obj1,filename);
 
                         if obj.Key && i==1
                             %obj.Data(i).('Key') = Shard(:,OperLib.GeKeyCol(obj.MainTable));
@@ -110,8 +109,8 @@ classdef DataLoader < OperLib & MeasObj
                             obj.Data=[obj.Data, Name];
                             %obj.Data.RowNames='Name';
                         end
-                        Test="auto";
-                        obj.Data=[obj.Data, TabRows(obj.TypeTable.TypesObj{i})];
+                        
+                        obj.Data=[obj.Data, TabRows(obj1)];
 %                         obj.Data.DataTypeName{i}=char(obj.TypeTable.DataType(i));
 %                         obj.Data.Data{i}=obj.TypeTable.TypesObj{i};
                         
@@ -123,7 +122,7 @@ classdef DataLoader < OperLib & MeasObj
                         
                         %F2File=cell2table(cell(0,size(items,1)));
                         f1pos=f1.Position;
-                        f2 = waitbar(0,'Please wait...','Name','Feature extraction');
+                        f2 = waitbar(0,'Please wait...','Name','Folder reading');
                         f2.Position(2)=f1pos(2)-f2.Position(4)-40;
                         
                         F2Lim=numel(items);
@@ -174,7 +173,6 @@ classdef DataLoader < OperLib & MeasObj
             Cat=table;
             if obj.Key==true
                 for i=1:size(obj.Data,1)
-                    
                     Cat=[Cat; GetCat(obj.Data.MainTable(i))];
                 end
             end
@@ -214,7 +212,6 @@ classdef DataLoader < OperLib & MeasObj
             idx=obj.Selector{:,Sel};
             CData=obj.Data(idx,:);
             for i=1:size(CData,1)
-
                 PlotType(CData.Press(i),ax);
                 PlotType(CData.Zedo(i),ax);
             end

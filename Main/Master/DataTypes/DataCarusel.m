@@ -123,6 +123,7 @@ classdef DataCarusel < handle
             end
             obj.FTable=FTable;               
             [A,B]=intersect(obj.InTab{:,1},obj.FTable{:,1});
+            %TMpIDx=find(obj.InTab{:,1}==A);
             obj.FIndex=B;
         end        
     end

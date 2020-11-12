@@ -23,6 +23,9 @@ classdef DataFrame < GUILib & OperLib
             obj@OperLib;
         end
         
+        function SetTypeSet(obj,TypeSet)
+            obj.TypeSet=TypeSet;
+        end
     end   
 end
 

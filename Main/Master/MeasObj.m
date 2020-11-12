@@ -18,7 +18,6 @@ classdef MeasObj < handle
         %this path may change between instances per users, its important 
         %for creation of new object
         Selector;
-        DataTypesTable;
         ClonedTypes=0;
         TotalTable;
     end
@@ -45,7 +44,7 @@ classdef MeasObj < handle
         %fill the table 
         function FillUITable(obj,UITable,Sel)
             %if isempty(obj.TotalTable)
-                MakeTotalTable(obj,Sel);
+            MakeTotalTable(obj,Sel);
             %end
             UITable.Data=obj.TotalTable;
             UITable.ColumnEditable(2) = true;
@@ -121,10 +120,6 @@ classdef MeasObj < handle
             Data=obj.Data(Idx,:);
         end
         
-        %will set options for data loading
-        function SetDataTypesTable(obj,TypeTable)
-            obj.DataTypesTable=TypeTable;
-        end
         
         
         
