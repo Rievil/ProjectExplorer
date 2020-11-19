@@ -23,7 +23,7 @@ classdef ProjectOverView < handle
                 %it does not exist, so create it
                 
             end
-            save(obj);
+            %save(obj);
         end
         
         %create new project

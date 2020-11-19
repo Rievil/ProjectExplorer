@@ -13,7 +13,6 @@ classdef DataLoader < OperLib & MeasObj
     
     properties
         TypeTable table;
-        %Data table;
         SpecimenCount;
     end
     
@@ -25,9 +24,9 @@ classdef DataLoader < OperLib & MeasObj
     
     methods
         %consruktor
-        function obj = DataLoader(ID,ProjectFolder,SandBox,Row)
+        function obj = DataLoader(ID,ProjectFolder,SandBox,Row,Parent)
             obj@OperLib;
-            obj@MeasObj(ID,ProjectFolder,SandBox,Row);
+            obj@MeasObj(ID,ProjectFolder,SandBox,Row,Parent);
             
             GetBruteFolder(obj);
         end
@@ -42,7 +41,6 @@ classdef DataLoader < OperLib & MeasObj
                 obj.BruteFolder=[obj.BruteFolder '\'];
                 obj.BruteFolderSet=1;
             end
-            %obj.BruteFolder=BruteFolder;
         end
         
         function ReLoadData(obj)
@@ -52,7 +50,9 @@ classdef DataLoader < OperLib & MeasObj
         
         %funkce pro ètení
         function ReadData(obj)
+            
             try
+            obj.Version=obj.Version+1;
             Types=obj.TypeTable.DataType;
             TP=DataFrame.GetTypes;
             
@@ -101,6 +101,7 @@ classdef DataLoader < OperLib & MeasObj
                         
                         %filename=ReadDir(obj,i);
                         obj1=Copy(obj.TypeTable.TypesObj{i});
+                        obj1.Parent=obj;
                         OutPut=Read(obj1,filename);
 
                         if obj.Key && i==1
@@ -129,13 +130,15 @@ classdef DataLoader < OperLib & MeasObj
                         F2File=table;
                         
                         for j=1:F2Lim
-                            waitbar(j/F2Lim,f2,['Processing: ''' char(items(j).name) '''']);
+                            
                             KeyNames=string({items.name}');
                             [TF]=contains(lower(KeyNames(j)),lower(obj.Data.Name));
                             if TF>0
-                                folder=[char(items(j).folder) '\' char(items(j).name) '\'];
+                                waitbar(j/F2Lim,f2,['Processing: ''' char(obj.Data.Name(j)) '''']);
+                                folder=[char(items(j).folder) '\' char(obj.Data.Name(j)) '\'];
                                 %'obj2 = copy(obj1)'
                                 obj2=Copy(obj.TypeTable.TypesObj{i});
+                                obj2.Parent=obj;
                                 Read(obj2,folder);
                                 F2File=[F2File; table(obj2,...
                                     'VariableNames',{char(obj.TypeTable.DataType(i))})];
@@ -156,19 +159,14 @@ classdef DataLoader < OperLib & MeasObj
             catch ME
                 close(f1);
                 close(f2);
-                msgbox('Error while loading of data');
+                msgbox(['Error while loading of data:\n' char(ME.message) '\n' ...
+                    'on line:' char(num2str(ME(1).line)) '\n' ...
+                    'file:' char(ME(1).file)]);
+                obj.Version=obj.Version-1;
             end
         end
-        
-        %function for final saving of data
-        function [DataFrame]=StoreData(obj,ID,ProjectFolder,Sandbox)
-            
-        end
-       
-        function Idx=FindPattern(obj,arr,pattern)
-            
-        end
-        
+
+        %Will create overview of descriptive variables from maintable
         function [Cat]=StackCat(obj)
             Cat=table;
             if obj.Key==true
@@ -176,11 +174,6 @@ classdef DataLoader < OperLib & MeasObj
                     Cat=[Cat; GetCat(obj.Data.MainTable(i))];
                 end
             end
-            
-        end
-        
-        function delete(obj)
-            
         end
     end
     
@@ -188,6 +181,7 @@ classdef DataLoader < OperLib & MeasObj
     methods (Static)
         
     end
+    
     %set get methods
     methods (Access = public) 
         
@@ -202,11 +196,7 @@ classdef DataLoader < OperLib & MeasObj
         end
     end
     
-    %Methods for loading
-    methods (Access = private)
-    end
-    
-    %Gui for plotter
+    %Gui methods
     methods 
         function Test(obj,ax,Sel)
             idx=obj.Selector{:,Sel};
@@ -215,6 +205,13 @@ classdef DataLoader < OperLib & MeasObj
                 PlotType(CData.Press(i),ax);
                 PlotType(CData.Zedo(i),ax);
             end
+        end
+    end
+    
+    %Delete,copy, load methods
+    methods
+        function delete(obj)
+            
         end
     end
 end

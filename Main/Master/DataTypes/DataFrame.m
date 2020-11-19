@@ -6,6 +6,7 @@ classdef DataFrame < GUILib & OperLib
         Data; %universal container, Data might be table, array, structure
         Filename; %for files type
         Folder; %for folder types
+        Parent;
     end
     
     %Interface of class

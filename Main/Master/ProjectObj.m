@@ -22,6 +22,11 @@ classdef ProjectObj < handle
         %their ussage
     end
     
+%     events
+%         ReloadData
+%     end
+    
+    %Main methods, consturction, destruction etc.
     methods (Access=public) 
         %creation of project objects
         function obj=ProjectObj(Name,SandBox,App)
@@ -49,9 +54,10 @@ classdef ProjectObj < handle
             Row=size(obj.Meas,2)+1;
             %Nyní se musí spustit data loader s souèasným nastavením
             %projektu
-            Loader=DataLoader(ID,obj.ProjectFolder,SandBox,Row);
             
+            Loader=DataLoader(ID,obj.ProjectFolder,SandBox,Row,obj);
             try
+            
                 if Loader.BruteFolderSet==true
                     SetDataTypes(Loader,obj.DataTypesTable);
                     ReadData(Loader);
@@ -75,97 +81,7 @@ classdef ProjectObj < handle
             end         
         end
         
-        function LoadMeas(obj,SandBox)
-            obj.Meas=[];
-            Files = dir([SandBox obj.ProjectFolder '*.mat']);
-            if size(Files,1)>0
-                for i=1:size(Files,1)
-                    load([Files(i).folder '\' Files(i).name],'meas');
-                    
-                    row=meas.Row;
-                    obj.Meas(row).Data=meas.Data;
-                    obj.Meas(row).ID=meas.ID;
-                    obj.Meas(row).Row=meas.Row;
-                    
-                    obj.Meas(row).Data.SandBox=SandBox;
-                    obj.Meas(row).Data.FName=[Files(i).folder '\' Files(i).name];
-                end
-                InitSelectorSets(obj);
-            end
-        end
-        
-        
-        function FillPTree(obj,TreeNode)
-            if numel(obj.MTreeNodes)>0
-                Nodes=TreeNode.Children;
-                Nodes.delete;
-            end
-            
-            if obj.MeasCount>0
-                for i=1:size(obj.Meas,2)
-    %                 tmp=char(datestr(obj.Meas{i}.Date));
-    %                 tmp2=obj.Meas{i}.Name;
-                        obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                                'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
-                                'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
-                end
-            end
-        end
-        
-        %work with selectors
-        function InitSelectorSets(obj,App)
-            if isempty(fieldnames(obj.SelectorSets))
-                %for i=1:numel(obj.Meas)
-                    SelectorSets=struct;
-                    SelectorSets.Sets=1;
-                    SelectorSets.Description='Default_set';                    
-                    obj.SelectorSets=SelectorSets;
-                %end
-                App.DropDownSelector.Value='Default_set';
-                App.DropDownSelector.Items={'Default_set'};
-                App.DropDownSelector.ItemsData=1;
-            end
-        end
-        
-        %add selector
-        function AddSelector(obj)
-            if ~isempty(fieldnames(obj.SelectorSets))
-                n=size(obj.SelectorSets,2);
-                obj.SelectorSets(n+1).Sets=n+1;
-                obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
-                for i=1:size(obj.Meas,2)
-                    AddSelRows(obj.Meas(i).Data,n+1,obj.SelectorSets(n+1).Description);
-                end
-            else
-                InitSelectorSets(obj);
-            end
-        end
-        
-        %change name of selector group
-        function ChangeSelName(obj,nSet,NewName)
-            obj.SelectorSets(nSet).Description=string(NewName);
-            for i=1:size(obj.Meas,2)
-                if ~isempty(obj.Meas(i).Data)
-                    obj.Meas(i).Data.Selector.Properties.VariableNames{nSet}=char(NewName);
-                    
-                end
-            end
-        end
-        
-        
-        %delete selecetor group
-        function DeleteSel(obj,nSet)
-            obj.SelectorSets(nSet)=[];
-            for i=1:size(obj.SelectorSets,2)
-                %pøeèísluje do správného poøadí jednotlivé selektory
-                obj.SelectorSets(i).Sets=i;
-            end
-            
-            for i=1:size(obj.Meas,2)
-                DeleteSelCol(obj.Meas(i).Data,nSet)
-            end
-        end
-        
+
         
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if
@@ -194,72 +110,106 @@ classdef ProjectObj < handle
                 end
             end
         end %end of status funciton
-        
-        %delete measurment
-        function DeleteM(obj,i,Meas,Node)
-%             Node.delete;
-%             filename=obj.Meas{i}.FName;
-%             delete(filename);  
-%             obj.Meas{i}=[];    
-            Node.delete;
-            delete(Meas);
-            obj.Meas(i)=[];
-        end
-        %class destructor of object
-        function delete(obj)
-            obj.TotalTable=[];
-        end
-        
-        %pull data from meas
-        function [StructData]=PullData(obj,Set)
-            StructData=struct;
-            for i=1:numel(obj.Meas)
-                [Data,Cat]=PullData(obj.Meas{i},Set);
-                StructData(i).PulledData=Data;
-                StructData(i).Names=fieldnames(StructData(i).PulledData);
-                StructData(i).Size=size(StructData(i).PulledData);
-                StructData(i).Cat=Cat;
-            end
-        end
+  
         
         %set master data table for project
         function SetDataTypesTable(obj,TypeTable)
             obj.DataTypesTable=TypeTable;
         end
         
-        %will copy options for data loading to its measobj
-        function CloneDataType(obj,TypeTable)
+ 
+    end
+    
+    %Data selectors
+    methods 
+        %work with selectors
+        function InitSelectorSets(obj,App)
+            if isempty(fieldnames(obj.SelectorSets))
+
+                SelectorSets=struct;
+                SelectorSets.Sets=1;
+                SelectorSets.Description='Default_set';   
+                
+                obj.SelectorSets=SelectorSets;
+
+                App.DropDownSelector.Value='Default_set';
+                App.DropDownSelector.Items={'Default_set'};
+                App.DropDownSelector.ItemsData=1;
+            end
+        end
+        
+        %add selector
+        function AddSelector(obj)
+            if ~isempty(fieldnames(obj.SelectorSets))
+                n=size(obj.SelectorSets,2);
+                obj.SelectorSets(n+1).Sets=n+1;
+                obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
+                for i=1:size(obj.Meas,2)
+                    AddSelRows(obj.Meas(i).Data,n+1,obj.SelectorSets(n+1).Description);
+                end
+            else
+                InitSelectorSets(obj);
+            end
+        end
+        
+        %change name of selector group
+        function ChangeSelName(obj,nSet,NewName)
+            obj.SelectorSets(nSet).Description=string(NewName);
             for i=1:size(obj.Meas,2)
-                obj.Meas(i).Data.TypeTable=TypeTable;
+                if ~isempty(obj.Meas(i).Data)
+                    obj.Meas(i).Data.Selector.Properties.VariableNames{nSet}=char(NewName);
+                end
+            end
+        end
+        
+        function ResetSelectors(obj)
+            
+            if size(obj.Meas,1)>0
+                for i=1:size(obj.Meas,2)
+                    M=obj.Meas(i).Data;
+                    ResetSelectors(M);
+                end
+            end
+        end
+        
+        
+        %delete selecetor group
+        function DeleteSel(obj,nSet)
+            obj.SelectorSets(nSet)=[];
+            for i=1:size(obj.SelectorSets,2)
+                %pøeèísluje do správného poøadí jednotlivé selektory
+                obj.SelectorSets(i).Sets=i;
+            end
+            
+            for i=1:size(obj.Meas,2)
+                DeleteSelCol(obj.Meas(i).Data,nSet)
             end
         end
     end
     
-    methods 
-        function ReLoadData(obj)
-            f3 = waitbar(0,'Please wait...','Name','Feature extraction');
-            f3.Position(2)=f3.Position(2)+60;
-            
-            count=0;
-            for i=1:numel(obj.Meas)
-                M=obj.Meas(i).Data;
-                if ~isempty(M)
-                    count=count+1;
-                end
+    %Gui methods
+    methods
+                
+        function FillPTree(obj,TreeNode)
+            if numel(obj.MTreeNodes)>0
+                Nodes=TreeNode.Children;
+                Nodes.delete;
             end
             
-            j=0;
-            for i=1:numel(obj.Meas)
-                M=obj.Meas(i).Data;
-                if ~isempty(M)
-                    j=j+1;
-                    waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
-                    ReLoadData(M);
+            if obj.MeasCount>0
+                for i=1:size(obj.Meas,2)
+    %                 tmp=char(datestr(obj.Meas{i}.Date));
+    %                 tmp2=obj.Meas{i}.Name;
+                        obj.MTreeNodes{i}=uitreenode(TreeNode,...
+                                'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
+                                'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
                 end
             end
-            close(f3);
         end
-        
+    end
+    
+    %Overview of all meas, data preparation
+    methods      
         function Out=MakeOverView(obj)
             Out=table;
             for i=1:size(obj.Meas,2)
@@ -301,7 +251,35 @@ classdef ProjectObj < handle
             obj.TotalTable=FilterStack;
             %obj.TotalTable=OutStack;
         end
-        
+    end
+    
+    %Save, load, delete, copy methods
+    methods 
+        function ReLoadData(obj)
+            f3 = waitbar(0,'Please wait...','Name','Feature extraction');
+            f3.Position(2)=f3.Position(2)+60;
+            
+            count=0;
+            for i=1:numel(obj.Meas)
+                M=obj.Meas(i).Data;
+                if ~isempty(M)
+                    count=count+1;
+                end
+            end
+            
+            %obj.notify('ReloadData');
+            j=0;
+            for i=1:numel(obj.Meas)
+                M=obj.Meas(i).Data;
+                if ~isempty(M)
+                    j=j+1;
+                    waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
+                    ReLoadData(M);
+                end
+            end
+            close(f3);
+        end
+
         function SaveMeas(obj,SandBox)
             %sobj = saveobj@MeasObj(obj);
             f1=waitbar(0,'Saving meas: ...');
@@ -311,7 +289,7 @@ classdef ProjectObj < handle
                     
                     warning ('off','all');
                     meas=obj.Meas(i);
-                    
+                    meas.Data.Parent=[];
                     save([SandBox obj.ProjectFolder 'Meas_' char(num2str(meas.ID)) '.mat'],'meas');
                     waitbar(i/MSize,f1,['Saving meas: ''' char(meas.Data.Name) '''']);
                     warning ('on','all');
@@ -320,6 +298,63 @@ classdef ProjectObj < handle
                 close(f1);
             end
             close(f1);
+        end
+        
+        
+        function LoadMeas(obj,SandBox)
+            obj.Meas=[];
+            Files = dir([SandBox obj.ProjectFolder '*.mat']);
+            if size(Files,1)>0
+                for i=1:size(Files,1)
+                    load([Files(i).folder '\' Files(i).name],'meas');
+                    
+                    row=meas.Row;
+                    obj.Meas(row).Data=meas.Data;
+                    obj.Meas(row).ID=meas.ID;
+                    obj.Meas(row).Row=meas.Row;
+                    
+                    obj.Meas(row).Data.SandBox=SandBox;
+                    obj.Meas(row).Data.FName=[Files(i).folder '\' Files(i).name];
+                    obj.Meas(row).Data.Parent=obj;
+                end
+                InitSelectorSets(obj);
+            end
+        end
+        
+        
+        %pull data from meas
+        function [StructData]=PullData(obj,Set)
+            StructData=struct;
+            for i=1:numel(obj.Meas)
+                [Data,Cat]=PullData(obj.Meas{i},Set);
+                StructData(i).PulledData=Data;
+                StructData(i).Names=fieldnames(StructData(i).PulledData);
+                StructData(i).Size=size(StructData(i).PulledData);
+                StructData(i).Cat=Cat;
+            end
+        end
+        
+       %will copy options for data loading to its measobj
+        function CloneDataType(obj,TypeTable)
+            for i=1:size(obj.Meas,2)
+                obj.Meas(i).Data.TypeTable=TypeTable;
+            end
+        end
+        
+              
+        %delete measurment
+        function DeleteM(obj,i,Meas,Node)
+%             Node.delete;
+%             filename=obj.Meas{i}.FName;
+%             delete(filename);  
+%             obj.Meas{i}=[];    
+            Node.delete;
+            delete(Meas);
+            obj.Meas(i)=[];
+        end
+        %class destructor of object
+        function delete(obj)
+            obj.TotalTable=[];
         end
     end
 end
