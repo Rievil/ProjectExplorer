@@ -13,7 +13,7 @@ classdef ProjectObj < handle
         MeasCount=0;
         MTreeNodes;     
         SelectorSets struct;
-        
+        CurrentSelector;
         MasterDataTypesTable; 
         DataTypesTable;
         TotalTable;
@@ -135,6 +135,7 @@ classdef ProjectObj < handle
                 App.DropDownSelector.Value='Default_set';
                 App.DropDownSelector.Items={'Default_set'};
                 App.DropDownSelector.ItemsData=1;
+                obj.CurrentSelector=1;
             end
         end
         
@@ -233,23 +234,35 @@ classdef ProjectObj < handle
             OutStack=table;
             for i=1:numel(obj.Meas)
                 M=obj.Meas(i).Data;
+                ID=obj.Meas(i).ID;
+                IDSpec=[];
                 if ~isempty(M)
                     idx=M.Selector{:,Sel};
-                    Filter=M.Data(idx,:);
-                    FilterStack=[FilterStack; Filter];
                     
-                    for j=1:size(Filter,1)
-                        Row=table;
-                        for k=2:size(Filter,2)
-                            Row=[Row, PackUp(Filter{j,k})];
-                            
-                        end
-                        OutStack=[OutStack; Row];
+                    
+                    IDMeas(1:size(M.Data,1),1)=ID;
+                    IDMeas=IDMeas(idx,1);
+                    
+                    IDSpec(:,1)=linspace(1,size(M.Data,1),size(M.Data,1))';
+                    IDSpec=IDSpec(idx,1);
+                    
+                    Filter=M.Data(idx,:);
+                    if size(Filter,1)>0
+                        Filter=[table(IDMeas,IDSpec,'VariableNames',{'IDMeas','IDSpec'}), Filter];
+                        
+                        FilterStack=[FilterStack; Filter];
                     end
                 end
             end
             obj.TotalTable=FilterStack;
             %obj.TotalTable=OutStack;
+        end
+        
+        function SignSpecimen(obj,meas,spec)
+            if obj.CurrentSelector>0
+                val=obj.Meas(meas).Data.Selector{spec,obj.CurrentSelector};
+                obj.Meas(meas).Data.Selector{spec,obj.CurrentSelector}=~val;
+            end
         end
     end
     
@@ -275,6 +288,7 @@ classdef ProjectObj < handle
                     j=j+1;
                     waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
                     ReLoadData(M);
+                    ResetSelectors(M);
                 end
             end
             close(f3);

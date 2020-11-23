@@ -46,6 +46,7 @@ classdef DataLoader < OperLib & MeasObj
         function ReLoadData(obj)
             obj.Data=[];
             ReadData(obj);
+            ResetSelectors(obj);
         end
         
         %funkce pro ètení

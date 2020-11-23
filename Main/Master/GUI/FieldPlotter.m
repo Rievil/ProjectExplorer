@@ -15,6 +15,8 @@ classdef FieldPlotter < handle
         IsAssociated=0;
         UITable;
         Panel;
+        Project;
+        VertMarker;
     end
     
     properties %plot styles, colors, lines, markers
@@ -30,6 +32,11 @@ classdef FieldPlotter < handle
         Y2Axis logical;
         CurrLine;
         GUI;
+        CurrentGOID;
+        View;
+        Is3D=0;
+        FigSize;
+        
     end
     
     methods
@@ -49,8 +56,9 @@ classdef FieldPlotter < handle
             types=obj.PlotTypes;
         end
         
-        function PutData(obj,Data)
-            obj.Data=Data;
+        function PutData(obj,node)
+            obj.Project=node;
+            obj.Data=obj.Project.TotalTable;
             obj.IsTotalTable=1;
         end
         
@@ -64,62 +72,87 @@ classdef FieldPlotter < handle
             obj.CurrLine=[];
             switch lower(Type)
                 case 'basic'
+                    obj.Is3D=0;
                     obj.Y2Axis=1;
                     GeneralPlot(obj,@PlotBasic);
+                    SaveFigures(obj);
                 case 'events'
+                    obj.Is3D=1;
                     obj.Y2Axis=0;
                     GeneralPlot(obj,@PlotEvents);
+                    SaveFigures(obj);
                     %PlotEvents(obj);
                 case 'velocity'
+                    obj.Is3D=0;
                     obj.Y2Axis=0;
                     GeneralPlot(obj,@PlotVelocity);
+                    SaveFigures(obj);
                 case 'tensile_shear'
+                    obj.Is3D=0;
                     obj.Y2Axis=0;
-                    PlotShearTensile(obj);
+                    obj.View=[];
+                    GeneralPlot(obj,@PlotShearTensile);
+                    SaveFigures(obj);
                 case 'selective'
+                    obj.Is3D=0;
                     obj.GUI=true;
                     obj.Y2Axis=1;
                     GeneralPlot(obj,@PlotSelective);
                     obj.GUI=false;
                 case 'events2'
+                    obj.Is3D=1;
                     obj.Y2Axis=0;
                     GeneralPlot(obj,@PlotEvents2);
+                    SaveFigures(obj);
             end
-            SaveFigures(obj);
+            
         end
         function SaveFigures(obj)
             GetLimits(obj);
             SaveFiles(obj);
         end
+        
+        function SaveFig(obj,UIAxes,Filename)
+            %h = figure;
+            copyUIAxes(UIAxes);
+            h=gcf;
+            ax=gca;
+            
+            if obj.Is3D==1
+                set(ax,'view',obj.View);
+            end
+            
+            set(h,'Position',[200 200 550 450]);
+            saveas(h,Filename,'svg');
+            delete(h)
+        end
+        
         function GetLimits(obj)
             x=[];
             y=[];
             z=[];
             n=0;
             for i=1:size(obj.Result,2)
-                for a=1
+
                     n=n+1;
-                    x(n,:,a)=obj.Result(i).Axes.XLim;
-                    y(n,:,a)=obj.Result(i).Axes.YLim;
-                    z(n,:,a)=obj.Result(i).Axes.ZLim;
+                    x(n,:)=obj.Result(i).Axes.XLim;
+                    y(n,:)=obj.Result(i).Axes.YLim;
+                    z(n,:)=obj.Result(i).Axes.ZLim;
                     if obj.Y2Axis==1
                         tmp=obj.Result(i).Axes.YLim;
-                        y2(n,:,2)=obj.Result(i).Axes.YAxis.Limits;  
+                        y2(n,:)=obj.Result(i).Axes.YAxis.Limits;  
                     end
-                end
             end
             
 
             for i=1:size(obj.Result,2)
-                
-                for a=1
-                    obj.Result(i).Axes(a).XLim=[min(x(:,1,a)) max(x(:,2,a))];
-                    obj.Result(i).Axes(a).YLim=[min(y(:,1,a)) max(y(:,2,a))];
-                    obj.Result(i).Axes(a).ZLim=[min(z(:,1,a)) max(z(:,2,a))];
+
+                    obj.Result(i).Axes.XLim=[min(x(:,1)) max(x(:,2))];
+                    obj.Result(i).Axes.YLim=[min(y(:,1)) max(y(:,2))];
+                    obj.Result(i).Axes.ZLim=[min(z(:,1)) max(z(:,2))];
                     if obj.Y2Axis==1
-                        obj.Result(i).Axes.YAxis(1).Limits=[min(y2(:,1,2)) max(y2(:,2,2))];
+                        obj.Result(i).Axes.YAxis(1).Limits=[min(y2(:,1)) max(y2(:,2))];
                     end
-                end
             end
         end
         function SaveFiles(obj)
@@ -138,22 +171,27 @@ classdef FieldPlotter < handle
         function SetSyle(obj,Num)
             Count=round(Num/4,0)+1;
             LT={'-','--','-.',':'};
-            obj.Figure.Colormap=parula(Num);
+            obj.Figure.Colormap=lines(Num);
             obj.Colors=obj.Figure.Colormap;
-            marker={'none','none','none','none';...
+            obj.View=[-21,37];
+            
+            marker={'none','none','none','none';... 
+                'none','none','none','none';...
                 'o','o','o','o';...
                 'd','d','d','d';...
-                '+','+','+','+';...
-                '^','^','^','^';...
-                'h','h','h','h';...
-                '*','*','*','*';...
                 's','s','s','s';...
+                '^','^','^','^';...
+                'v','v','v','v';...
                 '|','|','|','|';...
+                'h','h','h','h';...
+                '+','+','+','+';...
+                '*','*','*','*';...            
                 'p','p','p','p'};
+            obj.VertMarker=marker;
             
             for i=1:Count
                 obj.Lines=[obj.Lines, LT];
-                obj.Thick=[obj.Thick, linspace(1+(i-1)*0.5,1+(i-1)*0.5,4)];
+                obj.Thick=[obj.Thick, linspace(1+(i-1)*0.9,1+(i-1)*0.9,4)];
                 obj.Marker=[obj.Marker, marker(i,:)];
             end
 
@@ -176,10 +214,10 @@ classdef FieldPlotter < handle
             [FT,NewIdx]=sortrows(FT,[9,13,10]);
             obj.Data=obj.Data(NewIdx,:);
             
-            Carousel=DataCarusel(FT,[9,11,13]);
+            Carousel=DataCarusel(FT,[9]);
             
             %set(gcf,);
-            BaseSize=[200 200 850 650];
+            BaseSize=[200 200 750 550];
             obj.Figure=uifigure('Position',BaseSize);
             obj.TabGroup = uitabgroup(obj.Figure,'Position',[25 100 BaseSize(3)-50 BaseSize(4)-125]);
             if obj.GUI==true
@@ -204,43 +242,43 @@ classdef FieldPlotter < handle
 
                 SetSyle(obj,numel(Idx));
                 obj.Result(j).FigHan=obj.Figure;
-                
+                han=[];
                 for i=Idx
                     obj.Count=obj.Count+1;
                     
                     Name=obj.Data.Name(i);
                     DataCopy=struct;
-                    DataCopy(1).Type=Copy(obj.Data.Zedo(i));
-                    DataCopy(2).Type=Copy(obj.Data.Press(i));
-                    DataCopy(3).Type=Copy(obj.Data.MainTable(i));
+                    
+                    DataCopy.IDMeas=obj.Data.IDMeas(i);
+                    DataCopy.IDSpec=obj.Data.IDSpec(i);
+                    DataCopy.Name=obj.Data.Name(i);
+                    
+                    DataCopy.Data(1).Type=Copy(obj.Data.Zedo(i));
+                    DataCopy.Data(2).Type=Copy(obj.Data.Press(i));
+                    DataCopy.Data(3).Type=Copy(obj.Data.MainTable(i));
+                    
                     obj.CopyD=DataCopy;
-                    GetTension(DataCopy(2).Type,DataCopy(3).Type);
+                    GetTension(DataCopy.Data(2).Type,DataCopy.Data(3).Type);
                     
                     %________________________________
-                    AnFun(obj,DataCopy);
+                    h=AnFun(obj,DataCopy);
+                    han=[han, h];
                     %________________________________
                 end
 
-                legend(obj.Axes,'location','northwest');
+                legend(obj.Axes,han,'location','northwest');
                 SetAxes(obj,obj.Axes);
                 obj.Result(j).Axes=obj.Axes;
-                obj.Result(j).SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_Cumulative.png'];
+                type=char(AnFun);
+                obj.Result(j).SaveFilename=[obj.GraphFolder type '_' obj.Interpreter '_' char(num2str(j)) '_MFZ_Cumulative'];
                 
             end
         end
         
-        function SaveFig(obj,UIAxes,Filename)
-            %h = figure;
-            copyUIAxes(UIAxes);
-            h=gcf;
-            saveas(h,Filename,'png');
-            delete(h)
-        end
-        
-        function PlotBasic(obj,DataBag)
-            Z=DataBag(1).Type.Data.Records(1).ConDetector;
-            M=GetParams(DataBag(3).Type);
-            P=GetParams(DataBag(2).Type);
+        function han=PlotBasic(obj,DataCopy)
+            Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
             
             Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
             Z = sortrows(Z,Z.Properties.VariableNames(6));
@@ -254,7 +292,7 @@ classdef FieldPlotter < handle
             x1=EqDeff;
             y1=CHits;
             
-            plot(obj.Axes,x1,y1,'Marker','none','HandleVisibility','off',...
+            plot(obj.Axes,x1,y1,'Marker','none','HandleVisibility','on',...
                         'LineStyle',obj.Lines{obj.Count},'LineWidth',obj.Thick(obj.Count));
 %             plot(obj.Axes(1),EqDeff,CHits,'HandleVisibility','off',...
 %                 'Marker','.','LineWidth',obj.Thick(obj.Count),'LineStyle',...
@@ -281,18 +319,19 @@ classdef FieldPlotter < handle
             y2=P.Strength;
             %[x2, index] = unique(x2); 
             %yint2=interp1(x2,y2(index),intx2);
-            pl=plot(obj.Axes,x2,y2,'DisplayName',Name,...
+            han=plot(obj.Axes,x2,y2,'DisplayName',Name,...
                 'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10);
             
             ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
+            %yyaxis(obj.Axes, 'left');
             %set(gcf,'Position',[20 20 650 450]);
         end
         
 
-        function PlotEvents(obj,DataBag)
-            Z=DataBag(1).Type;
-            M=GetParams(DataBag(3).Type);
-            P=GetParams(DataBag(2).Type);
+        function han=PlotEvents(obj,DataCopy)
+            Z=DataCopy.Data(1).Type;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
             
             GetXDeltas(Z,M.Length,M.Velocity,1);
             if Z.HasEvents==true
@@ -319,9 +358,10 @@ classdef FieldPlotter < handle
                 %Energy=log((Z{:,11}*10^13).^2);
 
                 Energy=E{:,13};
-                b=scatter3(obj.Axes,E.XDelta+50,ZStrength,Energy,E{:,13},E{:,13}*10,'DisplayName',Name);
+                han=scatter3(obj.Axes,E.XDelta+50,ZStrength,Energy,E{:,13},'DisplayName',Name,...
+                    'Marker',obj.VertMarker{obj.Count+1,1});
 
-                b.MarkerFaceColor=b.MarkerEdgeColor;
+                han.MarkerFaceColor=han.MarkerEdgeColor;
 
 
 
@@ -336,27 +376,28 @@ classdef FieldPlotter < handle
             %                 
                 %sf = fit([x, y],z,'poly33');
                 %plot(sf,[x,y],z);
-                legend;
+                %legend;
                 xlabel(obj.Axes,'Delta x [mm]');
                 ylabel(obj.Axes,'Tensile strength \it f_{ct} \rm [MPa]');
                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
                 xlim(obj.Axes,[60 320]);
-                obj.Axes.View=[-21,37];
-                lgd=legend('location','northwest');
-                lgd.NumColumns =2;
+                obj.Axes.View=obj.View;
+                %lgd=legend('location','northwest');
+                %lgd.NumColumns =2;
                 obj.Axes.ZAxis.Scale='log';
                 SetAxes(obj,obj.Axes);
                 %set(gcf,'Position',[200 200 1100 600]);
             else
                 obj.Count=obj.Count-1;
+                han=[];
             end
 
         end
         
-        function PlotEvents2(obj,DataBag)
-            Z=DataBag(1).Type;
-            M=GetParams(DataBag(3).Type);
-            P=GetParams(DataBag(2).Type);
+        function han=PlotEvents2(obj,DataCopy)
+            Z=DataCopy.Data(1).Type;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
             
             GetXDeltas(Z,M.Length,M.Velocity,1);
             if Z.HasEvents==true
@@ -380,53 +421,52 @@ classdef FieldPlotter < handle
                 ZDefformation(:,1)=interp1(P.Time,P.Deff,ZedoTime);
 
                 Name=[char(M.Mixture) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
-                %Energy=log((Z{:,11}*10^13).^2);
 
                 Energy=E{:,13};
                 x=E.XDelta+50;
                 y=ZStrength;
                 z=Energy;
-                s=E{:,13};
+                
+                s=log(E{:,11}*10e+15).^2;
+                
                 c=E{:,13}*10;
                 
-                
-                
-                                
-                b=scatter3(obj.Axes,x,y,z,s,'DisplayName',Name,'MarkerFaceColor','r','MarkerEdgeColor','w');
-                %b.MarkerFaceColor=b.MarkerEdgeColor;
-                
+                han=scatter3(obj.Axes,x,y,z,s,'filled','DisplayName',Name,...
+                    'Marker',obj.VertMarker{obj.Count+2,1},'MarkerEdgeColor','k',...
+                    'MarkerFaceColor',[obj.Colors(obj.Count,:)]);
 
-
-                set(gca, 'Projection','perspective');
-                obj.Axes.View=[-21,37];
+                %set(obj.Axes, 'Projection','perspective');
+                
+                obj.Axes.View=obj.View;
                 senZ=obj.Axes.ZLim;
                 zlim(obj.Axes,senZ);
                 
-                for i=1:numel(x)
-                    if z(i)>max(z)*0.7
-                        plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[senZ(1) z(i)],'HandleVisibility','off','Color','r',...
+                for i=1:numel(x) 
+                    if s(i)>max(s)*0.20
+                        plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[0 z(i)],...
+                            'HandleVisibility','on','Color',[0.7,0.7,0.7],...
                             'LineStyle','-');
                     end
                 end
                 
-                legend;
+                %legend(obj.Axes);
                 xlabel(obj.Axes,'Delta x [mm]');
                 ylabel(obj.Axes,'Tensile strength \it f_{ct} \rm [MPa]');
                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                xlim(obj.Axes,[60 320]);
+                xlim(obj.Axes,[140 240]);
                 
-                lgd=legend('location','northwest');
-                lgd.NumColumns =2;
-                obj.Axes.ZAxis.Scale='log';
+                %lgd.NumColumns =2;
+                %obj.Axes.ZAxis.Scale='log';
                 SetAxes(obj,obj.Axes);
-                %set(gcf,'Position',[200 200 1100 600]);
+                obj.FigSize=obj.Axes.Parent.Position;
             else
                 obj.Count=obj.Count-1;
+                han=[];
             end
 
         end
-        function PlotVelocity(obj,DataBag)
-            M=GetParams(DataBag(3).Type);
+        function han=PlotVelocity(obj,DataCopy)
+            M=GetParams(DataCopy.Data(3).Type);
             Fig=obj.Figure;
             CurrAxes=Fig.CurrentAxes;
             
@@ -442,7 +482,7 @@ classdef FieldPlotter < handle
                 cla(obj.Axes(1));
             end
             Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age))];
-            errorbar(obj.Axes(1),x,y,err,'-o','DisplayName',Name);
+            han=errorbar(obj.Axes(1),x,y,err,'-o','DisplayName',Name);
 
            xlabel(obj.Axes(1),'Number of cycles');
            ylabel(obj.Axes(1),'Velocity of elastic wave \it v_{UZ} \rm [m\cdots^{-1}]');
@@ -450,86 +490,71 @@ classdef FieldPlotter < handle
             legend;
         end
         
-        function PlotShearTensile(obj)
-            FigNum=0;
-            FT=GetFilter(obj);
-            Carousel=DataCarusel(FT,[9]);
+        function han=PlotShearTensile(obj,DataCopy)
+            Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
+            %GetXDeltas(Z,M.Length,M.Velocity,1);
             
-            for j=1:Carousel.RealCombCount
-                FigNum=FigNum+1;
-                obj.Result(FigNum).FigHan=figure(j);
-                [FTable,Idx]=GetCombinations(Carousel,j);
-                
-                ax(1)=gca;
-                hold(ax(1),'on');
-                box(ax(1),'on');
-                grid(ax(1),'on');
-                
-                for k=1:numel(Idx)
-                    i=Idx(k);
-                    Name=obj.Data.Name(i);
-                    Zo=obj.Data.Zedo(i);
-                    Po=obj.Data.Press(i);
-                    Mo=obj.Data.MainTable(i);
+            han=[];
+            if size(Z,1)>0
 
-                    %Z=GetParams(Zo,Name);
-                    P=GetParams(Po,Name);
-                    M=GetParams(Mo,Name);
-                    Z=Zo.Data.Records(1).ConDetector;
-                    Z=Z(Z.Energy_V_2_Hz_>5e-10,:);
-                    clear AvgFreq;
+
+                Z=Z(Z.Energy_V_2_Hz_>5e-10,:);
+                Dur=Z.Duration_ns_;
+                HCount=Z.HCount_N_;
+                AvgFreq=Dur./HCount;
+
+                RiseTime=Z.Risetime_ns_;
+                MaxAmplitude=Z.Max_Amplitude_V_;
+
+                RAVal=(RiseTime*1e-8)./MaxAmplitude;
+
+                %colormap(jet(100));
+
+                Size=abs(Z{:,13}.*10e+4);
+
+                %Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
+                Name=[char(M.Mixture) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
+
+                han=scatter(obj.Axes,RAVal,AvgFreq,Size,'filled','DisplayName',Name,...
+                    'MarkerEdgeColor','k');
+                if obj.Count<2
+                    Alpha=63;
+                    YMax=70000;%obj.Axes(1).YLim(2);
+                    XMax=12;%obj.Axes(1).XLim(2);
+                    [XCoor,YCoor]=OperLib.Hypotenuse(XMax,YMax,Alpha);
+
+                    XLine=linspace(0,XCoor,1000);
+                    YLine=linspace(0,YCoor,1000);
+                    B=0;
+
+                    plot(obj.Axes,XLine,YLine+B,'-k','HandleVisibility','on');
+                    %xlim(obj.Axes,[0 XCoor*1.05]);
+                    red=[0.70 0.80];
+                    STR={'\leftarrow Tensile crack','Shear crack \rightarrow'};
+                    text(obj.Axes,XCoor*red(1),YCoor*red(2),STR{1},'HorizontalAlignment','right','FontSize',12,...
+                        'FontName','Palatino linotype','FontWeight','bold');
                     
-                    Dur=Z.Duration_ns_;
-                    HCount=Z.HCount_N_;
-                    AvgFreq=Dur./HCount;
-
-                    RiseTime=Z.Risetime_ns_;
-                    MaxAmplitude=Z.Max_Amplitude_V_;
-
-                    RAVal=(RiseTime*1e-8)./MaxAmplitude;
-
-                    colormap(jet(100));
-                    Size=abs(Z{:,13}.*10e+4);
-                    Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
-                    scatter(RAVal,AvgFreq,Size,'filled','DisplayName',Name);
-                    col=colorbar;
-                    col.Label.String='AE Classes [-]';
+                    text(obj.Axes,XCoor*red(2),YCoor*red(2),STR{2},'HorizontalAlignment','left',...
+                        'FontSize',12,...
+                        'FontName','Palatino linotype','FontWeight','bold');
+                    obj.Axes.XAxis.Scale='log';
                 end
-                
-                legend;
-                Alpha=63;
 
-
-                YMax=ax(1).YLim(2);
-                XMax=ax(1).XLim(2);
-
-                [XCoor,YCoor]=OperLib.Hypotenuse(XMax,YMax,Alpha);
-
-                XLine=[0 XCoor];
-                YLine=[0 YCoor];
-                B=0;
-
-                plot(XLine,YLine+B,'-k','HandleVisibility','off');
-
-                xlabel('RA values [ms/V]');
-                ylabel('Average frequency [Hz]');
-
-                red=[0.75 0.8];
-                STR={'\leftarrow Tensile crack','Shear crack \rightarrow'};
-                text(XCoor*red(1),YCoor*red(2),STR{1},'HorizontalAlignment','right','Rotation',Alpha-90,'FontSize',10);
-                text(XCoor*red(2),YCoor*red(1),STR{2},'Rotation',Alpha-90,'FontSize',10);
-                SetAxes(obj,ax);
-                set(gcf,'Position',[20 20 650 450]);
-                obj.Result(FigNum).Axes=ax;
-                obj.Result(FigNum).SaveFilename=[obj.GraphFolder obj.Interpreter '_' char(num2str(j)) '_MFZ_ShearTensile.png'];
-            end      
+                xlabel(obj.Axes,'RA values [ms/V]');
+                ylabel(obj.Axes,'Average frequency [Hz]');
+            else
+                obj.Count=obj.Count-1;
+                han=[];
+            end
         end
         
-        function PlotSelective(obj,DataBag)
+        function han=PlotSelective(obj,DataCopy)
             
-            Z=DataBag(1).Type.Data.Records(1).ConDetector;
-            M=GetParams(DataBag(3).Type);
-            P=GetParams(DataBag(2).Type);
+            Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
             
             Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
             Z = sortrows(Z,Z.Properties.VariableNames(6));
@@ -562,46 +587,68 @@ classdef FieldPlotter < handle
             Name=[char(M.Mixture) ' - ' char(M.Enviroment) C ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
             clear x2 y2;
             x2=P.Deff;
-            intx2=linspace(min(x2)*1.01,max(x2)*0.99,100);
+            intx2=linspace(min(x2)*1.01,max(x2)*0.99,30);
             
             y2=P.Strength;
             [x2, index] = unique(x2); 
             yint2=interp1(x2,y2(index),intx2);
-            pl=plot(obj.Axes,intx2,yint2,'DisplayName',Name,...
+            han=plot(obj.Axes,intx2,yint2,'DisplayName',Name,...
                 'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10,...
-                'ButtonDownFcn',@obj.ShowTitle,'UserData',{Name,obj.Axes,obj,true});
+                'ButtonDownFcn',@(src,event) ShowTitle(obj,event),...
+                'UserData',{DataCopy.IDMeas,DataCopy.IDSpec,true});
             
             ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
             title(obj.Axes,'');
         end
     end
-    
-    %Callbacks
-    methods (Static)
-        function ShowTitle(obj,event)
-            line=obj;
-            obj=event.Source.UserData{3};
-            if ~isempty(obj.CurrLine)
-                obj.CurrLine.Color=line.Color;  
-            end
-            gcf=event.Source.UserData{2};
-            title(gcf,['Selected specimen '''':' event.Source.UserData{1} '''']);
-            obj.CurrLine=line;
-            obj.CurrLine.Color='k';
-        end
-    end
-    
+
     %GUI plots
     methods
+        function ShowTitle(obj,event)
+            line=event.Source;
+            
+            obj.CurrentGOID=event.Source.UserData{1};
+            
+            if ~isempty(obj.CurrLine)
+                if obj.CurrLine.UserData{3}==1
+                    obj.CurrLine.Color=[0.8500,    0.3250,   0.0980];  
+                else
+                    obj.CurrLine.Color=[0.8,0.8,0.8];  
+                end
+            end
+            obj.CurrLine=line;
+            gcf=obj.CurrLine.Parent;
+            
+            if obj.CurrLine.UserData{3}==1
+                obj.CurrLine.Color='k';
+                title(gcf,['Selected specimen '''':' line.DisplayName ''' State: ON']);
+            else
+                obj.CurrLine.Color=[0.5,0.5,0.5];
+                title(gcf,['Selected specimen '''':' line.DisplayName ''' State: OFF']);
+            end
+        end
+        
         function CreateButtons(obj,Parent)
             uibutton(Parent,'Position',[20, 60, 100, 25],...
-                'Text','Mark/UnMark');
-%            uibutton(fig,'Position',[20, 60, 100, 25],...
-%                 'Text','Mark/UnMark',...
-%                'ButtonPushedFcn', @(btn,event) plotButtonPushed(btn,ax));
+                'Text','Mark/UnMark',...
+                'ButtonPushedFcn', @(src,event) SignSpecimen(obj,event));
         end
-    end
-    methods %gui
+        
+        function SignSpecimen(obj,event)
+            IDMeas=obj.CurrLine.UserData{1};
+            IDSpec=obj.CurrLine.UserData{2};
+            Name=obj.CurrLine.DisplayName;
+            
+            SignSpecimen(obj.Project,IDMeas,IDSpec);
+            value=obj.CurrLine.UserData{3};
+            obj.CurrLine.UserData{3}=~value;
+            if obj.CurrLine.UserData{3}==1
+                obj.CurrLine.Color=[0.8500,    0.3250,   0.0980];
+            else
+                obj.CurrLine.Color=[0.8,0.8,0.8];
+            end
+        end
+        
         function IniciateControls(obj)
             obj.Panel=obj.Parent.Panel;
             data=table

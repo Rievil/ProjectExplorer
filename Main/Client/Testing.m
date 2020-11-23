@@ -22,5 +22,14 @@ color=E{:,13};
 scatter3(x,y,z,size,color,'filled');
 arr=[x,y,z,size];
 %%
+figure(1);
+hold on;
+s=E{:,11}*10e+14;
+
+scatter3(x,y,z,s,'filled');
+%%
+s=log(E{:,11}*10e+15).^2;
+plot(s);
+%%
 filename='K:\ZEDO_DATA_Export\200527_Melichar_THIS\br121\br121.65.1a-ae-signal-00005.bin'
 [hit]=ReadHit('K:\ZEDO_DATA_Export\200527_Melichar_THIS\br121\','br121.65.1a-ae-signal-00005.bin')
