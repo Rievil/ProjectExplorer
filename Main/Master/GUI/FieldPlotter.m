@@ -123,7 +123,7 @@ classdef FieldPlotter < handle
             end
             
             set(h,'Position',[200 200 550 450]);
-            saveas(h,Filename,'svg');
+            saveas(h,Filename,'png');
             delete(h)
         end
         
@@ -211,7 +211,7 @@ classdef FieldPlotter < handle
             
             FT=GetFilter(obj);
             
-            [FT,NewIdx]=sortrows(FT,[9,13,10]);
+            [FT,NewIdx]=sortrows(FT,[9,13,10],'descend');
             obj.Data=obj.Data(NewIdx,:);
             
             Carousel=DataCarusel(FT,[9]);
@@ -297,7 +297,7 @@ classdef FieldPlotter < handle
 %             plot(obj.Axes(1),EqDeff,CHits,'HandleVisibility','off',...
 %                 'Marker','.','LineWidth',obj.Thick(obj.Count),'LineStyle',...
 %                 'none','Color',obj.Colors(obj.Count,:),'MarkerSize',2);
-            xlabel(obj.Axes,'Deformation \it \Deltah \rm [mm]');
+            xlabel(obj.Axes,'Deflection \it \delta \rm [mm]');
             ylabel(obj.Axes,'Cumulative hits [-]');
 
             if obj.Axes.YLim(2)<max(CHits)*1.02

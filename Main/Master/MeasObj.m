@@ -116,21 +116,16 @@ classdef MeasObj < handle
         end
         
         function CheckSel(obj,MSelector)
-            ThisNames=string(obj.Selector.Properties.VariableNames);
-            MNames=string({MSelector.Description});
-            [L,B]=intersect(ThisNames,MNames);
-            AddIdx=find(MNames~=L);
-            TMP=obj.Selector(:,end);
-            
-            for i=[AddIdx]
-                TMP.Properties.VariableNames={char(MNames(i))};
-                obj.Selector=[obj.Selector, TMP];
-            end
+            ResetSelectors(obj);
         end
         
         function ResetSelectors(obj)
             obj.Selector=[];
-            value=false([obj.Count,1]);            
+            value=false([obj.Count,1]);
+            if size(obj.Selector,1)>0
+                InitSel(obj);
+            end
+            
             for i=1:size(obj.Parent.SelectorSets,2)
                 obj.Selector=[obj.Selector, table(value,'VariableNames',obj.Parent.SelectorSets(i).Description)];
             end

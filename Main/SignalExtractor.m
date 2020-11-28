@@ -29,7 +29,7 @@ classdef SignalExtractor < handle
         %------------------------------------------------------------------
         %set the inputs
         %------------------------------------------------------------------
-        function GetEmptyFeature(obj)
+        function feat=GetEmptyFeature(obj)
             DomAmp=NaN;
             DomFreq=NaN;
             DomWidth=NaN;
@@ -85,10 +85,12 @@ classdef SignalExtractor < handle
             AnalyzeSignal(obj,false);
             
             %count the FFT
-            [obj.Frequency,obj.FAmplitude]=CountFFT(obj);
-            
-            %Extraction(obj.Frequency,obj.FAmplitude,false);
-            obj.FreqPeaks=ExtractPeaks(obj,false);
+            if numel(obj.Signal)>0
+                [obj.Frequency,obj.FAmplitude]=CountFFT(obj);
+                obj.FreqPeaks=ExtractPeaks(obj,false);
+            else
+                GetEmptyFeature(obj);
+            end
             warning('on','all');
             
             %Construct feature
@@ -163,9 +165,7 @@ classdef SignalExtractor < handle
         %------------------------------------------------------------------
         function [f,y]=CountFFT(obj)
             Signal=obj.Signal;
-            freq=obj.SampFreq;
-            
-            Fs = freq;                % Sampling frequency
+            Fs = obj.SampFreq;                % Sampling frequency
             T = 1/Fs;                  % Sampling period
 
             L=length(Signal);
@@ -182,7 +182,7 @@ classdef SignalExtractor < handle
 
             f(:,1)=Fs*(0:(L/2))/L;
             y=P1;
-
+            
             obj.Frequency=f;
             obj.FAmplitude=y;
         end
@@ -191,32 +191,40 @@ classdef SignalExtractor < handle
         %------------------------------------------------------------------
         function [peaks]=ExtractPeaks(obj,anotate)
             
-            [x,y]=CountFFT(obj);
-            %x=obj.Time;
-            %y=obj.Signal;
-            maxY=max(y);
+            %[x,y]=CountFFT(obj);
+            x=obj.Frequency;
+            y=obj.FAmplitude;
+            if numel(x)>0 && numel(y)>0
+                maxY=max(y);
 
-            minProm=max(y)*0.1;
-            minFreqDistance=x(end)/2*0.01;
-            if obj.FLimitsBool==true
-                idx=find(x>obj.FLimits(1) & x<obj.FLimits(2));
-                x=x(idx);
-                y=y(idx);
-            end
-            
-            [pks,locs,w,p]=findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
-            'extents','MinPeakDistance',minFreqDistance,'NPeaks',10,...
-            'MinPeakHeight',maxY*0.03);
-            peaks=struct('FPeaks',pks,'FLocs',locs,'FWidth',w,'FProminence',p);
+                minProm=max(y)*0.1;
+                minFreqDistance=x(end)/2*0.01;
 
-            if obj.Anotate==true
-                findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
+                [pks,locs,w,p]=findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
                 'extents','MinPeakDistance',minFreqDistance,'NPeaks',10,...
-                'MinPeakHeight',maxY*0.3);
-                lgd=legend;
-                lgd.EdgeColor='none';
+                'MinPeakHeight',maxY*0.03);
+            
+                if obj.FLimitsBool==true
+                    idx=locs>obj.FLimits(1) & locs<obj.FLimits(2);
+                    peaks=struct('FPeaks',pks(idx),'FLocs',locs(idx),...
+                        'FWidth',w(idx),'FProminence',p(idx));
+                else
+                    peaks=struct('FPeaks',pks,'FLocs',locs,'FWidth',w,'FProminence',p);
+                end
+
+                if obj.Anotate==true
+                    findpeaks(y,x,'MinPeakProminence',minProm,'Annotate',...
+                    'extents','MinPeakDistance',minFreqDistance,'NPeaks',10,...
+                    'MinPeakHeight',maxY*0.3);
+                    lgd=legend;
+                    lgd.EdgeColor='none';
+                end
+                obj.FPeaks=peaks;
+            else
+                peaks=struct('FPeaks',[],'FLocs',[],'FWidth',[],'FProminence',[]);
+                obj.FPeaks=peaks;
+                GetEmptyFeature(obj)
             end
-            obj.FPeaks=peaks;
         end
 
         %------------------------------------------------------------------

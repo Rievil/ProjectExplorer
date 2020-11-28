@@ -45,8 +45,15 @@ classdef DataLoader < OperLib & MeasObj
         
         function ReLoadData(obj)
             obj.Data=[];
-            ReadData(obj);
-            ResetSelectors(obj);
+            if ~exist(obj.BruteFolder, 'dir')
+                GetBruteFolder(obj)  
+                ReadData(obj);
+                ResetSelectors(obj);
+            else
+                ReadData(obj);
+                ResetSelectors(obj);
+            end
+
         end
         
         %funkce pro ètení
