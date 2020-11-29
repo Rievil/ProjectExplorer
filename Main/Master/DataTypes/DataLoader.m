@@ -45,15 +45,27 @@ classdef DataLoader < OperLib & MeasObj
         
         function ReLoadData(obj)
             obj.Data=[];
+            
+            SavedSelectors=obj.Selector;
+            SaveCount=obj.Count;
+            
             if ~exist(obj.BruteFolder, 'dir')
                 GetBruteFolder(obj)  
-                ReadData(obj);
+                if obj.BruteFolderSet==1
+                    ReadData(obj);
+                end
+                
+            else
+                if obj.BruteFolderSet==1
+                    ReadData(obj);
+                end
+            end
+            
+            if obj.Count~=SaveCount
                 ResetSelectors(obj);
             else
-                ReadData(obj);
-                ResetSelectors(obj);
+                obj.Selector=SavedSelectors;
             end
-
         end
         
         %funkce pro ètení
@@ -163,6 +175,7 @@ classdef DataLoader < OperLib & MeasObj
             obj.Count=size(obj.Data,1);
             
             InitSel(obj);
+            
             saveobj(obj);
             catch ME
                 close(f1);

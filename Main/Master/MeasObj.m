@@ -3,8 +3,8 @@ classdef MeasObj < handle
         Name char;
         FName char;  %filename within the project folder - important for deleting
         ID double; %number
-        Date datetime; %oficial name for measurement
-        LastChange datetime;
+        Date datetime; %oficial name for measurement, copy erliest date from files
+        LastChange datetime; %when change happen
         Count;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         %BruteFolder char; %folder with measured data, from which DataC construct itrs container
