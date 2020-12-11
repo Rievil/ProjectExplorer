@@ -37,8 +37,12 @@ plot(s);
 conn = database('ProjectExplorerDB','ProjectExplorerClient','18@25_LL35_!QR');
 
 %Set query to execute on the database
-query = ['SELECT * ' ...
-    'FROM master.dbo.spt_fallback_dev'];
+% data = meas.Data.Data.Zedo(4,1).Data.Events;
+% Insert the product data into a new database table toyTable.
 
-data = fetch(conn,query);
-close(conn)
+tablename = 'Records';
+% sqlwrite(conn,tablename,data);
+% Import the contents of the database table into MATLAB and display the rows. The results contain two rows for the inserted products.
+
+rows = sqlread(conn,tablename);
+close(conn);
