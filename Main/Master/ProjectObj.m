@@ -18,6 +18,7 @@ classdef ProjectObj < handle
         DataTypesTable;
         TotalTable;
         EvListener;
+        Parent;
         %master data table, which all measruemnts will or will not clone for
         %their ussage
     end
@@ -44,6 +45,7 @@ classdef ProjectObj < handle
                 SetStatus(obj,4);
             end
             InitSelectorSets(obj,App);
+            
         end
         
         
@@ -288,7 +290,7 @@ classdef ProjectObj < handle
                     j=j+1;
                     waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
                     ReLoadData(M);
-                    ResetSelectors(M);
+%                     ResetSelectors(M);
                 end
             end
             close(f3);

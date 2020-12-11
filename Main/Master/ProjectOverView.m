@@ -6,7 +6,7 @@ classdef ProjectOverView < handle
         TReeNodes;
         UITree; %handle to ui tree in project explorer
         App;
-        
+        CurrentMasterFolder;
     end
     
     methods (Access = public)
@@ -15,6 +15,7 @@ classdef ProjectOverView < handle
             obj.SandBoxFolder=SandBoxFolder;
             obj.UITree=UITree;
             obj.App=App;
+            obj.CurrentMasterFolder=obj.App.MasterFolder;
             if isfile([obj.SandBoxFolder 'Projects.mat'])
                 %project overview already exists
                 load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');

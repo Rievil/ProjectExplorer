@@ -261,7 +261,7 @@ classdef Zedo < DataFrame
             end
         end
         
-        function GetXDeltas(obj,length,velocity,orientation)
+        function GetXDeltas(obj,length,velocity,or)
             %1D localization
             if ~isempty(obj.Data.Events)
                 E=obj.Data.Events;
@@ -272,7 +272,14 @@ classdef Zedo < DataFrame
                 ECount=size(E,1);
                 XDelta=zeros([ECount, 1]);
                 %tst=E{i,14}(1);
+                if or<0
+                    orientation=2;
+                else
+                    orientation=1;
+                end
+                
                 FirstCard=string(obj.Data.Records(orientation).Cards);
+                
                 for i=1:ECount
                     if strcmp(E{i,15}(1),FirstCard)
                         TDiff=abs(E{i,7}-E{i,9});
