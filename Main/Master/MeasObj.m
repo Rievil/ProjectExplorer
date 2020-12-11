@@ -57,6 +57,10 @@ classdef MeasObj < handle
             if obj.Key==true
                 CatTab=StackCat(obj);
             end
+            
+            if isempty(obj.Selector)
+                ResetSelectors(obj)
+            end
             T=[T, obj.Selector(:,Sel), CatTab];
             obj.TotalTable=T;
         end

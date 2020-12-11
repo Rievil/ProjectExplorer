@@ -61,7 +61,7 @@ classdef DataLoader < OperLib & MeasObj
                 end
             end
             
-            if obj.Count~=SaveCount
+            if obj.Count~=SaveCount || isempty(SavedSelectors)
                 ResetSelectors(obj);
             else
                 obj.Selector=SavedSelectors;
