@@ -30,6 +30,15 @@ scatter3(x,y,z,s,'filled');
 %%
 s=log(E{:,11}*10e+15).^2;
 plot(s);
-%%
-filename='K:\ZEDO_DATA_Export\200527_Melichar_THIS\br121\br121.65.1a-ae-signal-00005.bin'
-[hit]=ReadHit('K:\ZEDO_DATA_Export\200527_Melichar_THIS\br121\','br121.65.1a-ae-signal-00005.bin')
+%% Connection to database
+
+%ProjectExplorerClient
+
+conn = database('ProjectExplorerDB','ProjectExplorerClient','18@25_LL35_!QR');
+
+%Set query to execute on the database
+query = ['SELECT * ' ...
+    'FROM master.dbo.spt_fallback_dev'];
+
+data = fetch(conn,query);
+close(conn)
