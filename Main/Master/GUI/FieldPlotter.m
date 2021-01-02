@@ -125,9 +125,37 @@ classdef FieldPlotter < handle
                 set(ax,'view',obj.View);
             end
             
-            set(h,'Position',[200 200 500 400]);
+            set(h,'Position',[200 200 800 400]);
             saveas(h,[obj.GraphFolder '\' Filename],'png');
             delete(h)
+        end
+        
+        function SaveFigures(obj,event)
+            
+            msg=sprintf(['Do you want to save in path:\n' char(replace(obj.GraphFolder,'\','/')) ' ?']);
+            
+            selection = uiconfirm(obj.Figure,msg,'Save options',...
+           'Options',{'Yes','Yes, but different path','No'},...
+           'DefaultOption',1,'CancelOption',3);
+            
+            switch selection
+                case 'Yes'
+                    GetLimits(obj);
+                    SaveFiles(obj);
+                case 'Yes, but different path'
+                    obj.GraphFolder = uigetdir([obj.GraphFolder]);
+                    GetLimits(obj);
+                    SaveFiles(obj);
+                case 'No'
+            end
+        end
+        
+        
+        function SaveFiles(obj)
+            for i=1:size(obj.Result,2)
+                SaveFig(obj,obj.Result(i).Axes,obj.Result(i).SaveFilename);
+                %saveas(obj.Result(i).FigHan,obj.Result(i).SaveFilename);
+            end
         end
         
         function GetLimits(obj)
@@ -146,7 +174,7 @@ classdef FieldPlotter < handle
                         y2(n,:)=obj.Result(i).Axes.YAxis.Limits;  
                     end
             end
-            
+
 
             for i=1:size(obj.Result,2)
 
@@ -158,14 +186,13 @@ classdef FieldPlotter < handle
                     end
             end
         end
-        function SaveFiles(obj)
-            for i=1:size(obj.Result,2)
-                SaveFig(obj,obj.Result(i).Axes,obj.Result(i).SaveFilename);
-                %saveas(obj.Result(i).FigHan,obj.Result(i).SaveFilename);
-            end
-        end
+    
+        
     end
     
+    
+
+        
     methods %settings for plots, fonts, sizes, colros etc.
         function SetAxes(obj,ax)
             set(ax,'FontName','Palatino linotype','FontSize',16,'LineWidth',1.2);
@@ -276,7 +303,7 @@ classdef FieldPlotter < handle
                     %________________________________
                 end
 
-%                 legend(obj.Axes,han,'location','northwest');
+                legend(obj.Axes,han,'location','northwest');
                 SetAxes(obj,obj.Axes);
                 obj.Result(j).Axes=obj.Axes;
                 type=char(AnFun);
@@ -533,7 +560,7 @@ classdef FieldPlotter < handle
 
                 %colormap(jet(100));
 
-                Size=abs(Z{:,13}.*10e+4);
+                Size=abs(Z{:,12}.*10e+9);
 
                 %Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
@@ -567,7 +594,7 @@ classdef FieldPlotter < handle
                 end
 
                 xlabel(obj.Axes,'RA values [ms/V]');
-                ylabel(obj.Axes,'Average frequency [Hz]');
+                ylabel(obj.Axes,'Average frequency \it F_{a} \rm[Hz]');
             else
                 obj.Count=obj.Count-1;
                 han=[];
@@ -609,6 +636,8 @@ classdef FieldPlotter < handle
             if size(Z,1)>0
 
 
+%                 Z=Z(Z.Energy_V_2_Hz_>1e-9,:);
+                Z=Z(Z{:,17}>10,:);
                 Z=Z(Z.Energy_V_2_Hz_>1e-9,:);
                 Dur=Z.Duration_ns_;
                 HCount=Z.HCount_N_;
@@ -621,7 +650,7 @@ classdef FieldPlotter < handle
 
                 %colormap(jet(100));
 
-                Size=abs(Z{:,13}.*10e+4);
+                Size=abs(Z{:,12}.*10e+9);
 
                 %Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
@@ -790,25 +819,7 @@ classdef FieldPlotter < handle
             
         end
         
-        function SaveFigures(obj,event)
-            
-            msg=sprintf(['Do you want to save in path:\n' char(replace(obj.GraphFolder,'\','/')) ' ?']);
-            
-            selection = uiconfirm(obj.Figure,msg,'Save options',...
-           'Options',{'Yes','Yes, but different path','No'},...
-           'DefaultOption',1,'CancelOption',3);
-            
-            switch selection
-                case 'Yes'
-                    GetLimits(obj);
-                    SaveFiles(obj);
-                case 'Yes, but different path'
-                    obj.GraphFolder = uigetdir([obj.GraphFolder]);
-                    GetLimits(obj);
-                    SaveFiles(obj);
-                case 'No'
-            end
-        end
+        
         
         function SignSpecimen(obj,event)
             IDMeas=obj.CurrLine.UserData{1};

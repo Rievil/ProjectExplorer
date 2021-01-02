@@ -28,21 +28,70 @@ s=E{:,11}*10e+14;
 
 scatter3(x,y,z,s,'filled');
 %%
-s=log(E{:,11}*10e+15).^2;
-plot(s);
+load('D:\Data\OneDrive\Dizertaèní práce\Dizertaèní práce\Programy\Concrete.mat');
+%%
+Signals=table;
+for i=1:9
+    TMP=Concrete(2).IE(1).signal(1).odezva{1, i};
+    Signals=[Signals; table(linspace(i,i,numel(TMP))',TMP,'VariableNames',{'ID','Data'})];
+end
+
+conn = database('ProjectExplorerDB','ProjectExplorerClient','18@25_LL35_!QR');
+sqlwrite(conn,'Signals',Signals);
+close(conn);
+
+
+%%
+files=dir('H:\Google drive\Škola\Mìøení\2020\Hex v krabici');
+files([1 2])=[];
+data=table;
+for i=1:5
+    img=imread([files(i).folder '\' files(i).name]);
+    data=[data; table(i,{img},'VariableNames',{'ID','Data'})];
+end
+%%
+conn = database('ProjectExplorerDB','ProjectExplorerClient','18@25_LL35_!QR');
+sqlwrite(conn,'Images',data);
+close(conn);
+%%
+test=table(i,{img},'VariableNames',{'ID','Data'});
 %% Connection to database
 
-%ProjectExplorerClient
+conn = database('Project2','ProjectExplorerClient','18@25_LL35_!QR');
+
+selectquery = 'SELECT * FROM Signals WHERE Signals.ID=6';
+
+data = select(conn,selectquery);
+close(conn);
+
+figure(1);
+hold on;
+unqID=unique(data.ID)';
+for ID=unqID
+    signal=data.Data(data.ID==ID,:);
+    plot(signal);
+end
+%%
+conn = database('Project2','ProjectExplorerClient','18@25_LL35_!QR');
+
+selectquery = 'SELECT Signals.ID FROM Signals';
+
+ID = select(conn,selectquery);
+close(conn);
+
+unqID=unique(ID)
+
+%%
 
 conn = database('ProjectExplorerDB','ProjectExplorerClient','18@25_LL35_!QR');
 
-%Set query to execute on the database
-% data = meas.Data.Data.Zedo(4,1).Data.Events;
-% Insert the product data into a new database table toyTable.
+rows = sqlread(conn,'Pictures');
 
-tablename = 'Records';
-% sqlwrite(conn,tablename,data);
-% Import the contents of the database table into MATLAB and display the rows. The results contain two rows for the inserted products.
-
-rows = sqlread(conn,tablename);
 close(conn);
+%%
+
+plot(rows.PictureData{1,1}  );
+%%
+RGB2 = im2uint8(data.Data{1,1}  );
+%%
+B = reshape(data.Data{1,1},1,[]);
