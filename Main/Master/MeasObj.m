@@ -131,7 +131,7 @@ classdef MeasObj < handle
             end
             
             for i=1:size(obj.Parent.SelectorSets,2)
-                obj.Selector=[obj.Selector, table(value,'VariableNames',obj.Parent.SelectorSets(i).Description)];
+                obj.Selector=[obj.Selector, table(value,'VariableNames',{obj.Parent.SelectorSets(i).Description})];
             end
         end
         

@@ -190,6 +190,10 @@ classdef Press < DataFrame
             Out.EndTime=obj.Data.Time(idx);
             
         end
+        
+        function Out=GetVariables(obj)
+            
+        end
     end
 end
 

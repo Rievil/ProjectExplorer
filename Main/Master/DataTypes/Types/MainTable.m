@@ -99,6 +99,7 @@ classdef MainTable < DataFrame
             
             obj.Data=Data;
         end
+        
         function Cat=GetCat(obj)
             Cat=table;
             for i=1:size(obj.Data,2)
@@ -152,6 +153,10 @@ classdef MainTable < DataFrame
         
         function Out=GetParams(obj,Name)
             Out=obj.Data;
+        end
+        
+        function Out=GetVariables(obj)
+            
         end
     end
 end

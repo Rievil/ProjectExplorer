@@ -1,5 +1,6 @@
 classdef ProjectObj < handle
     properties (SetAccess=public)
+        ID;
         Name char; %name of project
         ProjectFolder char; %created path in sandbox folder, all MData will be stored there
         Status;

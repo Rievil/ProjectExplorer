@@ -15,6 +15,7 @@ classdef DataFrame < GUILib & OperLib
         TabRows(obj);
         Copy(obj);
         PackUp(obj);
+        GetVariables(obj);
     end
     
     methods

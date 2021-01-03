@@ -392,6 +392,10 @@ classdef Zedo < DataFrame
         function Out=GetEvents(obj,Name)
             Out=obj.Data.Events;
         end
+        
+        function Out=GetVariables(obj)
+            
+        end
     end
 end
 

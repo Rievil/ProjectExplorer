@@ -33,12 +33,16 @@ classdef ProjectOverView < handle
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
                 obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj.App);
+                obj.Projects(newID).ID=newID;
+                
                 status=obj.Projects(newID).Status.Value;
+                
                 if status==4
+                    %
                     obj.Projects(newID)=[];
                 end
             end
-            save(obj);
+%             save(obj);
         end
         
         %count number of stored projects
@@ -113,8 +117,25 @@ classdef ProjectOverView < handle
             end
         end
         
-        function delete(obj)
-            save(obj);
+        function DeleteProject(obj,ID)
+            %delete folder
+%             fig = uifigure;
+            selection = uiconfirm(obj.App.UIFigure,'Do you really want to delete whole project?','Delete whole project',...
+                                    'Icon','question');
+            if selection=='OK'
+                ProjectFolder=[obj.SandBoxFolder obj.Projects(ID).ProjectFolder(1:end-1)];
+                [status, message, messageid]=rmdir(ProjectFolder,'s');
+
+                %delete data
+                obj.Projects(ID)=[];
+
+                %reduce count
+                if obj.ProjectCount>0
+                    obj.ProjectCount=obj.ProjectCount-1;
+                end
+            end
+            FillTree(obj);
         end
+        
     end
 end
