@@ -10,7 +10,7 @@ classdef PEVar < handle
     
     properties
         InData;
-        Parent; %general plot
+        Parent; %Plot profile
         OutData;
     end
     

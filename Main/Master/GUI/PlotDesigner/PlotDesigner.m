@@ -42,14 +42,30 @@ classdef PlotDesigner < handle
     %objektové rodinì pro provádìní analýz na datech,
     
     properties
+        GeneralPlot;
         PlotProfiles;
         Parent; %projectobj
     end
     
     methods %main - obecne pouzivaní designera
         %konstruktor objektu
-        function obj = PlotDesigner(inputArg1,inputArg2)
-
+        function obj = PlotDesigner(~)
+            
+        end
+        
+        function FillGui(obj,Parent)
+            obj.Parent=Parent;
+            LoadPlotDesigner(obj);
+        end
+        
+        function LoadProfiles(obj)
+            if size(obj.Parent.PlotProfiles)>0
+                %no profiles were yet created
+                
+            else
+                %there already is a profile which can be loaded
+                
+            end
         end
         
         function GiveData(obj,data)

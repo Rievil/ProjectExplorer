@@ -19,6 +19,7 @@ classdef ProjectObj < handle
         DataTypesTable;
         TotalTable;
         EvListener;
+        PlotProfiles;
         Parent;
         %master data table, which all measruemnts will or will not clone for
         %their ussage

@@ -5,7 +5,7 @@ classdef GeneralPlot
     properties
         PlotPlan; %table with have its plot order, general options, legends, data sources
         Property1
-        Parent;
+        Parent; %PlotDesigner
     end
     
     methods

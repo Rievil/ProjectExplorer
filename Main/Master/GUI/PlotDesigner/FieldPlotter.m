@@ -126,10 +126,7 @@ classdef FieldPlotter < handle
             end
             
             set(h,'Position',[200 200 800 400]);
-            FileName=[obj.GraphFolder '\' Filename];
-            saveas(h,FileName,'png');
-            savefig(h,[FileName '.fig']);
-            
+            saveas(h,[obj.GraphFolder '\' Filename],'png');
             delete(h)
         end
         
@@ -147,7 +144,7 @@ classdef FieldPlotter < handle
                     SaveFiles(obj);
                 case 'Yes, but different path'
                     obj.GraphFolder = uigetdir([obj.GraphFolder]);
-%                     GetLimits(obj);
+                    GetLimits(obj);
                     SaveFiles(obj);
                 case 'No'
             end
@@ -198,7 +195,7 @@ classdef FieldPlotter < handle
         
     methods %settings for plots, fonts, sizes, colros etc.
         function SetAxes(obj,ax)
-            set(ax,'FontName','palatino linotype','FontSize',16,'LineWidth',1.2);
+            set(ax,'FontName','Palatino linotype','FontSize',16,'LineWidth',1.2);
         end
         
         function SetSyle(obj,Num)
@@ -245,10 +242,10 @@ classdef FieldPlotter < handle
             
             FT=GetFilter(obj);
             
-            [FT,NewIdx]=sortrows(FT,[4,5,6],'descend');
+            [FT,NewIdx]=sortrows(FT,[9,13,10],'descend');
             obj.Data=obj.Data(NewIdx,:);
             obj.PreProcessedData=FT;
-            Carousel=DataCarusel(FT,[4]);
+            Carousel=DataCarusel(FT,[9]);
             
             %set(gcf,);
             BaseSize=[200 200 750 550];
@@ -276,7 +273,7 @@ classdef FieldPlotter < handle
                     'Title',['Plot ' char(num2str(j))]);
                 TBSZ=obj.Result(j).Tab.Position;
                 obj.Axes=uiaxes(obj.Result(j).Tab,...
-                    'Position',[TBSZ(1)+10, TBSZ(2)+10, TBSZ(3)-20, TBSZ(4)-80]);
+                    'Position',[TBSZ(1), TBSZ(2)+10, TBSZ(3)-20, TBSZ(4)-80]);
                 
                 hold(obj.Axes,'on');
 
@@ -294,11 +291,11 @@ classdef FieldPlotter < handle
                     DataCopy.Name=obj.Data.Name(i);
                     
                     DataCopy.Data(1).Type=Copy(obj.Data.Zedo(i));
-                    %DataCopy.Data(2).Type=Copy(obj.Data.Press(i));
-                    DataCopy.Data(2).Type=Copy(obj.Data.MainTable(i));
+                    DataCopy.Data(2).Type=Copy(obj.Data.Press(i));
+                    DataCopy.Data(3).Type=Copy(obj.Data.MainTable(i));
                     
                     obj.CopyD=DataCopy;
-                    %GetTension(DataCopy.Data(2).Type,DataCopy.Data(3).Type);
+                    GetTension(DataCopy.Data(2).Type,DataCopy.Data(3).Type);
                     
                     %________________________________
                     h=AnFun(obj,DataCopy);
@@ -316,59 +313,55 @@ classdef FieldPlotter < handle
         end
         
         function han=PlotBasic(obj,DataCopy)
-%             Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
-            M=GetParams(DataCopy.Data(2).Type);
-            %P=GetParams(DataCopy.Data(2).Type);
-            
-            %Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
             Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
+            
+            Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
             Z = sortrows(Z,Z.Properties.VariableNames(6));
-            CHits=cumsum(Z{:,17});
             %---------------------------------
-            %EqDeff=interp1(P.Time,P.Deff,Z{:,6});
+            EqDeff=interp1(P.Time,P.Deff,Z{:,6});
 
-%             yyaxis(obj.Axes, 'left');
+            yyaxis(obj.Axes, 'left');
             CHits=cumsum(Z{:,17});
             %CHits=Z{:,19};
             
-            x1=Z{:,4};
+            x1=EqDeff;
             y1=CHits;
-            Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
-            han=plot(obj.Axes,x1,y1,'Marker','none','HandleVisibility','on',...
-                        'LineStyle',obj.Lines{obj.Count},'LineWidth',obj.Thick(obj.Count),...
-                        'DisplayName',Name);
+            
+            plot(obj.Axes,x1,y1,'Marker','none','HandleVisibility','on',...
+                        'LineStyle',obj.Lines{obj.Count},'LineWidth',obj.Thick(obj.Count));
 %             plot(obj.Axes(1),EqDeff,CHits,'HandleVisibility','off',...
 %                 'Marker','.','LineWidth',obj.Thick(obj.Count),'LineStyle',...
 %                 'none','Color',obj.Colors(obj.Count,:),'MarkerSize',2);
-            xlabel(obj.Axes,'Relative time \it s \rm [s]');
-            ylabel(obj.Axes,'Cummulative AE hits [-]');
-            xlim(obj.Axes,[0 2050]);
-            ylim(obj.Axes,[0 3.5e+5]);
-%             if obj.Axes.YLim(2)<max(CHits)*1.02
-%                 ylim(obj.Axes,[0 max(CHits)*1.02]);
-%             end
-% 
-% %             yyaxis(obj.Axes, 'right');
-% %             if ismissing(M.Cycles)
-% %                 C='';
-% %             else
-% %                 C=char(num2str(M.Cycles));
-% %             end
-%             
-%             
-%             clear x2 y2;
-%             x2=P.Deff;
-%             intx2=linspace(min(x2)*1.01,max(x2)*0.99,20);
-%             
-%             y2=P.Strength;
-%             %[x2, index] = unique(x2); 
-%             %yint2=interp1(x2,y2(index),intx2);
-%             han=plot(obj.Axes,x2,y2,'DisplayName',Name,...
-%                 'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10);
-%             
-%             ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
-%             %yyaxis(obj.Axes, 'left');
-%             %set(gcf,'Position',[20 20 650 450]);
+            xlabel(obj.Axes,'Deflection \it \delta \rm [mm]');
+            ylabel(obj.Axes,'Cumulative hits [-]');
+
+            if obj.Axes.YLim(2)<max(CHits)*1.02
+                ylim(obj.Axes,[0 max(CHits)*1.02]);
+            end
+
+            yyaxis(obj.Axes, 'right');
+            if ismissing(M.Cycles)
+                C='';
+            else
+                C=char(num2str(M.Cycles));
+            end
+            
+            Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) C];
+            clear x2 y2;
+            x2=P.Deff;
+            intx2=linspace(min(x2)*1.01,max(x2)*0.99,20);
+            
+            y2=P.Strength;
+            %[x2, index] = unique(x2); 
+            %yint2=interp1(x2,y2(index),intx2);
+            han=plot(obj.Axes,x2,y2,'DisplayName',Name,...
+                'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10);
+            
+            ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
+            %yyaxis(obj.Axes, 'left');
+            %set(gcf,'Position',[20 20 650 450]);
         end
         
 
@@ -440,10 +433,10 @@ classdef FieldPlotter < handle
         
         function han=PlotEvents2(obj,DataCopy)
             Z=DataCopy.Data(1).Type;
-            M=GetParams(DataCopy.Data(2).Type);
-%             P=GetParams(DataCopy.Data(2).Type);
-%             Or=M.Orientation;
-            Or=0;
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
+            Or=M.Orientation;
+            
             GetXDeltas(Z,M.Length,M.Velocity,1);
             if Z.HasEvents==true
                 box(obj.Axes,'on');
@@ -454,42 +447,35 @@ classdef FieldPlotter < handle
 
                 %Z=Z(Z{:,2}=="65.1A" & Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
                 E=Z.Data.Events;
-%                 E=E(E{:,9}<P.EndTime,:);
-                E=E(E{:,11}>1e-12,:);
+                E=E(E{:,9}<P.EndTime,:);
+
 
                 ZedoTime=E{:,7};
 
-%                 ZStrength=zeros([size(E,1),1]);
-%                 ZStrength(:,1)= interp1(P.Time,P.Strength,ZedoTime);
+                ZStrength=zeros([size(E,1),1]);
+                ZStrength(:,1)= interp1(P.Time,P.Strength,ZedoTime);
 
-%                 ZDefformation=zeros([size(E,1),1]);
-%                 ZDefformation(:,1)=interp1(P.Time,P.Deff,ZedoTime);
+                ZDefformation=zeros([size(E,1),1]);
+                ZDefformation(:,1)=interp1(P.Time,P.Deff,ZedoTime);
 
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
-%                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
-                Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
-                
-                Energy=E{:,11};
+                Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
+
+                Energy=E{:,13};
                 if Or<0
                     x=E.XDelta+50+35;
                 else
                     x=E.XDelta+50;
                 end
                 
-                x=E.XDelta;
-                
-                Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
-                Z = sortrows(Z,Z.Properties.VariableNames(6));
-                CHits=cumsum(Z{:,17});
-                
-                y=ZedoTime;
+                y=ZStrength;
                 z=Energy;
                 
-                s=log(E{:,11}*10e+14).^2;
+                s=log(E{:,11}*10e+15).^2;
                 
                 c=E{:,13}*10;
                 
-                han=scatter3(obj.Axes,x,y,z,'filled','DisplayName',Name,...
+                han=scatter3(obj.Axes,x,y,z,s,'filled','DisplayName',Name,...
                     'Marker',obj.VertMarker{obj.Count+2,1},'MarkerEdgeColor','k',...
                     'MarkerFaceColor',[obj.Colors(obj.Count,:)]);
 
@@ -497,24 +483,21 @@ classdef FieldPlotter < handle
                 
                 obj.Axes.View=obj.View;
                 senZ=obj.Axes.ZLim;
-%                 zlim(obj.Axes,senZ);
+                zlim(obj.Axes,senZ);
                 
-%                 for i=1:numel(x) 
-%                     if s(i)>max(s)*0.20
-%                         plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[0 z(i)],...
-%                             'HandleVisibility','on','Color',[0.85,0.85,0.85],...
-%                             'LineStyle','-','LineWidth',0.2);
-%                     end
-%                 end
-                xlim(obj.Axes,[-250,250]);
-                ylim(obj.Axes,[0,2000]);
-                zlim(obj.Axes,[0,3e-8]);
+                for i=1:numel(x) 
+                    if s(i)>max(s)*0.20
+                        plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[0 z(i)],...
+                            'HandleVisibility','on','Color',[0.85,0.85,0.85],...
+                            'LineStyle','-','LineWidth',0.2);
+                    end
+                end
                 
                 %legend(obj.Axes);
                 xlabel(obj.Axes,'Location x [mm]');
-                ylabel(obj.Axes,'Relative time of events \it t \rm [S]');
+                ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-%                 xlim(obj.Axes,[140 240]);
+                xlim(obj.Axes,[140 240]);
                 
                 %lgd.NumColumns =2;
                 %obj.Axes.ZAxis.Scale='log';
@@ -642,8 +625,8 @@ classdef FieldPlotter < handle
          function han=PlotShearTensile2(obj,DataCopy)
             Z=[DataCopy.Data(1).Type.Data.Records(1).ConDetector; ...
                 DataCopy.Data(1).Type.Data.Records(2).ConDetector];
-            M=GetParams(DataCopy.Data(2).Type);
-            %P=GetParams(DataCopy.Data(2).Type);
+            M=GetParams(DataCopy.Data(3).Type);
+            P=GetParams(DataCopy.Data(2).Type);
             %GetXDeltas(Z,M.Length,M.Velocity,1);
             
             han=[];
@@ -670,8 +653,8 @@ classdef FieldPlotter < handle
                 Size=abs(Z{:,12}.*10e+9);
 
                 %Name=[char(M.Mixture) ' - ' char(M.Enviroment) ' - ' char(num2str(M.Age)) ' - ' char(num2str(M.IDNum))];
-                %Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
-                Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
+                Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
+
                 han=scatter(obj.Axes,RAVal,AvgFreq,Size,'filled','DisplayName',Name,...
                     'MarkerEdgeColor','k','MarkerFaceColor',obj.Colors(obj.Count,:));
                 
