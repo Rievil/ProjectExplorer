@@ -115,11 +115,42 @@ classdef OperLib < handle
             T=table(ColNames(1),Key,Label,IsDescriptive,Num,'VariableNames',{'ColType','Key','Label','IsDescriptive','ColNumber'});
         end
         
+        %blueprint for variable selection
+        function T=VarSelTable
+            TypeName=categorical(["string","datetime","double"],{'string','datetime','double'},'ordinal',true);
+            VarName="Vairable name";
+            Unit="V";
+            Description="Default text";
+            T=table(VarName,TypeName(1),Unit,Description,'VariableNames',{'VarName','Type','Unit','Description'});
+        end
+        
         %Get All types that are present in datatype library
         function CTypes=GetTypes
             STRTypes=["MainTable","Press","Zedo"];
             CTypes = categorical(STRTypes,{'MainTable','Press','Zedo'},'Ordinal',true);
         end  
+        
+        %Get All types that are present in datatype library
+        function S=AutoParagraph(String,ChLen)
+            String=char(String);
+            TotalChLen=numel(String);
+            rows=round(TotalChLen/ChLen,0);
+            if rows >1
+                idx=find(char(String)==' ');
+                old=0;
+                n=0;
+                for i=idx
+                    n=n+1;
+                    if i-old>ChLen
+                        String=[String(1:i),'\n',String(i+1:end)];
+                        idx(n+1:end)=idx(n+1:end)+2;
+                        old=i;
+                    end
+                end
+            end
+            S=String;
+            
+        end
         
         %Create appropriate type
         function Out=CreateType(ClassName)

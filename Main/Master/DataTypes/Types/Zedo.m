@@ -77,7 +77,7 @@ classdef Zedo < DataFrame
             if length(IdxE)>0
                 filename=[files(IdxE).folder '\' files(IdxE).name];
                 [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
-                
+                obj.HasEvents='true';
                 Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine);
                 Events=AdjustEvents(obj,Events);
                 [speed,Cards]=GetSpeed(obj,filename);     
@@ -253,6 +253,7 @@ classdef Zedo < DataFrame
         %------------------------------------------------------------------
         %Spojí tabulky
         %------------------------------------------------------------------
+        
         function [ConTab]=ConnTables(obj,S)
             ConTab=table;
             for i=1:size(S,2)
@@ -304,6 +305,38 @@ classdef Zedo < DataFrame
             else
                 obj.HasEvents=false;
             end
+        end
+        
+        function [Out]=GetValueByEvent(obj,Table,Column)
+%             if obj.HasEvents==1
+             Guide=table(obj.Data.Events{:,7},obj.Data.Events.HitsID,obj.Data.Events.Cards,'VariableNames',...
+                 {'Time','ID','Cards'});
+             CardsList=string({obj.Data.Records(:).Cards});
+             Out=table;
+             switch lower(Table)
+                 case 'param'
+                     for i=1:size(obj.Data.Events,1)
+                         card=Guide.Cards(i);
+                     end
+                 case 'detector'
+                     n=0;
+                     for i=1:size(obj.Data.Events,1)
+                         sz=size(Guide.Cards);
+                         for j=1:sz(2)
+                             n=n+1;
+                             card=Guide.Cards(i,j);
+                             ID=Guide.ID(i,j);
+                             Row=find(CardsList==card);
+                             STime=Guide.Time(i);
+                             CID=find(obj.Data.Records(Row).ConDetector{:,2}==ID);
+                             SValue=obj.Data.Records(Row).ConDetector{CID,Column};
+                             Out=[Out; table(n,STime,ID,card,SValue,j,...
+                                 'VariableNames',{'n','Time','ID','Card','Value','Order'})];
+                         end
+                     end
+                     Out.Properties.VariableNames(5)=obj.Data.Records(Row).ConDetector.Properties.VariableNames(Column);
+             end
+%             end
         end
     end
 

@@ -95,3 +95,7 @@ plot(rows.PictureData{1,1}  );
 RGB2 = im2uint8(data.Data{1,1}  );
 %%
 B = reshape(data.Data{1,1},1,[]);
+%%
+x=pr.PR.Projects(1, 2).Meas(1).Data.Data.Press(1,1).Data.Time;
+y=pr.PR.Projects(1, 2).Meas(1).Data.Data.Press(1,1).Data.Force;
+plot(x,y);

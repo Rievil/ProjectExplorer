@@ -51,17 +51,26 @@ classdef Press < DataFrame
     methods %reading methods
                 %will read data started from dataloader
         function Out=Read(obj,filename)
-            obj.ColNumbers=3;
+            
             obj.Filename=filename;
-            opts=detectImportOptions(filename,'NumHeaderLines',2,...
-                'Sheet','Test Curve Data');
+            
+            ListName=obj.TypeSet{7};
+            HeadersLine=str2double(obj.TypeSet{5});
+            
+            opts=detectImportOptions(filename,'NumHeaderLines',HeadersLine,...
+                'Sheet',ListName);
             
             %K:\ZEDO_DATA_Export\200408_Melichar_THIS
             INData=readtable(filename,opts);    
             %INData=ResamplePressData(obj,INData);
             
             DCount=size(INData,2);
-            VarNames={'Time','Force','Deff'};
+            VarNames=cellstr(obj.TypeSet{1, 1}.VarName');
+            Units=cellstr(obj.TypeSet{1, 1}.Unit');
+            Description=cellstr(obj.TypeSet{1, 1}.Description');
+            
+            obj.ColNumbers=numel(VarNames);
+            
             T=table;
             n=0;
             try
@@ -81,8 +90,13 @@ classdef Press < DataFrame
                     Arr(isnan(Arr(:,1)),:)=[];
                     PR=Press;
                     for j=1:obj.ColNumbers
-                        PR.Data=[PR.Data, table(Arr(:,j),'VariableNames',VarNames(j))];
+                        TPart=table(Arr(:,j),'VariableNames',VarNames(j));
+                        TPart.Properties.VariableUnits(1)=Units(j);
+                        TPart.Properties.VariableDescriptions(1)=Description(j);
+                        PR.Data=[PR.Data, TPart];
+                        
                     end
+                    clear TPart;
                     n=n+1;
                     T.Press(n)=PR;
                 end
@@ -146,24 +160,54 @@ classdef Press < DataFrame
             dim=size(Target.Data);
             if dim(1)~=Value
                 if Value>dim(1)
-                    Target.Data=[Target.Data; MTBlueprint(obj)];
-                    Target.Data{end,4}=Value;
+                    Target.Data=[Target.Data; OperLib.VarSelTable];
                 else
                     Target.Data(end,:)=[];
                 end
                 obj.TypeSet{Target.UserData{2}}=Target.Data;
             end
         end
+        
+        %Select how many header lines there is
+        function SetHeaders(obj,val,idx)
+            val=str2double(val);
+            if isnumeric(val)
+                val=round(val,0);
+                obj.TypeSet{idx}=num2str(val);
+            end
+        end
+        
+        function SetSheetName(obj,val,idx)
+            obj.TypeSet{idx}=val;
+        end
+        
         %will initalize gui for first time
         function InitializeOption(obj)
-            
+%             
+%             Clear(obj);
+% 
+%             %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
+%             %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
+%             DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
+%                            'and choose the type of each column, column position in source file.\n',...
+%                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+
             Clear(obj);
 
-            %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
-            %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.\n',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+            Target=DrawUITable(obj,OperLib.VarSelTable,@SetVal,150);
+%             DrawLabel(obj,['Select how many repeating variables will be present in type:'],[300 120]);
+            
+            DrawSpinner(obj,[1 20],Target,@TypeAdRow);
+            
+            DrawLabel(obj,['Select how variables come at sheet, order of variables ',...
+                           'should be same as in maintable'],[300 70]);
+
+           DrawLabel(obj,['Select number of header lines:'],[300 20]);
+           DrawUIEditField(obj,0,@SetHeaders);
+           DrawLabel(obj,['Choose name for list within a sheet:'],[300 20]);
+           DrawUIEditField(obj,'List1',@SetSheetName);
+            
+            
         end
     end
     

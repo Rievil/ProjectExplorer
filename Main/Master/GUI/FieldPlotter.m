@@ -248,7 +248,7 @@ classdef FieldPlotter < handle
             [FT,NewIdx]=sortrows(FT,[4,5,6],'descend');
             obj.Data=obj.Data(NewIdx,:);
             obj.PreProcessedData=FT;
-            Carousel=DataCarusel(FT,[4]);
+            Carousel=DataCarusel(FT,[4,5]);
             
             %set(gcf,);
             BaseSize=[200 200 750 550];
@@ -293,9 +293,10 @@ classdef FieldPlotter < handle
                     DataCopy.IDSpec=obj.Data.IDSpec(i);
                     DataCopy.Name=obj.Data.Name(i);
                     
+%                     
                     DataCopy.Data(1).Type=Copy(obj.Data.Zedo(i));
-                    %DataCopy.Data(2).Type=Copy(obj.Data.Press(i));
                     DataCopy.Data(2).Type=Copy(obj.Data.MainTable(i));
+                    DataCopy.Data(3).Type=Copy(obj.Data.Press(i));
                     
                     obj.CopyD=DataCopy;
                     %GetTension(DataCopy.Data(2).Type,DataCopy.Data(3).Type);
@@ -306,7 +307,9 @@ classdef FieldPlotter < handle
                     %________________________________
                 end
 
-                legend(obj.Axes,han,'location','northwest');
+                lgd=legend(obj.Axes,han,'location','southoutside');
+                lgd.NumColumns=3;
+                
                 SetAxes(obj,obj.Axes);
                 obj.Result(j).Axes=obj.Axes;
                 type=char(AnFun);
@@ -318,37 +321,51 @@ classdef FieldPlotter < handle
         function han=PlotBasic(obj,DataCopy)
 %             Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
             M=GetParams(DataCopy.Data(2).Type);
-            %P=GetParams(DataCopy.Data(2).Type);
-            
-            %Z=Z(Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
+            P=DataCopy.Data(3).Type.Data;
             Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
-            Z = sortrows(Z,Z.Properties.VariableNames(6));
-            CHits=cumsum(Z{:,17});
+            Z2=DataCopy.Data(1).Type;
+            
+            [Value]=GetValueByEvent(Z2,'detector',17);
+            
+            x1=Value{(Value.Order==1),2};
+            y1=cumsum(Value{(Value.Order==1),5});
+
+            x2=P.CMOD;
+            y2=P.Force;
+            
+            x12=interp1(P.Time,P.CMOD,x1);
+            
+            
+%             Tidx=x1<x2(end);
+%             x1=x1(Tidx,1);
+%             y1=y1(Tidx,1);
             %---------------------------------
             %EqDeff=interp1(P.Time,P.Deff,Z{:,6});
 
-%             yyaxis(obj.Axes, 'left');
-            CHits=cumsum(Z{:,17});
+            yyaxis(obj.Axes, 'left');
+%             CHits=cumsum(Z{:,17});
             %CHits=Z{:,19};
             
-            x1=Z{:,4};
-            y1=CHits;
+%             x1=Z{:,4};
+%             y1=CHits;
             Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
-            han=plot(obj.Axes,x1,y1,'Marker','none','HandleVisibility','on',...
+            han=plot(obj.Axes,x12,y1,'Marker','none','HandleVisibility','on',...
                         'LineStyle',obj.Lines{obj.Count},'LineWidth',obj.Thick(obj.Count),...
                         'DisplayName',Name);
 %             plot(obj.Axes(1),EqDeff,CHits,'HandleVisibility','off',...
 %                 'Marker','.','LineWidth',obj.Thick(obj.Count),'LineStyle',...
 %                 'none','Color',obj.Colors(obj.Count,:),'MarkerSize',2);
-            xlabel(obj.Axes,'Relative time \it s \rm [s]');
+            xlabel(obj.Axes,'CMOD [mm]');
             ylabel(obj.Axes,'Cummulative AE hits [-]');
-            xlim(obj.Axes,[0 2050]);
-            ylim(obj.Axes,[0 3.5e+5]);
+%             xlim(obj.Axes,[0 800]);
+%             ylim(obj.Axes,[0 0.5e+5]);
+            
+            
 %             if obj.Axes.YLim(2)<max(CHits)*1.02
 %                 ylim(obj.Axes,[0 max(CHits)*1.02]);
 %             end
 % 
-% %             yyaxis(obj.Axes, 'right');
+            yyaxis(obj.Axes, 'right');
 % %             if ismissing(M.Cycles)
 % %                 C='';
 % %             else
@@ -357,18 +374,20 @@ classdef FieldPlotter < handle
 %             
 %             
 %             clear x2 y2;
-%             x2=P.Deff;
+            
+
+            
 %             intx2=linspace(min(x2)*1.01,max(x2)*0.99,20);
-%             
-%             y2=P.Strength;
-%             %[x2, index] = unique(x2); 
-%             %yint2=interp1(x2,y2(index),intx2);
-%             han=plot(obj.Axes,x2,y2,'DisplayName',Name,...
-%                 'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10);
-%             
-%             ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
-%             %yyaxis(obj.Axes, 'left');
-%             %set(gcf,'Position',[20 20 650 450]);
+            
+            
+%             [x2, index] = unique(x2); 
+%             yint2=interp1(x2,y2,intx2);
+            han=plot(obj.Axes,x2,y2,'DisplayName',Name,...
+                'LineWidth',obj.Thick(obj.Count),'Marker',obj.Marker{obj.Count},'LineStyle',obj.Lines{obj.Count},'MarkerSize',10);
+            
+            ylabel(obj.Axes,'Force \it f_{m} \rm [N]');
+            yyaxis(obj.Axes, 'left');
+%             set(gcf,'Position',[20 20 650 450]);
         end
         
 
@@ -412,19 +431,13 @@ classdef FieldPlotter < handle
                 senZ=obj.Axes.ZLim;
                 zlim(obj.Axes,senZ);
 
-            %                 scatter3(senX(1),senY(1),senZ(1),'Marker','d','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor A');
-            %                 scatter3(senX(2),senY(2),senZ(1),'Marker','^','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','Sensor B');
-            %                 plot3([senX(1) senX(1)],[senY(1) senY(1)],senZ,'-k','HandleVisibility','off');
-            %                 plot3([senX(2) senX(2)],[senY(2) senY(2)],senZ,'-k','HandleVisibility','off');
-            %                 
-            %                 
                 %sf = fit([x, y],z,'poly33');
                 %plot(sf,[x,y],z);
                 %legend;
                 xlabel(obj.Axes,'Delta x [mm]');
                 ylabel(obj.Axes,'Tensile strength \it f_{ct} \rm [MPa]');
                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                xlim(obj.Axes,[60 320]);
+%                 xlim(obj.Axes,[60 320]);
                 obj.Axes.View=obj.View;
                 %lgd=legend('location','northwest');
                 %lgd.NumColumns =2;
@@ -441,7 +454,8 @@ classdef FieldPlotter < handle
         function han=PlotEvents2(obj,DataCopy)
             Z=DataCopy.Data(1).Type;
             M=GetParams(DataCopy.Data(2).Type);
-%             P=GetParams(DataCopy.Data(2).Type);
+            P=DataCopy.Data(3).Type.Data;
+            
 %             Or=M.Orientation;
             Or=0;
             GetXDeltas(Z,M.Length,M.Velocity,1);
@@ -458,7 +472,8 @@ classdef FieldPlotter < handle
                 E=E(E{:,11}>1e-12,:);
 
                 ZedoTime=E{:,7};
-
+                ZDeff=interp1(P.Time(2:end),P.CMOD(2:end),ZedoTime);
+                
 %                 ZStrength=zeros([size(E,1),1]);
 %                 ZStrength(:,1)= interp1(P.Time,P.Strength,ZedoTime);
 
@@ -482,12 +497,14 @@ classdef FieldPlotter < handle
                 Z = sortrows(Z,Z.Properties.VariableNames(6));
                 CHits=cumsum(Z{:,17});
                 
-                y=ZedoTime;
+                y=ZDeff;
                 z=Energy;
                 
                 s=log(E{:,11}*10e+14).^2;
                 
                 c=E{:,13}*10;
+                z=z-min(z);
+                z=z/max(z);
                 
                 han=scatter3(obj.Axes,x,y,z,'filled','DisplayName',Name,...
                     'Marker',obj.VertMarker{obj.Count+2,1},'MarkerEdgeColor','k',...
@@ -506,18 +523,19 @@ classdef FieldPlotter < handle
 %                             'LineStyle','-','LineWidth',0.2);
 %                     end
 %                 end
-                xlim(obj.Axes,[-250,250]);
-                ylim(obj.Axes,[0,2000]);
-                zlim(obj.Axes,[0,3e-8]);
+                xlim(obj.Axes,[25-2,25+2]);
+%                 ylim(obj.Axes,[0,2000]);
+%                 zlim(obj.Axes,[0,3e-8]);
                 
                 %legend(obj.Axes);
                 xlabel(obj.Axes,'Location x [mm]');
-                ylabel(obj.Axes,'Relative time of events \it t \rm [S]');
-                zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
+                ylabel(obj.Axes,'CMOD [mm]');
+%                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
+                zlabel(obj.Axes,'Relative hit energy \it E_{AE} \rm [%]');
 %                 xlim(obj.Axes,[140 240]);
-                
+%                 set(obj.Axes,'ZScale','log');
                 %lgd.NumColumns =2;
-                %obj.Axes.ZAxis.Scale='log';
+                %obj.Axess.ZAxis.Scale='log';
                 SetAxes(obj,obj.Axes);
                 obj.FigSize=obj.Axes.Parent.Position;
             else

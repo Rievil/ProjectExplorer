@@ -137,10 +137,10 @@ classdef MainTable < DataFrame
         function InitializeOption(obj)
             Clear(obj);
 
-            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);
+            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal,200);
             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.\n',...
+            DrawLabel(obj,['Select composition of main table: by spinner select number of columns ',...
+                           'and choose the type of each column, column position in source file.',...
                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
     end

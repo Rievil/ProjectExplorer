@@ -131,12 +131,15 @@ classdef GUILib < handle
         
         %------------------------------------------------------------------
         %uitable
-        function han=DrawUITable(obj,Data,Key)
+        function han=DrawUITable(obj,Data,Key,Height)
             obj.Count=obj.Count+1;
             %Pos=obj.GuiParent.InnerPosition;
+            if Height>~0
+                Height=200;
+            end
             
-            yP=obj.Pos(2)-300-(obj.Count*20);
-            Pos=[10,yP,obj.Pos(3)-15,300];
+            yP=obj.Pos(2)-Height-(obj.Count*20);
+            Pos=[10,yP,obj.Pos(3)-15,Height];
             obj.Pos(2)=yP;
             
             %Pos=[10,Pos(4)-200-(obj.Count*23),Pos(3)-15,180];
@@ -162,6 +165,9 @@ classdef GUILib < handle
         function han=DrawLabel(obj,String,Dim)
             obj.Count=obj.Count+1;
             
+            String=OperLib.AutoParagraph(String,50);
+            
+            
             yP=obj.Pos(2)-Dim(2);
             Pos=[10,yP,obj.Pos(3)-15,Dim(2)];
             obj.Pos(2)=yP;
@@ -169,6 +175,7 @@ classdef GUILib < handle
             han = uilabel(obj.GuiParent,'Text',sprintf(String),'Position',Pos);
             obj.Children{obj.Count}=han;
         end
+        
         
         %------------------------------------------------------------------
         %uitree
@@ -201,7 +208,7 @@ classdef GUILib < handle
         end
         
         %uieditfield-------------------------------------------------------
-        function han=DrawUIEditField(obj,Type,Key)
+        function han=DrawUIEditField(obj,Data,Key)
             obj.Count=obj.Count+1;
             
             yP=obj.Pos(2)-20;
@@ -209,16 +216,20 @@ classdef GUILib < handle
             obj.Pos(2)=yP;
             
             han=uieditfield(obj.GuiParent,'Position',Pos,...
-                'Value',Type,...
-                'UserData',{Key, obj.Count},...
-                'ValueChangedFcn',@(src,event)UIEditFieldChange(obj,event));
-            
+                'Value',char(num2str(Data)),...
+                'UserData',{Key, obj.Count,Data},...
+                'ValueChangedFcn',@(src,event)UIEditFieldChange(obj,event));            
             obj.Children{obj.Count}=han;
+            
+            if ~obj.Init
+                Key(obj,han.Value,obj.Count);
+            end
+             
         end
         
         %uieditfield callback
         function UIEditFieldChange(obj,event)
-            
+            event.Source.UserData{1}(obj,event.Source.Value,event.Source.UserData{2});
         end
         
         %setting for dimensions--------------------------------------------
@@ -238,6 +249,8 @@ classdef GUILib < handle
                         obj.Children{i}.Value=obj.TypeSet{i};
                     case 'uitable'
                         obj.Children{i}.Data=obj.TypeSet{i};
+                    case 'uieditfield'
+                        obj.Children{i}.Value=obj.TypeSet{i};
                     otherwise %label
                 end
                 
