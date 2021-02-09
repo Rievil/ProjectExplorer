@@ -79,6 +79,7 @@ classdef ProjectObj < handle
                 end
 
             catch ME
+                error(ME.message);
                 obj.Meas(Row)=[];
                 Row=Row-1;
                 obj.MeasCount=obj.MeasCount-1;

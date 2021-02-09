@@ -286,11 +286,25 @@ classdef Zedo < DataFrame
                         TDiff=abs(E{i,7}-E{i,9});
                         LDiff=TDiff*velocity;
                         LDiff=length-(LDiff+(length-LDiff)/2);
+                        if LDiff>length
+                            LDiff=length;
+                        end
+                        
+                        if LDiff<0
+                            LDiff=0;
+                        end
                         XDelta(i)=LDiff;   
                     else
                         TDiff=abs(E{i,9}-E{i,7});
                         LDiff=TDiff*velocity;
                         LDiff=LDiff+(length-LDiff)/2;
+                        if LDiff>length
+                            LDiff=length;
+                        end
+                        
+                        if LDiff<0
+                            LDiff=0;
+                        end
                         XDelta(i)=LDiff;   
                     end
                 end

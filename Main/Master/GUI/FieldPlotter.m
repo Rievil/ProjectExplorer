@@ -206,7 +206,7 @@ classdef FieldPlotter < handle
             LT={'-','--','-.',':'};
             obj.Figure.Colormap=lines(Num);
             obj.Colors=obj.Figure.Colormap;
-            obj.View=[-50,30];
+            obj.View=[-30,50];
             
             marker={'none','none','none','none';... 
                 'none','none','none','none';...
@@ -245,10 +245,10 @@ classdef FieldPlotter < handle
             
             FT=GetFilter(obj);
             
-            [FT,NewIdx]=sortrows(FT,[4,5,6],'descend');
+            [FT,NewIdx]=sortrows(FT,[14],'descend');
             obj.Data=obj.Data(NewIdx,:);
             obj.PreProcessedData=FT;
-            Carousel=DataCarusel(FT,[4,5]);
+            Carousel=DataCarusel(FT,[8]);
             
             %set(gcf,);
             BaseSize=[200 200 750 550];
@@ -307,8 +307,8 @@ classdef FieldPlotter < handle
                     %________________________________
                 end
 
-                lgd=legend(obj.Axes,han,'location','southoutside');
-                lgd.NumColumns=3;
+                lgd=legend(obj.Axes,han,'location','best');
+                lgd.NumColumns=1;
                 
                 SetAxes(obj,obj.Axes);
                 obj.Result(j).Axes=obj.Axes;
@@ -330,10 +330,10 @@ classdef FieldPlotter < handle
             x1=Value{(Value.Order==1),2};
             y1=cumsum(Value{(Value.Order==1),5});
 
-            x2=P.CMOD;
+            x2=P.Deff;
             y2=P.Force;
             
-            x12=interp1(P.Time,P.CMOD,x1);
+            x12=interp1(P.Time,P.Deff,x1);
             
             
 %             Tidx=x1<x2(end);
@@ -348,10 +348,13 @@ classdef FieldPlotter < handle
             
 %             x1=Z{:,4};
 %             y1=CHits;
-            Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
+%              Name=char(sprintf('%s - %s Num: %0.0f mm',M.Mixture,M.Enviroment,M.OffSet));
+            Name=char(sprintf('%0.0f mm od kraje / %0.0f mm snimace od sebe',M.OffSet,M.Length));
             han=plot(obj.Axes,x12,y1,'Marker','none','HandleVisibility','on',...
                         'LineStyle',obj.Lines{obj.Count},'LineWidth',obj.Thick(obj.Count),...
                         'DisplayName',Name);
+            xlim(obj.Axes,[0 2.5]);
+            ylim(obj.Axes,[0 2500]);
 %             plot(obj.Axes(1),EqDeff,CHits,'HandleVisibility','off',...
 %                 'Marker','.','LineWidth',obj.Thick(obj.Count),'LineStyle',...
 %                 'none','Color',obj.Colors(obj.Count,:),'MarkerSize',2);
@@ -469,10 +472,10 @@ classdef FieldPlotter < handle
                 %Z=Z(Z{:,2}=="65.1A" & Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
                 E=Z.Data.Events;
 %                 E=E(E{:,9}<P.EndTime,:);
-                E=E(E{:,11}>1e-12,:);
+%                 E=E(E{:,11}>1e-12,:);
 
                 ZedoTime=E{:,7};
-                ZDeff=interp1(P.Time(2:end),P.CMOD(2:end),ZedoTime);
+                ZDeff=interp1(P.Time(2:end),P.Deff(2:end),ZedoTime);
                 
 %                 ZStrength=zeros([size(E,1),1]);
 %                 ZStrength(:,1)= interp1(P.Time,P.Strength,ZedoTime);
@@ -482,29 +485,37 @@ classdef FieldPlotter < handle
 
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
-                Name=char(sprintf('%s - %s Num: %0.0f',M.Group,M.Enviroment,M.IDNum));
+                Name=char(sprintf('%0.0f mm od kraje / %0.0f mm snimace od sebe',M.OffSet,M.Length));
                 
-                Energy=E{:,11};
-                if Or<0
-                    x=E.XDelta+50+35;
-                else
-                    x=E.XDelta+50;
-                end
+%                 Energy=E{:,11};
+%                 x=E.XDelta+M.OffSet;
+%                 if Or<0
+%                     x=E.XDelta+50+35;
+%                 else
+%                     x=E.XDelta+50;
+%                 end
                 
-                x=E.XDelta;
+%                 x=E.XDelta;
+                x=E.XDelta+M.OffSet;
                 
-                Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
-                Z = sortrows(Z,Z.Properties.VariableNames(6));
-                CHits=cumsum(Z{:,17});
+                [Value]=GetValueByEvent(Z,'detector',17);
+                z=Value(Value.Order==1,5);
+                z=z{:,1};
+                z=cumsum(z);
+%                 Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
+%                 Z = sortrows(Z,Z.Properties.VariableNames(6));
+%                 CHits=cumsum(Z{:,17});
                 
                 y=ZDeff;
-                z=Energy;
+%                 z=Energy;
+%                 [Value]=GetValueByEvent(Z,'detector',17);
+%                 z=Z{:,17};
                 
                 s=log(E{:,11}*10e+14).^2;
                 
                 c=E{:,13}*10;
-                z=z-min(z);
-                z=z/max(z);
+%                 z=z-min(z);
+%                 z=z/max(z);
                 
                 han=scatter3(obj.Axes,x,y,z,'filled','DisplayName',Name,...
                     'Marker',obj.VertMarker{obj.Count+2,1},'MarkerEdgeColor','k',...
@@ -523,15 +534,15 @@ classdef FieldPlotter < handle
 %                             'LineStyle','-','LineWidth',0.2);
 %                     end
 %                 end
-                xlim(obj.Axes,[25-2,25+2]);
+                xlim(obj.Axes,[0 380]);
 %                 ylim(obj.Axes,[0,2000]);
-%                 zlim(obj.Axes,[0,3e-8]);
+%                 zlim(obj.Axes,[0,800]);
                 
                 %legend(obj.Axes);
                 xlabel(obj.Axes,'Location x [mm]');
                 ylabel(obj.Axes,'CMOD [mm]');
 %                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                zlabel(obj.Axes,'Relative hit energy \it E_{AE} \rm [%]');
+                zlabel(obj.Axes,'HCount [-]');
 %                 xlim(obj.Axes,[140 240]);
 %                 set(obj.Axes,'ZScale','log');
                 %lgd.NumColumns =2;

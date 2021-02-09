@@ -178,6 +178,7 @@ classdef DataLoader < OperLib & MeasObj
             
             saveobj(obj);
             catch ME
+                error(ME.message);
                 close(f1);
                 close(f2);
                 msgbox(['Error while loading of data:\n' char(ME.message) '\n' ...

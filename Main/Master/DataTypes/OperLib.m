@@ -83,7 +83,14 @@ classdef OperLib < handle
             all_dir(1:2)=[];
         end
         %sort data in maintable
-        function Arr=ConvertTabeType(Type,InArr)            
+        function Arr=ConvertTabeType(Type,InArr)
+            
+%             if strcmp(class(InArr),'cell')
+%                 tmp=cell2mat(InArr);
+%                 clear InArr;
+%                 InArr=tmp;
+%             end
+%             
             switch lower(Type)
                 case "string"
                     Arr=string(InArr);
@@ -93,8 +100,10 @@ classdef OperLib < handle
                     if isa(InArr,'double')
                         Arr=InArr;
                     else
-                        Arr=string2double(InArr);
+%                         InArr=string(InArr);
+                        Arr=str2double(InArr);
                     end
+                    
                 case "category"
                     Arr=categorical(InArr,'Ordinal',true);
                 otherwise
