@@ -456,11 +456,10 @@ classdef FieldPlotter < handle
         
         function han=PlotEvents2(obj,DataCopy)
             Z=DataCopy.Data(1).Type;
+            P=GetParams(DataCopy.Data(3).Type);
             M=GetParams(DataCopy.Data(2).Type);
-            P=DataCopy.Data(3).Type.Data;
-            
 %             Or=M.Orientation;
-            Or=0;
+            
             GetXDeltas(Z,M.Length,M.Velocity,1);
             if Z.HasEvents==true
                 box(obj.Axes,'on');
@@ -471,53 +470,35 @@ classdef FieldPlotter < handle
 
                 %Z=Z(Z{:,2}=="65.1A" & Z.NHitDet==1 & Z{:,6}<P.EndTime,:);
                 E=Z.Data.Events;
-%                 E=E(E{:,9}<P.EndTime,:);
-%                 E=E(E{:,11}>1e-12,:);
+                E=E(E{:,9}<P.EndTime,:);
+
 
                 ZedoTime=E{:,7};
-                ZDeff=interp1(P.Time(2:end),P.Deff(2:end),ZedoTime);
-                
-%                 ZStrength=zeros([size(E,1),1]);
-%                 ZStrength(:,1)= interp1(P.Time,P.Strength,ZedoTime);
 
-%                 ZDefformation=zeros([size(E,1),1]);
-%                 ZDefformation(:,1)=interp1(P.Time,P.Deff,ZedoTime);
+                ZStrength=zeros([size(E,1),1]);
+                ZStrength(:,1)= interp1(P.Time,P.Force,ZedoTime);
+
+                ZDefformation=zeros([size(E,1),1]);
+                ZDefformation(:,1)=interp1(P.Time,P.Deff,ZedoTime);
 
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
-                Name=char(sprintf('%0.0f mm od kraje / %0.0f mm snimace od sebe',M.OffSet,M.Length));
-                
-%                 Energy=E{:,11};
-%                 x=E.XDelta+M.OffSet;
+
+                Energy=E{:,13};
 %                 if Or<0
 %                     x=E.XDelta+50+35;
 %                 else
 %                     x=E.XDelta+50;
 %                 end
+                x=E.XDelta+50;
+                y=ZStrength;
+                z=Energy;
                 
-%                 x=E.XDelta;
-                x=E.XDelta+M.OffSet;
-                
-                [Value]=GetValueByEvent(Z,'detector',17);
-                z=Value(Value.Order==1,5);
-                z=z{:,1};
-                z=cumsum(z);
-%                 Z=DataCopy.Data(1).Type.Data.Records(1).ConDetector;
-%                 Z = sortrows(Z,Z.Properties.VariableNames(6));
-%                 CHits=cumsum(Z{:,17});
-                
-                y=ZDeff;
-%                 z=Energy;
-%                 [Value]=GetValueByEvent(Z,'detector',17);
-%                 z=Z{:,17};
-                
-                s=log(E{:,11}*10e+14).^2;
+                s=log(E{:,11}*10e+15).^2;
                 
                 c=E{:,13}*10;
-%                 z=z-min(z);
-%                 z=z/max(z);
                 
-                han=scatter3(obj.Axes,x,y,z,'filled','DisplayName',Name,...
+                han=scatter3(obj.Axes,x,y,z,s,'filled','DisplayName','',...
                     'Marker',obj.VertMarker{obj.Count+2,1},'MarkerEdgeColor','k',...
                     'MarkerFaceColor',[obj.Colors(obj.Count,:)]);
 
@@ -525,28 +506,24 @@ classdef FieldPlotter < handle
                 
                 obj.Axes.View=obj.View;
                 senZ=obj.Axes.ZLim;
-%                 zlim(obj.Axes,senZ);
+                zlim(obj.Axes,senZ);
                 
-%                 for i=1:numel(x) 
-%                     if s(i)>max(s)*0.20
-%                         plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[0 z(i)],...
-%                             'HandleVisibility','on','Color',[0.85,0.85,0.85],...
-%                             'LineStyle','-','LineWidth',0.2);
-%                     end
-%                 end
-                xlim(obj.Axes,[0 380]);
-%                 ylim(obj.Axes,[0,2000]);
-%                 zlim(obj.Axes,[0,800]);
+                for i=1:numel(x) 
+                    if s(i)>max(s)*0.20
+                        plot3(obj.Axes,[x(i) x(i)],[y(i) y(i)],[0 z(i)],...
+                            'HandleVisibility','on','Color',[0.85,0.85,0.85],...
+                            'LineStyle','-','LineWidth',0.2);
+                    end
+                end
                 
                 %legend(obj.Axes);
                 xlabel(obj.Axes,'Location x [mm]');
-                ylabel(obj.Axes,'CMOD [mm]');
-%                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                zlabel(obj.Axes,'HCount [-]');
-%                 xlim(obj.Axes,[140 240]);
-%                 set(obj.Axes,'ZScale','log');
+                ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
+                zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
+                xlim(obj.Axes,[140 240]);
+                
                 %lgd.NumColumns =2;
-                %obj.Axess.ZAxis.Scale='log';
+                %obj.Axes.ZAxis.Scale='log';
                 SetAxes(obj,obj.Axes);
                 obj.FigSize=obj.Axes.Parent.Position;
             else
