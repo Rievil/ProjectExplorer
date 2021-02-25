@@ -79,3 +79,5 @@ execute(conn,sqlquery);
 %%
 sqlquery = 'UPDATE ProjectList SET ID = 1 WHERE ID = 20';
 execute(conn,sqlquery);
+%%
+close(conn);
