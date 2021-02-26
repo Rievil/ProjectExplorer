@@ -61,4 +61,4 @@ sqlwrite(conn,'Meas',datain)
 selectquery = 'SELECT * FROM Meas';
 Meas = select(conn,selectquery);
 %%
-
+close(conn);
