@@ -3,7 +3,7 @@ opts = configureJDBCDataSource('Vendor',vendor);
 %% Create new connection and save to registr of client pc
 username = "PEClient";
 password = "45@&25#!#HezkyK_n";
-
+%%
 driverfile=[cd '\Databases\sqljdbc4.jar'];
 
 vendor = "Microsoft SQL Server";
@@ -74,8 +74,8 @@ data=table(2,"CETRIS",rtf,...
 sqlwrite(conn,'Experiments',data);
 % close(conn);
 %%
-sqlquery = 'DELETE FROM ProjectList WHERE ID>6';
-execute(conn,sqlquery);
+sqlquery = 'DELETE FROM ProjectList WHERE ID>0';
+
 %%
 sqlquery = 'UPDATE ProjectList SET ID = 1 WHERE ID = 20';
 execute(conn,sqlquery);
