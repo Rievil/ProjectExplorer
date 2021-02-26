@@ -7,9 +7,9 @@ execute(conn,'DELETE FROM ProjectList WHERE ID>0');
 names=["CETRIS";"HANKA"];
 desc=["Mìøení cementotøískových desek";...
     "Mìøení lomové energie na alkalicky aktivovaných trámeècích o rozmìrech 40x40x160 mm"];
-startdate=[datetime(2019,1,1,'Format','yyyy);datetime(2020,1,1)];
-enddate=[datetime(2021,12,31);datetime(2021,12,31)];
-lastchange=[datetime(now(),'ConvertFrom','datenum');datetime(now(),'ConvertFrom','datenum')];
+startdate=[datetime(2019,1,1,'Format','yyyy-mm-dd hh:mm:ss');datetime(2020,1,1,'Format','yyyy-mm-dd hh:mm:ss')];
+enddate=[datetime(2021,12,31,'Format','yyyy-mm-dd hh:mm:ss');datetime(2021,12,31,'Format','yyyy-mm-dd hh:mm:ss')];
+lastchange=[datetime(now(),'ConvertFrom','datenum','Format','yyyy-mm-dd hh:mm:ss');datetime(now(),'ConvertFrom','datenum','Format','yyyy-mm-dd hh:mm:ss')];
 
 datain=table(names,desc,...
         startdate,enddate,lastchange,'VariableNames',...
@@ -17,3 +17,12 @@ datain=table(names,desc,...
     
 
 sqlwrite(conn,'ProjectList',datain)
+%% Create random experiments for each project
+
+selectquery = 'SELECT * FROM ProjectList';
+ProjectList = select(conn,selectquery);
+
+IDs=ProjectList.ID;
+for i=IDs'
+    datain=(i,[]
+end
