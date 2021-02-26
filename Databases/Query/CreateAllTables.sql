@@ -12,9 +12,9 @@ CREATE TABLE [dbo].[ProjectList](
 	[ID] [int] NOT NULL IDENTITY(1,1) PRIMARY KEY,
 	[ProjectName] [ntext] NULL,
 	[Description] [ntext] NULL,
-	[ProjectStart] [date] NULL,
-	[ProjectEnd] [date] NULL,
-	[LastChange] [date] NULL
+	[ProjectStart] [datetime] NULL,
+	[ProjectEnd] [datetime] NULL,
+	[LastChange] [datetime] NULL
 )
 GO
 
