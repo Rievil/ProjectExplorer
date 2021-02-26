@@ -80,3 +80,5 @@ sqlquery = 'UPDATE ProjectList SET ID = 1 WHERE ID = 20';
 execute(conn,sqlquery);
 %%
 close(conn);
+%%
+tst=DbConn(25);

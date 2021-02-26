@@ -4,6 +4,7 @@ classdef ExplorerObj < handle
     
     properties
         App;
+        DbConn;
     end
     
     methods
