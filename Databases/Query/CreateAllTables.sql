@@ -97,7 +97,7 @@ CREATE TABLE [dbo].[Meas](
 	[ExpID] [int] NOT NULL,
 	[Datetime] [datetime] NULL,
 	[SpecCount] [int] NULL,
-	[MasterFolder] [char] NULL,
+	[MasterFolder] [ntext] NULL,
 	[Description] [ntext] NULL,
  CONSTRAINT [ExpID] FOREIGN KEY([ExpID]) REFERENCES [dbo].[Experiments] ([ID]) ON DELETE CASCADE)
 GO
