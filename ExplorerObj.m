@@ -18,14 +18,17 @@ classdef ExplorerObj < handle
     methods
         function obj = ExplorerObj(type)
             
-            if type==true
-                obj.App=ProjectExplorer(obj);
-            end
-            
             obj.Users=Users(obj);
             
             obj.DbConn=DbConn(obj);
             obj.Core=CoreObj;
+            
+            if type==true
+                obj.App=ProjectExplorer(obj);
+            end
+            
+            
+            
         end
         
     end

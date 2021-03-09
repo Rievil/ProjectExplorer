@@ -1,5 +1,5 @@
 %% Start with GUI
-ExplorerStartGui;
+ExplorerAppStartMain;
 %% Testing of categorical arrays and their sorting
 pr=ProjectExplorer;
 %%
@@ -29,7 +29,7 @@ s=E{:,11}*10e+14;
 
 scatter3(x,y,z,s,'filled');
 %%
-load('D:\Data\OneDrive\Dizertaèní práce\Dizertaèní práce\Programy\Concrete.mat');
+load('D:\Data\OneDrive\DizertaÄnÃ­ prÃ¡ce\DizertaÄnÃ­ prÃ¡ce\Programy\Concrete.mat');
 %%
 Signals=table;
 for i=1:9
@@ -43,7 +43,7 @@ close(conn);
 
 
 %%
-files=dir('H:\Google drive\Škola\Mìøení\2020\Hex v krabici');
+files=dir('H:\Google drive\Å kola\MÄ›Å™enÃ­\2020\Hex v krabici');
 files([1 2])=[];
 data=table;
 for i=1:5
@@ -97,3 +97,8 @@ RGB2 = im2uint8(data.Data{1,1}  );
 %%
 B = reshape(data.Data{1,1},1,[]);
 %%
+tst=TestObj;
+%%
+Save(tst);
+%%
+Load(tst);

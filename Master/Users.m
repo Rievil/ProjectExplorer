@@ -1,14 +1,17 @@
 classdef Users
     properties (SetAccess = public)
         UserOptions;
+        
         MasterFolder; %link to mother app
         CurrentUserID; %current id of user
-        CurrentUser; %current username
-        ClientPCName; %current user pc
+        CurrentUser; %current windows username
+        ClientPCName; %current user pc    
         RootFolder; %matlab root folder        
+        
         SandBoxFolder;
+        
         UserID;
-        Username;
+        UserName;
     end
      
     properties (Access = private)
@@ -17,18 +20,16 @@ classdef Users
     
     methods (Access = public)
         %start the object
-        function obj=Users(parent)
-            obj.Parent=parent;
+        function obj=Users(~)
             
-            obj.RootFolder=matlabroot;  
+            obj.RootFolder=matlabroot;            
             
             GetAppPath(obj);
             GetCurrentPc(obj);
             
             if isfile([obj.RootFolder '\UserOptions.mat'])
                 %load UserOptions structure
-                load([obj.RootFolder '\UserOptions.mat'],'-mat','UserOptions');
-                obj.UserOptions=UserOptions;
+                load(obj);
             else
                 %ask user to create DefaultOptions structure
                 obj.UserOptions=[obj.UserOptions; CreateNewUserOptions(obj)];
@@ -42,6 +43,10 @@ classdef Users
         
         function GetCurrentPc(obj)
             obj.ClientPCName=getenv('COMPUTERNAME');
+        end
+        
+        function GetPCUserName(obj)
+            obj.CurrentUser=getenv('USERNAME');
         end
         
         %check what current user is
@@ -61,9 +66,16 @@ classdef Users
         end
                 
         %save user options into masterfolder
-        function SaveUserOptions(obj)
-            UserOptions=obj.UserOptions;
-            save ([obj.MA.MasterFolder 'UserOptions.mat'],'UserOptions');
+        function Save(obj)
+            tmp=parent;
+            obj.Parent=[];
+            save ([obj.RootFolder '\PEUser.mat'],'obj');
+            obj.Parent=tmp;
+        end
+        
+        function Load(obj2)
+            load([obj2.RootFolder '\PEUser.mat'],'obj');
+            obj2=obj;
         end
     end  
     
