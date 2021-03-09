@@ -20,8 +20,7 @@ classdef Users
         function obj=Users(parent)
             obj.Parent=parent;
             
-            obj.RootFolder=matlabroot;  
-            
+            obj.RootFolder=matlabroot;            
             GetAppPath(obj);
             GetCurrentPc(obj);
             

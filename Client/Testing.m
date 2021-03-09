@@ -96,3 +96,4 @@ plot(rows.PictureData{1,1}  );
 RGB2 = im2uint8(data.Data{1,1}  );
 %%
 B = reshape(data.Data{1,1},1,[]);
+%%

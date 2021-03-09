@@ -28,22 +28,7 @@ classdef DbConn < handle
             %DBCONN Construct an instance of this class
             %   Detailed explanation goes here
             obj.Parent=parent;
-            obj.RootFolder=matlabroot;
-            
-            GetAppPath(obj);
-            GetCurrentPc(obj);            
-            
-            if not(CheckUsers(obj))
-                GetKeyLocation(obj);            
-            end
-        
-        end
-        
-        function CheckUsers(obj)
-        end
-        
-        function GetCurrentPc(obj)
-            obj.ClientPCName=getenv('COMPUTERNAME');
+            obj.RootFolder=matlabroot;            
         end
         
         function SetupConnection(obj)
@@ -77,10 +62,7 @@ classdef DbConn < handle
             obj.KeyFilename=[path, file];
             bool=ReadKey(obj);
         end
-        
-        function GetAppPath(obj)
-            app.MasterFolder=strrep(which('ProjectExplorer'),'App\ProjectExplorer.mlapp','');
-        end
+
         
         function bool=ReadKey(obj)
             try
