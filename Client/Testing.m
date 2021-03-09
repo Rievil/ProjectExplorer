@@ -1,4 +1,5 @@
-
+%% Start with GUI
+ExplorerStartGui;
 %% Testing of categorical arrays and their sorting
 pr=ProjectExplorer;
 %%

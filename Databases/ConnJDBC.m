@@ -82,3 +82,5 @@ execute(conn,sqlquery);
 close(conn);
 %%
 tst=DbConn(25);
+%%
+mr = matlabroot;

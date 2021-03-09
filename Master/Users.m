@@ -4,11 +4,13 @@ classdef Users
         MA; %link to mother app
         CurrentUserID; %current id of user
         CurrentUser; %current user
+        RootFolder;
     end
     
     methods (Access = public)
         %start the object
         function obj=Users(MA)
+            obj.RootFolder=matlabroot;
             obj.MA=MA;
             obj.CurrentUser=getenv('COMPUTERNAME');
             

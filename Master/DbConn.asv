@@ -16,7 +16,6 @@ classdef DbConn < handle
         DatabaseName;
         AuthType;        
         RootFolder;
-        MasterFolder;
     end
     
     properties (Access = private)
@@ -30,16 +29,8 @@ classdef DbConn < handle
             obj.Parent=parent;
             obj.RootFolder=matlabroot;
             
-            GetAppPath(obj);
             GetCurrentPc(obj);            
-            
-            if not(CheckUsers(obj))
-                GetKeyLocation(obj);            
-            end
-        
-        end
-        
-        function CheckUsers(obj)
+            GetKeyLocation(obj);
         end
         
         function GetCurrentPc(obj)
@@ -54,7 +45,7 @@ classdef DbConn < handle
             obj.IPAdress='147.229.25.228';
             obj.PortNumber=1433;
             obj.DatabaseName='Projects';
-            obj.DriverPath=[app.MasterFolder '\Databases\sqljdbc4.jar'];
+            obj.DriverPath=[cd '\Databases\sqljdbc4.jar'];
             
             obj.Opts = setConnectionOptions(obj.Opts, ...
                 'DataSourceName',obj.ConnectionName, ...
@@ -78,7 +69,7 @@ classdef DbConn < handle
             bool=ReadKey(obj);
         end
         
-        function GetAppPath(obj)
+        function bool=IsFirstRun(obj)
             app.MasterFolder=strrep(which('ProjectExplorer'),'App\ProjectExplorer.mlapp','');
         end
         
