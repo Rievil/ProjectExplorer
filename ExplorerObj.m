@@ -13,24 +13,42 @@ classdef ExplorerObj < handle
         Users;
     end
     
-
+    properties
+        RootFolder;
+        MasterFolder;
+        CurrentUser;
+        ClientPCName;
+        KeyFileName;
+    end
+    
+    events
+        GetConn;
+    end
     
     methods
         function obj = ExplorerObj(type)
             
-            obj.Users=Users(obj);
+            GetCurrPc(obj);
             
+            obj.Users=Users(obj);            
             obj.DbConn=DbConn(obj);
-            obj.Core=CoreObj;
-            
+%             obj.Core=CoreObj;
+            obj.GetConn=addlistener();
             if type==true
-                obj.App=ProjectExplorer(obj);
-            end
-            
-            
-            
+%                 obj.App=ProjectExplorer(obj);
+            end  
         end
         
+        function GetCurrPc(obj)
+            obj.RootFolder=matlabroot;                        
+            obj.MasterFolder=strrep(which('ExplorerObj'),'\ExplorerObj.m','');
+            obj.CurrentUser=getenv('USERNAME');
+            obj.ClientPCName=getenv('COMPUTERNAME');
+        end
+    end
+    
+    methods %events
+
     end
 end
 

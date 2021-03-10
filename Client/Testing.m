@@ -102,3 +102,7 @@ tst=TestObj;
 Save(tst);
 %%
 Load(tst);
+%%
+[keys,vals] = getenvall();
+T=table(keys,vals);
+%
