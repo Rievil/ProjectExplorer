@@ -6,11 +6,9 @@ classdef ProjectObj < handle
         Status;
         CreationDate datetime;
         LastChange datetime;
-        Meas struct; %list of measuremnts objects in the specific object
-        %each object is stored as a separate file in project folder, for
-        %clarity this is must - user might want to manualy load data
-        %container of specific measuremnt to access the data, in a long
-        %term and debuging this is importnat
+        Meas struct; 
+        ExpNode;
+        Experiments;        
         MeasCount=0;
         MTreeNodes;     
         SelectorSets struct;

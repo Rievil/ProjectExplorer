@@ -32,10 +32,11 @@ classdef ExplorerObj < handle
             
             obj.Users=Users(obj);            
             obj.DbConn=DbConn(obj);
-%             obj.Core=CoreObj;
-            obj.GetConn=addlistener();
-            if type==true
-%                 obj.App=ProjectExplorer(obj);
+            obj.Core=CoreObj(obj);
+
+            if obj.DbConn.Status==true
+%                 SetUserDetails(obj.Users);
+                obj.App=ProjectExplorer(obj);
             end  
         end
         
@@ -47,8 +48,15 @@ classdef ExplorerObj < handle
         end
     end
     
-    methods %events
-
+    methods 
+        function ParentCare(obj,name,data)
+            switch name
+                case 'ss'
+                otherwise
+            end
+        end
     end
+    
+
 end
 

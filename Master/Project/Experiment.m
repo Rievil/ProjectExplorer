@@ -1,23 +1,21 @@
-classdef Experiment
+classdef Experiment < handle
     %EXPERIMENT Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        Property1
+        TreeNode;
+        Name;
+        TypeSettings;
+        Meas;
+        Parent; %ProjectObj
     end
     
     methods
-        function obj = Experiment(inputArg1,inputArg2)
-            %EXPERIMENT Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        function obj = Experiment(parent)
+            obj.Parent=parent;
+
         end
-        
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
-        end
+
     end
 end
 

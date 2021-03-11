@@ -50,7 +50,7 @@ classdef Users < handle
             NewUser.UserName=obj.Parent.CurrentUser;
             NewUser.MasterFolder=obj.Parent.MasterFolder;
             NewUser.KeyFilename=[];
-            NewUser.SandBoxFolder=[uigetdir(cd,'Select folder for saving all work') '\'];
+            NewUser.SandBoxFolder=[];
             
             %NewUser.SandBoxFolder=[uigetdir(cd,'Select folder for saving all work') '\'];
             %obj.UserOptions=UserOptions;
@@ -61,14 +61,7 @@ classdef Users < handle
         function SetUserDetails(obj)
             screenDim=get(0,'ScreenSize');
             obj.Fig=uifigure('Name','User details options','Position',[screenDim(3)/2-350,screenDim(4)/2-200,700,400]);
-            
-            ef1 = uilabel(obj.Fig,'Text',['PC Name:           ' obj.UserOptions.PCName],'Position',[20 370 310 20]);
-            ef1 = uilabel(obj.Fig,'Text',['Current user:      ' obj.UserOptions.UserName],'Position',[20 350 310 20]);
-            ef1 = uilabel(obj.Fig,'Text',['App master folder: ' obj.UserOptions.MasterFolder],'Position',[20 330 310 20]);
-            ef1 = uilabel(obj.Fig,'Text',['Key filename:      ' obj.UserOptions.KeyFilename],'Position',[20 310 310 20]);
-            
+            ef1 = uilabel(obj.Fig,'Text','PC Name:','Position',[20 370 310 20]);
         end
-        
-        
     end
 end

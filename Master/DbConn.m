@@ -17,6 +17,7 @@ classdef DbConn < handle
         AuthType;        
         RootFolder;
         MasterFolder;
+        Status=0;
     end
     
     properties (Access = private)
@@ -86,6 +87,7 @@ classdef DbConn < handle
             else
                 warning('Can''t connect to database, is VPN on?');
             end
+            obj.Status=status;
         end
         
         function bool=CheckConnectionName(obj)

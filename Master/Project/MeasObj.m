@@ -98,6 +98,7 @@ classdef MeasObj < handle
 %             obj.eReload = addlistener(obj.Parent,'ReloadData',@obj.ReLoadData);
 %         end
     end
+    
     %Selectors
     methods
         %Initiate selector
