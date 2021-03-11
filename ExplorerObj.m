@@ -74,7 +74,12 @@ classdef ExplorerObj < handle
                     
             end
         end
+        
+        function stash=Pack(obj)
+            stash=Pack(obj.Core.ProjectOverview);
+        end
     end
+    
     
 
 end

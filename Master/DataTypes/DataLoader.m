@@ -1,4 +1,4 @@
-classdef DataLoader < OperLib & MeasObj
+classdef DataLoader < handle
     %Each type has its own structure, which is tends to be most effective,
     %data Loader will use each type as a blueprint of "how to load and
     %preprocess data", but the output of type is matlab primitive (array,
@@ -26,9 +26,10 @@ classdef DataLoader < OperLib & MeasObj
         %consruktor
         function obj = DataLoader(ID,ProjectFolder,SandBox,Row,Parent)
             obj@OperLib;
+            GetBruteFolder(obj);
             obj@MeasObj(ID,ProjectFolder,SandBox,Row,Parent);
             
-            GetBruteFolder(obj);
+            
         end
         
         %Výbìr adresáøe s mìøeními

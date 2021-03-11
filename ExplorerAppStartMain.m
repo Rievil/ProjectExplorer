@@ -1,4 +1,4 @@
-function ExplorerAppStartMain(~)
-    ExplorerObj(1);
+function han=ExplorerAppStartMain(~)
+    han=ExplorerObj(1);
 end
 

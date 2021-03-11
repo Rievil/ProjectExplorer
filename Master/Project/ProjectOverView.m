@@ -4,7 +4,7 @@ classdef ProjectOverView < handle
         SandBoxFolder char;
         ProjectCount=0;
         
-        TReeNodes;
+%         TReeNodes;
         UITree; %handle to ui tree in project explorer
         
         CurrentMasterFolder;
@@ -25,38 +25,54 @@ classdef ProjectOverView < handle
             obj.CurrentMasterFolder=ParentCare(TMPO,'masterfolder');
             
             if isfile([obj.SandBoxFolder 'Projects.mat'])
-                %project overview already exists
                 load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');
                 obj.Projects=Projects;
             else
-                %it does not exist, so create it
+
             end
-            %save(obj);
         end
         
         function DesignNewProject(obj)
             obj.FigProjectDesign=EditProject(obj);
         end
-        
-        %create new project
+
         function [status,newID]=CreateProject(obj,Name)
             newID=numel(obj.Projects) + 1;
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
-                obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj);
+                obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj);                
                 obj.Projects(newID).ID=newID;
-                
                 status=obj.Projects(newID).Status.Value;
-                
-                if status==4
-                    
-                    obj.Projects(newID)=[];
-                end
+                treenode=uitreenode(obj.UITree,...
+                    'Text',obj.Projects(newID).Name,...
+                    'NodeData',{obj.Projects(newID),'project'}); 
+
+                obj.Projects(newID).TreeNode=treenode;
+                AddMainExpNode(obj.Projects(newID));
+                switch status
+                    case 1
+    
+                    case 4
+                        DeleteProject(obj,newID);
+                        
+                end                
             end
-%             save(obj);
         end
         
-        %count number of stored projects
+        function DeleteProject(obj,ID)
+            i=0;
+            for P=obj.Projects
+                i=i+1;
+                if P.ID==ID
+                    Remove(obj.Projects(i));
+                    obj.Projects(i)=[];
+                    break;
+                end
+            
+            end
+            obj.ProjectCount=numel(obj.Projects);
+        end
+        
         function [ProjectCount]=Count(obj)
             ProjectCount=numel(obj.Projects);
             obj.ProjectCount=ProjectCount;
@@ -72,7 +88,7 @@ classdef ProjectOverView < handle
                         
                     obj.TReeNodes{i}=uitreenode(obj.UITree,...
                         'Text',obj.Projects(i).Name,...
-                        'NodeData',{i,obj.Projects(i)}); 
+                        'NodeData',{obj.Projects(i),'project'}); 
                     
                         obj.Projects(i).TreeNode=obj.TReeNodes{i};
                         AddMainExpNode(obj.Projects(i));
@@ -92,18 +108,18 @@ classdef ProjectOverView < handle
         
         %delete the node and its children (actualy will leave the node
         %intacked, but will set the project status to hidden)
-        function HideProject(obj, nProject)
-            SetStatus(obj.Projects(nProject),3);
-            obj.TReeNodes{nProject}.delete;
-            save(obj);
-        end
-        
-        function ShowProjects(obj)
-            for i=1:numel(obj.Projects)
-                SetStatus(obj.Projects(i),1);
-            end
-            FillTree(obj);
-        end
+%         function HideProject(obj, nProject)
+%             SetStatus(obj.Projects(nProject),3);
+%             obj.TReeNodes{nProject}.delete;
+%             save(obj);
+%         end
+%         
+%         function ShowProjects(obj)
+%             for i=1:numel(obj.Projects)
+%                 SetStatus(obj.Projects(i),1);
+%             end
+%             FillTree(obj);
+%         end
     end %end of public methods
     
     %private methods for controling project overview
@@ -134,25 +150,25 @@ classdef ProjectOverView < handle
             end
         end
         
-        function DeleteProject(obj,ID)
-            %delete folder
-%             fig = uifigure;
-            selection = uiconfirm(obj.Parent.UIFigure,'Do you really want to delete whole project?','Delete whole project',...
-                                    'Icon','question');
-            if selection=='OK'
-                ProjectFolder=[obj.SandBoxFolder obj.Projects(ID).ProjectFolder(1:end-1)];
-                [status, message, messageid]=rmdir(ProjectFolder,'s');
-
-                %delete data
-                obj.Projects(ID)=[];
-
-                %reduce count
-                if obj.ProjectCount>0
-                    obj.ProjectCount=obj.ProjectCount-1;
-                end
-            end
-            FillTree(obj);
-        end
+%         function DeleteProject(obj,ID)
+%             %delete folder
+% %             fig = uifigure;
+%             selection = uiconfirm(obj.Parent.UIFigure,'Do you really want to delete whole project?','Delete whole project',...
+%                                     'Icon','question');
+%             if selection=='OK'
+%                 ProjectFolder=[obj.SandBoxFolder obj.Projects(ID).ProjectFolder(1:end-1)];
+%                 [status, message, messageid]=rmdir(ProjectFolder,'s');
+% 
+%                 %delete data
+%                 obj.Projects(ID)=[];
+% 
+%                 %reduce count
+%                 if obj.ProjectCount>0
+%                     obj.ProjectCount=obj.ProjectCount-1;
+%                 end
+%             end
+%             FillTree(obj);
+%         end
         
         function stash=Pack(obj)
             stash=struct;

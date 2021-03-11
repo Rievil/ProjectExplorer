@@ -12,6 +12,7 @@ classdef ProjectObj < handle
         
         ExpMainNode;
         Experiments;        
+        ExpCount=0;
         TypeFig;
         
         MeasCount=0;
@@ -29,16 +30,19 @@ classdef ProjectObj < handle
     %Main methods, consturction, destruction etc.
     methods (Access=public) 
         %creation of project objects
-        function obj=ProjectObj(Name,SandBox,App)
+        function obj=ProjectObj(Name,SandBox,parent)
+            obj.Parent=parent;
             obj.Name=Name;
-            obj.ProjectFolder=[Name '\'];
+            
             obj.Meas=struct('Data',[],'ID',[],'Row',[]);
             
             if ~exist([SandBox obj.Name '\'],'dir')
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
                 mkdir([SandBox Name '\']);
+                obj.ProjectFolder=[Name '\'];
                 SetStatus(obj,1);
+                
             else
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
@@ -47,10 +51,37 @@ classdef ProjectObj < handle
 %             InitSelectorSets(obj,App);
         end
         
-        function NewExperiment(obj)
-            obj.TypeFig=AppTypeSelector(obj,app.MasterFolder,1);
+        function NewExperiment(obj) %volání aplikací
+            MasterFolder=obj.Parent.Parent.Parent.MasterFolder;
+            exphan=AddExperiment(obj);
+            obj.TypeFig=AppTypeSelector(obj,MasterFolder,1,exphan);
         end
-            
+        
+        function EditExperiment(obj,ExpHan)
+            MasterFolder=obj.Parent.Parent.Parent.MasterFolder;
+            obj.TypeFig=AppTypeSelector(obj,MasterFolder,1,ExpHan);
+        end
+        
+        function exphan=AddExperiment(obj)
+            obj.ExpCount=obj.ExpCount+1;
+            exphan=Experiment(obj,obj.ExpCount);            
+            node=uitreenode(obj.ExpMainNode,'Text','--#New Experiment#--','NodeData',{exphan,'experiment'});
+            exphan.TreeNode=node;            
+            obj.Experiments=[obj.Experiments, exphan];
+        end
+        
+        function DeleteExperiment(obj,name)
+            i=0;
+            for E=obj.Experiments
+                i=i+1;
+                if strcmp(E.Name,name)
+                    Remove(obj.Experiments(i));
+                    obj.Experiments(i)=[];
+                    break;
+                end
+            end
+            obj.ExpCount=numel(obj.Experiments);
+        end
         
         function AddMainExpNode(obj)
             obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'});
@@ -212,7 +243,7 @@ classdef ProjectObj < handle
     %                 tmp2=obj.Meas{i}.Name;
                         obj.TreeNode{i}=uitreenode(obj.ExpMainNode,...
                                 'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
-                                'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
+                                'NodeData',{obj.Meas(i).Data,'meas'}); 
                 end
             end
         end
@@ -367,17 +398,22 @@ classdef ProjectObj < handle
               
         %delete measurment
         function DeleteM(obj,i,Meas,Node)
-%             Node.delete;
-%             filename=obj.Meas{i}.FName;
-%             delete(filename);  
-%             obj.Meas{i}=[];    
             Node.delete;
             delete(Meas);
             obj.Meas(i)=[];
         end
+        
+        function Remove(obj)
+            if ~isempty(obj.ProjectFolder)
+                folder=[obj.Parent.SandBoxFolder, obj.ProjectFolder];
+                rmdir(folder,'s');
+            end
+            delete(obj.TreeNode);
+        end
+        
         %class destructor of object
         function delete(obj)
-            obj.TotalTable=[];
+            delete(obj.TreeNode);
         end
         
         function stash=Pack(obj)
