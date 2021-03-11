@@ -65,7 +65,8 @@ classdef ProjectObj < handle
         function exphan=AddExperiment(obj)
             obj.ExpCount=obj.ExpCount+1;
             exphan=Experiment(obj,obj.ExpCount);            
-            node=uitreenode(obj.ExpMainNode,'Text','--#New Experiment#--','NodeData',{exphan,'experiment'});
+            node=uitreenode(obj.ExpMainNode,'Text','--#New Experiment#--','NodeData',{exphan,'experiment'},...
+                'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\nExp.gif']);
             exphan.TreeNode=node;            
             obj.Experiments=[obj.Experiments, exphan];
         end
@@ -84,7 +85,8 @@ classdef ProjectObj < handle
         end
         
         function AddMainExpNode(obj)
-            obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'});
+            obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'},...
+                'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\Experiment.gif']);
         end
         
         %creation of meas

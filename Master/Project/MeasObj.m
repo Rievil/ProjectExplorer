@@ -1,17 +1,19 @@
 classdef MeasObj < OperLib
     properties (SetAccess = public)
-        Name char;
+        
         FName char;  %filename within the project folder - important for deleting
+        Name char;
         ID double; %number
         Date datetime; %oficial name for measurement, copy erliest date from files
         LastChange datetime; %when change happen
         Count;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
-        %BruteFolder char; %folder with measured data, from which DataC construct itrs container
+        BruteFolder char; %folder with measured data, from which DataC construct itrs container
+        
         Row;
         ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
-        BruteFolder char;
+        c char;
         %if 'extracted', then we already have DataC created in project
         %folder, and we dont have to check if BruteFolder is avaliable, or
         %not
@@ -52,13 +54,15 @@ classdef MeasObj < OperLib
             
             obj.ID=ID;
             obj.Parent=Parent;
-            obj.eReload=addlistener(obj.Parent,'Reload',@obj.ReLoadData);
+            obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             
             
             obj.ProjectFolder=ProjectFolder;
             obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
             
-            obj.Name=sprintf('%d - %s - %s',obj.ID,obj.Parent.Name,datestr(obj.Date,'dd.MM.yyyy hh:mm'));
+            txt=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
+            
+            obj.Name=txt;
             obj.SandBox=obj.Parent.Parent.Parent.SandBoxFolder;
             obj.Version=0;
             
@@ -109,14 +113,6 @@ classdef MeasObj < OperLib
             Idx=table2array(obj.Selector(:,Set));
             Data=obj.Data(Idx,:);
         end
-    end
-
-    %Get set methods
-    methods
-        function Name=get.Name(obj)
-            BruteFolders=split(obj.BruteFolder,'\');
-            Name=char(BruteFolders(end-1));
-        end             
     end
     
     %Events, listeners, callbacks
@@ -228,7 +224,10 @@ classdef MeasObj < OperLib
         
         %funkce pro ètení
         function ReadData(obj)
-            GetBruteFolder(obj);
+            if obj.BruteFolderSet==0
+                GetBruteFolder(obj);
+            end
+            
             try
                 obj.Version=obj.Version+1;
                 Types=obj.TypeTable.DataType;
@@ -386,9 +385,5 @@ classdef MeasObj < OperLib
             end
         end
     end
-    
-    %Delete,copy, load methods
-    methods
 
-    end
 end

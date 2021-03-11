@@ -10,8 +10,8 @@ classdef Experiment < handle
         Name;
         TypeSettings;
         
-        Meas;
-        MeasCount;
+        Meas; %this can be erased, and can be sizely
+        MeasCount; %this is efficiently stored measurements
         
         
         Specimens;
@@ -19,7 +19,7 @@ classdef Experiment < handle
         Parent; %ProjectObj
     end
     
-    properties
+    events
         eReload;
     end
     
@@ -55,7 +55,7 @@ classdef Experiment < handle
         end
         
         function CreateExpFolder(obj)
-            obj.ExpFolder=[obj.Parent.ProjectFolder '\' obj.Name];
+            obj.ExpFolder=[obj.Parent.ProjectFolder, obj.Name];
             mkdir([obj.Parent.Parent.SandBoxFolder, obj.ExpFolder]);
         end
         
@@ -70,6 +70,11 @@ classdef Experiment < handle
             stash.Name=obj.Name;
             stash.TypeSettings=obj.TypeSettings;
             stash.Meas=[];
+            n=0;
+            for M=obj.Meas
+                n=n+1;
+                stash.Meas(n)=Pack(M);            
+            end
         end
         
         function Remove(obj)
