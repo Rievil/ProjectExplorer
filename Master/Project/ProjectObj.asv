@@ -12,17 +12,18 @@ classdef ProjectObj < handle
         
         ExpMainNode;
         Experiments;        
-        TypeFig;
         
         MeasCount=0;
-        TreeNode;     
+        MTreeNodes;     
         SelectorSets struct;
         CurrentSelector;
         MasterDataTypesTable; 
         DataTypesTable;
         TotalTable;
         EvListener;
-        Parent;        
+        Parent;
+
+        
     end
 
     
@@ -43,18 +44,9 @@ classdef ProjectObj < handle
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
             end
-%             AddMainExpNode(obj);
-%             InitSelectorSets(obj,App);
+            InitSelectorSets(obj,App);
         end
         
-        function NewExperiment(obj)
-            obj.TypeFig=AppTypeSelector(obj,app.MasterFolder,1);
-        end
-            
-        
-        function AddMainExpNode(obj)
-            obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'});
-        end
         
         %creation of meas
         function CreateMeas(obj,app,SandBox,TreeNode)
@@ -201,7 +193,7 @@ classdef ProjectObj < handle
     methods
                 
         function FillPTree(obj,TreeNode)
-            if numel(obj.TreeNode)>0
+            if numel(obj.MTreeNodes)>0
                 Nodes=TreeNode.Children;
                 Nodes.delete;
             end
@@ -210,7 +202,7 @@ classdef ProjectObj < handle
                 for i=1:size(obj.Meas,2)
     %                 tmp=char(datestr(obj.Meas{i}.Date));
     %                 tmp2=obj.Meas{i}.Name;
-                        obj.TreeNode{i}=uitreenode(obj.ExpMainNode,...
+                        obj.MTreeNodes{i}=uitreenode(TreeNode,...
                                 'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
                                 'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
                 end

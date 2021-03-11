@@ -5,11 +5,10 @@ classdef CoreObj < handle
     properties
         ProjectOverview;
         App;
-        Parent;
     end
     
     properties (Access = private)
-        
+        Parent;
     end
     
     %----------------------------------------------------------------------
@@ -22,9 +21,7 @@ classdef CoreObj < handle
     methods
         function CreateOverview(obj)
             obj.ProjectOverview=ProjectOverView(ParentCare(obj.Parent,'sandbox'),...
-                obj.App.PTree,obj);
-            
-            FillTree(obj.ProjectOverview);
+                app.UITree,obj);
         end
         
         function Save(obj)
@@ -34,10 +31,6 @@ classdef CoreObj < handle
         function Load(obj)
             
         end
-    end
-    
-    methods %callbacks for app controlling
-        
     end
     %----------------------------------------------------------------------
 end

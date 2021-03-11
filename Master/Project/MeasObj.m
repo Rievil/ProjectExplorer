@@ -22,7 +22,8 @@ classdef MeasObj < handle
         ClonedTypes=0;
         TotalTable;
         Parent;
-        Version; 
+        Version;
+        TreeNode;
     end
     
     %event listeners
@@ -166,6 +167,10 @@ classdef MeasObj < handle
         
         function save(obj)
 
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
         end
     end
 end

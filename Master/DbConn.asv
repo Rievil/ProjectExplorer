@@ -19,7 +19,6 @@ classdef DbConn < handle
         MasterFolder;
         Status=0;
         UserListener;
-        User;
     end
     
     properties (Access = private)
@@ -29,12 +28,11 @@ classdef DbConn < handle
 
     
     methods
-        function obj = DbConn(parent,user)
+        function obj = DbConn(parent,users)
             %DBCONN Construct an instance of this class
             %   Detailed explanation goes here
             obj.Parent=parent;
-            obj.User=user;
-            obj.UserListener = addlistener(obj.User,'ChangedUser',@obj.ChangedUser);
+            obj.UserListener = addlistener(hVypinac,'ChangedUser',@obj.zmena);
             
             vendor = "Microsoft SQL Server";
 
@@ -53,7 +51,6 @@ classdef DbConn < handle
                 'JDBCDriverLocation',obj.DriverPath, ...
                 'AuthType','Server');  
             
-            
             CheckForAccess(obj);
         end
         
@@ -65,41 +62,36 @@ classdef DbConn < handle
             saveAsJDBCDataSource(obj.Opts)
         end
         
-        function ChangedUser(obj,src,event)
-            CheckForAccess(obj);
-        end
         
         function CheckForAccess(obj)
-            status=0;
-            try
+            if isempty(obj.Parent.Users.UserOptions.KeyFilename)
                 GetKeyLocation(obj);
+                if ReadKey(obj,1)
+                    obj.Parent.Users.UserOptions.KeyFilename=obj.KeyFilename;
+                    Save(obj.Parent.Users);
+                end
+            else
+                %there is already keyfilename
+                obj.KeyFilename=obj.Parent.Users.UserOptions.KeyFilename;
                 if ReadKey(obj,0)
-                    warning('Key filename does exists and works properly');
-                else
-                    warning('Key filename error');
-                end
-
-
-                if ~CheckConnectionName(obj)
-                    SaveConnection(obj);
-                    bool=false;
-                else
-                    bool=true;
-                end
-
-                status=TestConnect(obj);
-                if status==true
-                    warning('Succesfully connected to database');
-                else
-                    warning('Can''t connect to database, is VPN on?');
-                end
-                obj.Status=status;
-            catch ME
-                warning('KeyFilename hasn''t been selected yet')
-                if status==0
-                    warning('Can''t connect to database, is VPN on? Is filename working?');
+                    
                 end
             end
+            
+            if ~CheckConnectionName(obj)
+                SaveConnection(obj);
+                bool=false;
+            else
+                bool=true;
+            end
+            
+            status=TestConnect(obj);
+            if status==true
+                warning('Succesfully connected to database');
+            else
+                warning('Can''t connect to database, is VPN on?');
+            end
+            obj.Status=status;
         end
         
         function bool=CheckConnectionName(obj)
@@ -124,7 +116,8 @@ classdef DbConn < handle
         end
         
         function GetKeyLocation(obj)
-            obj.KeyFilename=obj.User.UserOptions.KeyFilename;
+            [file,path]=uigetfile('.txt','Select KeyFilename');
+            obj.KeyFilename=[path, file];
         end
 
         
@@ -149,7 +142,7 @@ classdef DbConn < handle
                     case 'MATLAB:nonExistentField'
                         error('Filed "Name" or "Password" is spelled wrong or is missing');
                     otherwise
-                        warning(['Other error: ',ME.identifier]);
+                        error(['Other error: ',ME.identifier]);
                 end
                 bool=false;
             end
