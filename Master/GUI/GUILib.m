@@ -3,6 +3,7 @@ classdef GUILib < handle
     %   Detailed explanation goes here
     
     properties (SetAccess = public)
+        GUIParents struct; 
         GuiParent;
         Count=0;
         Children;
@@ -13,12 +14,21 @@ classdef GUILib < handle
     
     %interface
     methods (Abstract)
-        InitializeOption(obj);
-        PlotType(obj);
+%         InitializeOption(obj);
+%         PlotType(obj);
     end
     
     methods (Access = public)
+        %Constructor
+        function obj=GUILib(~)
+            obj.Init=false;
+            ResetParents(obj);
+%             obj.DrawNode=DrawNode;
+        end
         
+        function ResetParents(obj)
+            obj.GUIParents=struct('Parent',[],'Class',[],'Name',[],'Pos',[]);
+        end
         %will draw options for current data type
         function DrawTypeOption(obj)
             if obj.Init
@@ -37,13 +47,65 @@ classdef GUILib < handle
             T=obj.TypeSet{1, 1};  
         end
         
-        function obj=GUILib(~)
-            obj.Init=false;
+        function AddParent(obj,parent,name)
+            sz=size([obj.GUIParents(:).Parent],2); 
+            
+            obj.GUIParents(sz+1).Parent=parent;
+            obj.GUIParents(sz+1).Class=class(parent);
+            obj.GUIParents(sz+1).Name=lower(name);
+            
+            obj.GUIParents(sz+1).Pos=[10,...
+                    obj.GUIParents(sz+1).Parent.InnerPosition(4),...
+                    obj.GUIParents(sz+1).Parent.InnerPosition(3),...
+                    20];
+        end
+        
+        function p=GetParent(obj,in)
+            sz=size(obj.GUIParents,1);
+            switch class(in)
+                case 'char'
+                    %getting by name
+                    for i=1:sz
+                        if strcmp(in,obj.GUIParents(i).Name)
+                            find=i;
+                            break;
+                        else 
+                            find=0;
+                        end
+                    end
+                case 'double'
+                    %getting by number
+                    find=in;
+            end
+            
+            if find<=sz && find>0
+                p=obj.GUIParents(find);            
+            else
+                warning('You try to get parent index which was not defined!');
+                p=[];
+            end
         end
         
         
+        function SetParent(obj,n)
+            p=GetParent(obj,n);
+            obj.GuiParent=p.Parent;
+            obj.Pos=p.Pos;
+        end
+        
         function SetGuiParent(obj,Parent)
-            obj.GuiParent=Parent;
+            if obj.Init==0
+                ResetParents(obj);
+                tst=class(Parent);
+                switch class(Parent)
+                    case 'matlab.ui.container.TabGroup'
+                        for ch=Parent.Children'
+                            AddParent(obj,ch,lower(ch.Title));
+                        end
+                    otherwise
+                        obj.GuiParent=Parent;
+                end
+            end
         end
         
         function NewRow(obj)
@@ -61,15 +123,24 @@ classdef GUILib < handle
         
         %clear GUI COntainer
         function Clear(obj)
+            
             obj.Count=0;
-            delete(obj.GuiParent.Children);
-            if numel(obj.Children)>0
-                for i=1:numel(obj.Children)
-                delete(obj.Children{i});
+            for i=1:size(obj.GUIParents,2)
+                Ch=obj.GUIParents(i).Parent;
+                delete(Ch.Children);
+                if numel(obj.Children)>0
+                    for j=1:numel(obj.Children)
+                    delete(obj.Children{j});
+                    end
+                    obj.Children=[];
                 end
-                obj.Children=[];
+                obj.GUIParents(i).Pos=[10,...
+                    obj.GUIParents(i).Parent.InnerPosition(4),...
+                    obj.GUIParents(i).Parent.InnerPosition(3),...
+                    20];
+%                 obj.Pos=
             end
-            obj.Pos=[10,obj.GuiParent.InnerPosition(4),obj.GuiParent.InnerPosition(3),20];
+            
         end
         
         %Init of GUI per children
@@ -134,7 +205,7 @@ classdef GUILib < handle
         function han=DrawUITable(obj,Data,Key)
             obj.Count=obj.Count+1;
             %Pos=obj.GuiParent.InnerPosition;
-            
+
             yP=obj.Pos(2)-300-(obj.Count*20);
             Pos=[10,yP,obj.Pos(3)-15,300];
             obj.Pos(2)=yP;
@@ -146,12 +217,14 @@ classdef GUILib < handle
                      'UserData',{Key, obj.Count},...
                      'ColumnEditable',true,...
                      'ColumnWidth','auto',...
-                     'CellEditCallback',@(src,event)UITableChange(obj,event));   
+                     'CellEditCallback',@(src,event)UITableChange(obj,event));  
+                 
              if ~obj.Init
                 Key(obj,Data,obj.Count);
              end
              obj.Children{obj.Count}=han;
         end
+        
          %uitable callback
         function UITableChange(obj,event)
             event.Source.UserData{1}(obj,event.Source.Data,event.Source.UserData{2});

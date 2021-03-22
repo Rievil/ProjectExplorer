@@ -12,6 +12,10 @@ classdef MainTable < DataFrame
     methods %main methods
         function obj = MainTable(~)
             obj@DataFrame;
+            
+            obj.ContainerType=OperLib.GetContainerTypes(1);
+            obj.KeyWord='';
+            obj.Sufix=OperLib.GetSuffixTypes(1);
         end
         
 
@@ -133,10 +137,13 @@ classdef MainTable < DataFrame
                 obj.TypeSet{Target.UserData{2}}=Target.Data;
             end
         end
+        
         %will initalize gui for first time
         function InitializeOption(obj)
+            SetParent(obj,'type');
             Clear(obj);
-
+            
+            
             Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);
             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
             DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...

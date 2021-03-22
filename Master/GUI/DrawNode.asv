@@ -1,0 +1,49 @@
+classdef DrawNode < GUILib
+    %DRAWNODE Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        GUIParents struct;     
+    end
+    
+
+    
+    methods
+        function obj = DrawNode(~)
+            obj@GUILib;            
+            obj.GUIParents=struct('Parent','Class','Name');
+        end
+        
+        function AddParent(obj,parent,name)
+            sz=size(obj.GUIParents,1);
+            
+            obj.GUIParents(sz+1).Parent=parent;
+            obj.GUIParents(sz+1).Class=class(parent);
+            obj.GUIParents(sz+1).Name=lower(name);
+        end
+        
+        function p=GetParent(obj,in)
+            sz=size(obj.GUIParents,1);
+            switch class(in)
+                case 'char'
+                    %getting by name
+                    for i=1:sz
+                        if strcmp(in,obj.GUIParents(i).Name)
+                            find=i;
+                            break;
+                        end
+                    end
+                case 'double'
+                    %getting by number
+                    find=in;
+            end
+            
+            if find<=sz
+                p=obj.GUIParents(n).Parent;            
+            else
+            end
+        end
+        
+    end
+end
+

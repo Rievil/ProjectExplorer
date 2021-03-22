@@ -43,7 +43,7 @@ classdef DataFrame < OperLib & GUILib
         end
         
         function SetConType(obj,type)
-            obj.ContainerType=type;
+            obj.ContainerType=
         end
     end   
 end

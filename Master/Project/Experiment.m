@@ -9,6 +9,7 @@ classdef Experiment < handle
         Status;
         Name;
         TypeSettings;
+        TypeFig;
         
         Meas; %this can be erased, and can be sizely
         MeasCount; %this is efficiently stored measurements
@@ -24,8 +25,9 @@ classdef Experiment < handle
     end
     
     properties
-        TypeSelWin;
+%         TypeSelWin;
         eEditTypes;
+        DrawNode;
     end
     
     methods
@@ -50,9 +52,14 @@ classdef Experiment < handle
                obj.notify('eReload');
         end
         
-        function StartTypeEditor(obj)
-            obj.TypeSelWin=AppTypeSelector(app.PNodeSelected,app.MasterFolder,1);
+        function EditExperiment(obj)
+%             obj.DrawNode=DrawNode;
+            
+            obj.TypeFig=AppTypeSelector(obj);
         end
+%         function StartTypeEditor(obj)
+%             obj.TypeSelWin=AppTypeSelector(app.PNodeSelected,app.MasterFolder,obj);
+%         end
         
         function CreateExpFolder(obj)
             obj.ExpFolder=[obj.Parent.ProjectFolder, obj.Name];

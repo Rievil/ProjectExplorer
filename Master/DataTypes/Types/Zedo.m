@@ -348,7 +348,7 @@ classdef Zedo < DataFrame
         end
         %will initalize gui for first time
         function InitializeOption(obj)
-            
+            SetParent(obj,'type');
             Clear(obj);
             
 %             Target=DrawUITree(obj,@SetVal);

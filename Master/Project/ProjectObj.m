@@ -13,16 +13,23 @@ classdef ProjectObj < handle
         ExpMainNode;
         Experiments;        
         ExpCount=0;
-        TypeFig;
+%         TypeFig;
         
         MeasCount=0;
-        TreeNode;     
+        TreeNode;    
+        
         SelectorSets struct;
+        
+        
         CurrentSelector;
         MasterDataTypesTable; 
+        
         DataTypesTable;
+        
         TotalTable;
+        
         EvListener;
+        
         Parent;        
     end
 
@@ -57,10 +64,7 @@ classdef ProjectObj < handle
             obj.TypeFig=AppTypeSelector(obj,MasterFolder,1,exphan);
         end
         
-        function EditExperiment(obj,ExpHan)
-            MasterFolder=obj.Parent.Parent.Parent.MasterFolder;
-            obj.TypeFig=AppTypeSelector(obj,MasterFolder,1,ExpHan);
-        end
+
         
         function exphan=AddExperiment(obj)
             obj.ExpCount=obj.ExpCount+1;

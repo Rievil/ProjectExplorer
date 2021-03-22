@@ -82,6 +82,7 @@ classdef OperLib < handle
             all_dir = all_files([all_files(:).isdir]);
             all_dir(1:2)=[];
         end
+        
         %sort data in maintable
         function Arr=ConvertTabeType(Type,InArr)            
             switch lower(Type)
@@ -113,6 +114,15 @@ classdef OperLib < handle
             IsDescriptive=false;
             Num=1;
             T=table(ColNames(1),Key,Label,IsDescriptive,Num,'VariableNames',{'ColType','Key','Label','IsDescriptive','ColNumber'});
+        end
+        
+        function T=PRBlueprint
+            ColNames=categorical(["seconds","datetime","double"],{'seconds','datetime','double'},'ordinal',true);
+            Label="Name of column";
+            Unit="N or s or MPA";
+            IsDescriptive=false;
+            Num=1;
+            T=table(Num,Label,Unit,ColNames(1),'VariableNames',{'ColOrder','VariableName','Unit','Type'});
         end
         
         %Get All types that are present in datatype library
@@ -149,6 +159,47 @@ classdef OperLib < handle
                 StrArr(i)=TMP2;
             end
         end
-    end    
+        
+        function out=GetContainerTypes(varargin)
+            t=["File","Folder"];
+            if numel(varargin)>0
+                out=t(varargin{1});
+            else
+                out=t;
+            end
+            
+        end
+        
+        function out=GetSuffixTypes(varargin)
+            t=[".xls",".xlsx",".csv",".txt",".bin","~"];
+            if numel(varargin)>0
+                out=t(varargin{1});
+            else
+                out=t;
+            end
+        end
+        
+    end 
+    
+    %Methods for node operations from 
+    methods 
+        function AddNode(obj,node)
+            
+        end
+        
+        function DelNode(obj,node)
+            
+        end
+        
+        
+        function stash=PackNode(obj)
+            
+        end
+        
+        
+        function FillNode(obj,stash)
+            
+        end
+    end
 end
 
