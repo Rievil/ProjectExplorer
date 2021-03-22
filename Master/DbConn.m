@@ -105,13 +105,15 @@ classdef DbConn < handle
         function bool=CheckConnectionName(obj)
             v=ver('MATLAB'); 
             currVersion=str2double(replace(v.Release,{'(R',')'},''));
-            if v.Release=="(R2018a)"
-                list= getdatasources;
-                
-                %Code
-            elseif v.Release=="(R2019b)"
-                %Code
-                list= getdatasources;
+            switch v.Release
+                case "(R2018a)"
+                    list= getdatasources;
+                case "(R2019b)"
+                    list= getdatasources;
+                case "(R2020b)"
+                    list= getdatasources;
+                otherwise
+                    list= getdatasources;
             end
             
             bool=false;
