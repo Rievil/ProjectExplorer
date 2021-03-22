@@ -4,8 +4,6 @@ clear all;
 b=ExplorerAppStartMain;
 %%
 result=Pack(b);
-%% Testing of categorical arrays and their sorting
-pr=ProjectExplorer;
 %%
 results = GetCurrentData(pr);
 %%

@@ -7,15 +7,17 @@ classdef Experiment < handle
         ExpFolder char;
         TreeNode;
         Status;
-        Name;
+        Name='--#New Experiment#--';
         TypeSettings;
         TypeFig;
         
+        %meas purpose is for reading a new data, changing it to specimens
+        %with properties and then saving to specimens
         Meas; %this can be erased, and can be sizely
-        MeasCount; %this is efficiently stored measurements
+        MeasCount; 
         
         
-        Specimens;
+        Specimens; %this is efficiently stored measurements
         SpecimensCount;
         Parent; %ProjectObj
     end
@@ -35,17 +37,27 @@ classdef Experiment < handle
             obj.Parent=parent;
             obj.ID=ID;
             obj.Status=0;
-
+            
+        end
+        
+        function FillNode(obj)
+%             if isvalid(obj.TreeNode)
+%                 obj.TreeNode.Text=obj.Name;
+%             else
+                obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
+                    'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\nExp.gif']);
+%             end
         end
         
         function AddMeas(obj)
             MeasID=numel(obj.Meas)+1; 
-            MeasFolder=obj.ExpFolder;
-            meas=MeasObj(MeasID,MeasFolder,obj);
-            obj.Meas=[obj.Meas, meas];
             
-            node=uitreenode(obj.TreeNode,'Text',meas.Name,'NodeData',{meas,'meas'});
-            meas.TreeNode=node;
+            MeasFolder=obj.ExpFolder;
+            
+            meas=MeasObj(MeasID,MeasFolder,obj);
+            FillNode(meas);
+            
+            obj.Meas=[obj.Meas, meas];            
         end
         
         function Reload(obj)
@@ -53,8 +65,6 @@ classdef Experiment < handle
         end
         
         function EditExperiment(obj)
-%             obj.DrawNode=DrawNode;
-            
             obj.TypeFig=AppTypeSelector(obj);
         end
 %         function StartTypeEditor(obj)

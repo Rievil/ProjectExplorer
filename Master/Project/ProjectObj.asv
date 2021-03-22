@@ -67,8 +67,10 @@ classdef ProjectObj < handle
         
         function exphan=AddExperiment(obj)
             obj.ExpCount=obj.ExpCount+1;
-            exphan=Experiment(obj,obj.ExpCount);   
-            FillNode(exphan);
+            exphan=Experiment(obj,obj.ExpCount);            
+            node=uitreenode(obj.ExpMainNode,'Text','--#New Experiment#--','NodeData',{exphan,'experiment'},...
+                'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\nExp.gif']);
+            exphan.TreeNode=node;            
             obj.Experiments=[obj.Experiments, exphan];
         end
         

@@ -22,7 +22,7 @@ classdef ExplorerObj < handle
     end
     
     properties (Access=private)
-        Regime; %0 without app ; 1=with app
+        Regime=0; %0 without app ; 1=with app
     end
     
     events
@@ -32,6 +32,7 @@ classdef ExplorerObj < handle
     methods
         function obj = ExplorerObj(type)
             obj.Regime=type;
+            
             GetCurrPc(obj);
             
             obj.Users=Users(obj);            
@@ -42,14 +43,16 @@ classdef ExplorerObj < handle
         end
         
         function OpenStructure(obj)
+            if obj.Regime==1
+%                 if isempty(obj.App)
+                    obj.App=ProjectExplorer(obj);
+                    obj.Core.App=obj.App;
+%                 end
+            end
+                
             if obj.DbConn.Status==true
 %                 SetUserDetails(obj.Users);
-                if obj.Regime==1
-                    if isempty(obj.App)
-                        obj.App=ProjectExplorer(obj);
-                        obj.Core.App=obj.App;
-                    end
-                end
+                
                 CreateOverview(obj.Core);
             end
         end

@@ -199,11 +199,11 @@ classdef OperLib < handle
             list=properties(obj2);
             while numel(list)>0
                 idx=contains(list,name);
-                if sum(idx)>0
-                    prop=list(idx);
-                    val=obj2.(prop{1});
+                if idx>0
+                    
                     break;
                 end
+                
                 obj2=obj2.Parent;
                 list=properties(obj2);
             end

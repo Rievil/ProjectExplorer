@@ -14,7 +14,7 @@ classdef GUILib < handle
     
     %interface
     methods (Abstract)
-%         InitializeOption(obj);
+        InitializeOption(obj);
 %         PlotType(obj);
     end
     
@@ -94,7 +94,7 @@ classdef GUILib < handle
         end
         
         function SetGuiParent(obj,Parent)
-            if obj.Init==0
+%             if obj.Init==0
                 ResetParents(obj);
                 tst=class(Parent);
                 switch class(Parent)
@@ -105,7 +105,7 @@ classdef GUILib < handle
                     otherwise
                         obj.GuiParent=Parent;
                 end
-            end
+%             end
         end
         
         function NewRow(obj)
@@ -127,18 +127,20 @@ classdef GUILib < handle
             obj.Count=0;
             for i=1:size(obj.GUIParents,2)
                 Ch=obj.GUIParents(i).Parent;
-                delete(Ch.Children);
-                if numel(obj.Children)>0
-                    for j=1:numel(obj.Children)
-                    delete(obj.Children{j});
+                if isvalid(Ch)
+                    delete(Ch.Children);
+                    if numel(obj.Children)>0
+                        for j=1:numel(obj.Children)
+                        delete(obj.Children{j});
+                        end
+                        obj.Children=[];
                     end
-                    obj.Children=[];
+                    obj.GUIParents(i).Pos=[10,...
+                        obj.GUIParents(i).Parent.InnerPosition(4),...
+                        obj.GUIParents(i).Parent.InnerPosition(3),...
+                        20];
+    %                 obj.Pos=
                 end
-                obj.GUIParents(i).Pos=[10,...
-                    obj.GUIParents(i).Parent.InnerPosition(4),...
-                    obj.GUIParents(i).Parent.InnerPosition(3),...
-                    20];
-%                 obj.Pos=
             end
             
         end
@@ -202,12 +204,26 @@ classdef GUILib < handle
         
         %------------------------------------------------------------------
         %uitable
-        function han=DrawUITable(obj,Data,Key)
+        function han=DrawUITable(obj,Data,Key,inHeight)
+            arguments
+                obj;
+                Data;
+                Key;
+                inHeight;
+            end
+            
+            if inHeight>~0
+                Height=inHeight;
+            else
+                Height=300;
+            end
+               
             obj.Count=obj.Count+1;
             %Pos=obj.GuiParent.InnerPosition;
 
-            yP=obj.Pos(2)-300-(obj.Count*20);
-            Pos=[10,yP,obj.Pos(3)-15,300];
+            yP=obj.Pos(2)-Height-(obj.Count*20);
+            
+            Pos=[10,yP,obj.Pos(3)-15,Height];
             obj.Pos(2)=yP;
             
             %Pos=[10,Pos(4)-200-(obj.Count*23),Pos(3)-15,180];

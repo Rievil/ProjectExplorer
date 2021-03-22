@@ -1,4 +1,4 @@
-classdef MeasObj < OperLib
+classdef MeasObj < Node
     properties (SetAccess = public)
         
         FName char;  %filename within the project folder - important for deleting
@@ -6,7 +6,6 @@ classdef MeasObj < OperLib
         ID double; %number
         Date datetime; %oficial name for measurement, copy erliest date from files
         LastChange datetime; %when change happen
-        Count;
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         BruteFolder char; %folder with measured data, from which DataC construct itrs container
         
@@ -48,27 +47,29 @@ classdef MeasObj < OperLib
     methods (Access = public)
         %constructor of object
         function obj=MeasObj(ID,ProjectFolder,Parent)
-            obj@OperLib;
-            
-            
+            obj@Node;
             
             obj.ID=ID;
-            obj.Parent=Parent;
-            obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             
-            
-            obj.ProjectFolder=ProjectFolder;
             obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
+            obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
             
-            txt=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
-            
-            obj.Name=txt;
+            obj.Parent=Parent;
             obj.SandBox=obj.Parent.Parent.Parent.SandBoxFolder;
+            obj.ProjectFolder=ProjectFolder;
+            obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;
-            
-%             GetBruteFolder(obj);
         end
         
+        function FillNode(obj)
+            obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
+                'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'],...
+                'NodeData',{obj,'meas'});
+        end
+        
+        function FillUITab(obj)
+            
+        end
         %Výbìr adresáøe s mìøeními
         function GetBruteFolder(obj)
             obj.BruteFolder=uigetdir(cd,'Pick folder with formated data as set in experiment');            
@@ -343,7 +344,7 @@ classdef MeasObj < OperLib
                 obj.Version=obj.Version-1;
             end
         end
-
+        
         %Will create overview of descriptive variables from maintable
         function [Cat]=StackCat(obj)
             Cat=table;
@@ -376,13 +377,12 @@ classdef MeasObj < OperLib
     
     %Gui methods
     methods 
-        function Test(obj,ax,Sel)
-            idx=obj.Selector{:,Sel};
-            CData=obj.Data(idx,:);
-            for i=1:size(CData,1)
-                PlotType(CData.Press(i),ax);
-                PlotType(CData.Zedo(i),ax);
-            end
+        function InitializeOption(obj)
+            SetParent(obj,'type');
+            UITab=OperLib.FindProp(obj,'UITab');
+            DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
+                           'and choose the type of each column, column position in source file.\n',...
+                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
     end
 

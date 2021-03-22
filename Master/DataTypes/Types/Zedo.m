@@ -15,6 +15,10 @@ classdef Zedo < DataFrame
     methods %main methods with abstract interpretations
         function obj = Zedo(~)
             obj@DataFrame;
+            
+            obj.ContainerType=OperLib.GetContainerTypes(2);
+            obj.KeyWord="";
+            obj.Sufix="";
         end
         
         function Tab=TabRows(obj,InT)

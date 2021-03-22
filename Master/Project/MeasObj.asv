@@ -1,40 +1,73 @@
-classdef DataLoader < handle
-    %Each type has its own structure, which is tends to be most effective,
-    %data Loader will use each type as a blueprint of "how to load and
-    %preprocess data", but the output of type is matlab primitive (array,
-    %structure, table or so), each block of data will then be stored in
-    %structure inside a data loader, for each operation, where first column
-    %is for PILOT KEY variable, and if loader finds any data, which is in
-    %right column for each type, and ricgh row for each KEY, then the
-    %dataloader structure will be most effective; if I then load any data,
-    %i will just use the datatypetable, and to each specified type will
-    %load data stored in dataloader structure; by this way i can easily
-    %adjust the code, update, and the data is still intacted
-    
-    properties
+classdef MeasObj < OperLib
+    properties (SetAccess = public)
+        
+        FName char;  %filename within the project folder - important for deleting
+        Name char;
+        ID double; %number
+        Date datetime; %oficial name for measurement, copy erliest date from files
+        LastChange datetime; %when change happen
+        Count;
+        Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
+        BruteFolder char; %folder with measured data, from which DataC construct itrs container
+        
+        Row;
+        ProjectFolder char;
+        ExtractionState; %status of extraction of data from brute folder
+        c char;
+        %if 'extracted', then we already have DataC created in project
+        %folder, and we dont have to check if BruteFolder is avaliable, or
+        %not
+        SandBox char; 
+        %this path may change between instances per users, its important 
+        %for creation of new object
+        Selector;
+        ClonedTypes=0;
+        TotalTable;
+        Parent;
+        Version;
+        TreeNode;
+        
         TypeTable table;
         SpecimenCount;
-    end
-    
-    properties 
         Key logical;
         MainTable table;
         BruteFolderSet=false;
     end
     
-    methods
-        %consruktor
-        function obj = DataLoader(ID,ProjectFolder,SandBox,Row,Parent)
-%             obj@OperLib;
-            GetBruteFolder(obj);
-            obj@MeasObj(ID,ProjectFolder,SandBox,Row,Parent);
+    
+    %event listeners
+    properties
+        eReload
+    end
+
+    events
+        TotalTableChange;
+    end
+    
+    %Main methods, consturction, destruction etc.
+    methods (Access = public)
+        %constructor of object
+        function obj=MeasObj(ID,ProjectFolder,Parent)
+            obj@OperLib;
             
-            
+            defaultname=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
+            obj.Name=defaultname;
+            obj.ID=ID;
+            obj.Parent=Parent;
+            obj.SandBox=obj.Parent.Parent.Parent.SandBoxFolder;
+            obj.ProjectFolder=ProjectFolder;
+            obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
+
+            obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
+            obj.Version=0;
         end
         
+        function FillNode(obj)
+            obj.node=uitreenode(obj.TreeNode,'Text',meas.Name);
+        end
         %Výbìr adresáøe s mìøeními
         function GetBruteFolder(obj)
-            obj.BruteFolder=uigetdir(cd,'Vyber slozku s mìøenými vzorky');
+            obj.BruteFolder=uigetdir(cd,'Pick folder with formated data as set in experiment');            
             if obj.BruteFolder==0
                 obj.BruteFolder="none";
                 obj.BruteFolderSet=0;
@@ -44,11 +77,127 @@ classdef DataLoader < handle
             end
         end
         
+        function MakeTotalTable(obj,Sel)
+            T=table;
+            T.Name=obj.Data.Name;
+            
+            if obj.Key==true
+                CatTab=StackCat(obj);
+            end
+            
+            if isempty(obj.Selector)
+                ResetSelectors(obj)
+            end
+            T=[T, obj.Selector(:,Sel), CatTab];
+            obj.TotalTable=T;
+        end
+        
+        
+        %prepare tab for inspection of signle specimen
+        function [Tab]=Inspect(obj,Row)
+            Specimen=obj.Data.Measuremnts(Row);
+            RowNames=fieldnames(Specimen);
+            for i=1:numel(RowNames)
+                MyValues{i} = getfield(Specimen,RowNames{i});
+            end           
+            %Tab=table(MyValues','RowNames',RowNames','VariableNames',{'Value'});
+            Tab=table(RowNames,MyValues','VariableNames',{'Parameters','Value'});
+        end
+        
+        %get data for data core
+        function [Data]=PullData(obj,Set)     
+            Idx=table2array(obj.Selector(:,Set));
+            Data=obj.Data(Idx,:);
+        end
+    end
+    
+    %Events, listeners, callbacks
+    methods
+%         function SetListeners(obj)
+%             obj.eReload = addlistener(obj.Parent,'ReloadData',@obj.ReLoadData);
+%         end
+    end
+    
+    %Selectors
+    methods
+        %Initiate selector
+        function InitSel(obj)
+            Default_set(1:obj.Count,1)=false;
+            obj.Selector=table(Default_set);            
+        end
+        
+        %Change Selector
+        function SetSelector(obj,Row,Val,Set)
+            obj.Selector{Row,Set}=Val;
+            %saveobj(obj);
+        end
+        
+        %add Selector rows
+        function AddSelRows(obj,nSet,Name)
+            Selector(1:1:obj.Count,1)=false;
+            %obj.Selector=[obj.Selector, table(Selector)];
+            obj.Selector = addvars(obj.Selector,Selector,'NewVariableNames',char(Name));
+        end
+        
+        function CheckSel(obj,MSelector)
+            ResetSelectors(obj);
+        end
+        
+        function ResetSelectors(obj)
+            obj.Selector=[];
+            value=false([obj.Count,1]);
+            if size(obj.Selector,1)>0
+                InitSel(obj);
+            end
+            
+            for i=1:size(obj.Parent.SelectorSets,2)
+                obj.Selector=[obj.Selector, table(value,'VariableNames',{obj.Parent.SelectorSets(i).Description})];
+            end
+        end
+        
+        %delete sel column
+        function DeleteSelCol(obj,nSet)
+            obj.Selector(:,nSet)=[];
+        end
+    end
+    
+    %Gui methods
+    methods
+        %fill the table 
+        function FillUITable(obj,UITable,Sel)
+            %if isempty(obj.TotalTable)
+            MakeTotalTable(obj,Sel);
+            %end
+            UITable.Data=obj.TotalTable;
+            UITable.ColumnEditable(2) = true;
+            UITable.ColumnEditable(~2) = false;
+            for i=1:size(obj.TotalTable,2)
+                UITable.ColumnName{i}=obj.TotalTable.Properties.VariableNames{i};
+            end
+        end
+    end
+    
+    %Save, load, delete, copy methods
+    methods
+        function delete(obj)
+            
+        end
+        
+        function save(obj)
+
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
+        end
+    end
+    
+    methods %Reading methods
         function ReLoadData(obj)
             obj.Data=[];
             
-            SavedSelectors=obj.Selector;
-            SaveCount=obj.Count;
+%             SavedSelectors=obj.Selector;
+%             SaveCount=obj.Count;
             
             if ~exist(obj.BruteFolder, 'dir')
                 GetBruteFolder(obj)  
@@ -62,15 +211,18 @@ classdef DataLoader < handle
                 end
             end
             
-            if obj.Count~=SaveCount || isempty(SavedSelectors)
-                ResetSelectors(obj);
-            else
-                obj.Selector=SavedSelectors;
-            end
+%             if obj.Count~=SaveCount || isempty(SavedSelectors)
+%                 ResetSelectors(obj);
+%             else
+%                 obj.Selector=SavedSelectors;
+%             end
         end
         
         %funkce pro ètení
         function ReadData(obj)
+            if obj.BruteFolderSet==0
+                GetBruteFolder(obj);
+            end
             
             try
                 obj.Version=obj.Version+1;
@@ -229,12 +381,5 @@ classdef DataLoader < handle
             end
         end
     end
-    
-    %Delete,copy, load methods
-    methods
-        function delete(obj)
-            
-        end
-    end
-end
 
+end

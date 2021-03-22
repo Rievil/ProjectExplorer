@@ -6,23 +6,24 @@ classdef ProjectOverView < handle
         
 %         TReeNodes;
         UITree; %handle to ui tree in project explorer
+        UITab;
         
-        CurrentMasterFolder;
+        MasterFolder;
         FigProjectDesign;
         Parent;
     end
     
     methods (Access = public)
         %constructor of overview
-        function obj=ProjectOverView(SandBoxFolder,UITree,parent)
+        function obj=ProjectOverView(SandBoxFolder,UITree,ProjectTab,parent)
             obj.Parent=parent;
             obj.UITree=UITree;
             obj.SandBoxFolder=SandBoxFolder;
-            
+            obj.UITab=ProjectTab;
             
             TMPO=obj.Parent.Parent;
             
-            obj.CurrentMasterFolder=ParentCare(TMPO,'masterfolder');
+            obj.MasterFolder=ParentCare(TMPO,'masterfolder');
             
             if isfile([obj.SandBoxFolder 'Projects.mat'])
                 load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');

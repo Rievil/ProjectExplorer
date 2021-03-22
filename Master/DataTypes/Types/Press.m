@@ -9,6 +9,9 @@ classdef Press < DataFrame
         function obj = Press(~)
             obj@DataFrame;
             
+            obj.ContainerType=OperLib.GetContainerTypes(1);
+            obj.KeyWord="";
+            obj.Sufix=OperLib.GetSuffixTypes(1);
         end
         
 
@@ -163,7 +166,7 @@ classdef Press < DataFrame
 
             %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
             %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            Target=DrawUITable(obj,OperLib.PRBlueprint,@SetVal);
+            Target=DrawUITable(obj,OperLib.PRBlueprint,@SetVal,200);
             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
             DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...

@@ -14,7 +14,7 @@ classdef MainTable < DataFrame
             obj@DataFrame;
             
             obj.ContainerType=OperLib.GetContainerTypes(1);
-            obj.KeyWord='';
+            obj.KeyWord="";
             obj.Sufix=OperLib.GetSuffixTypes(1);
         end
         
@@ -144,7 +144,7 @@ classdef MainTable < DataFrame
             Clear(obj);
             
             
-            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);
+            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal,200);
             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
             DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...

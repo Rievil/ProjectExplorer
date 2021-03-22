@@ -15,16 +15,17 @@ classdef CoreObj < handle
     %----------------------------------------------------------------------
     methods
         function obj = CoreObj(parent)
-            obj.Parent=parent;            
+            obj.Parent=parent;   
+%             CreateOverview(obj);
         end
     end
     %----------------------------------------------------------------------
     methods
         function CreateOverview(obj)
             obj.ProjectOverview=ProjectOverView(ParentCare(obj.Parent,'sandbox'),...
-                obj.App.PTree,obj);
+                obj.App.PTree,obj.App.ProjectTab,obj);
             
-            FillTree(obj.ProjectOverview);
+%             FillTree(obj.ProjectOverview);
         end
         
         function Save(obj)

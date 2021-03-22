@@ -37,8 +37,10 @@ classdef DbConn < handle
             obj.UserListener = addlistener(obj.User,'ChangedUser',@obj.ChangedUser);
             
             vendor = "Microsoft SQL Server";
-
+            
+            %check if database toolbox
             obj.Opts = configureJDBCDataSource('Vendor',vendor);
+            
             obj.ConnectionName='Project explorer Client';
             obj.IPAdress='147.229.25.228';
             obj.DatabaseName='Projects';
