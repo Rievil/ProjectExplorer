@@ -23,7 +23,7 @@ classdef CoreObj < handle
     methods
         function CreateOverview(obj)
             obj.ProjectOverview=ProjectOverView(ParentCare(obj.Parent,'sandbox'),...
-                obj.App.PTree,obj.App.ProjectTab,obj);
+                obj.App.PTree,obj.App.TabGroup,obj);
             
 %             FillTree(obj.ProjectOverview);
         end

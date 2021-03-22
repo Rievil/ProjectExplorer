@@ -307,7 +307,7 @@ classdef GUILib < handle
         
         %uieditfield callback
         function UIEditFieldChange(obj,event)
-            
+            event.Source.UserData{1}(obj,event.Value);
         end
         
         %setting for dimensions--------------------------------------------

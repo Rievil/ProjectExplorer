@@ -62,12 +62,16 @@ classdef MeasObj < Node
         end
         
         function FillNode(obj)
+            iconName=[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'];
             obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
-                'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'],...
+                'Icon',iconName,...
                 'NodeData',{obj,'meas'});
         end
         
-        function FillUITab(obj)
+        function FillUITab(obj,Tab)
+            p=OperLib.FindProp(obj,'UITab');
+            SetGuiParent(obj,p);
+            InitializeOption(obj);
             
         end
         %Výbìr adresáøe s mìøeními
@@ -377,12 +381,21 @@ classdef MeasObj < Node
     
     %Gui methods
     methods 
+        function ChangeName(obj,name)
+            obj.Name=name;
+            obj.TreeNode.Text=name;
+        end
+        
         function InitializeOption(obj)
-            SetParent(obj,'type');
-            UITab=OperLib.FindProp(obj,'UITab');
-            DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.\n',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+            SetParent(obj,'project');
+            Clear(obj);
+            DrawLabel(obj,['Great new description of Measurement:'],[300 60]);
+            
+            han=DrawUIEditField(obj,'My text',@ChangeName);
+            han.Value=obj.Name;
+            
+            DrawLabel(obj,['Description of measurement'],[300 60]);
+%             han=DrawUIEditField(obj,'My text',@ChangeName);
         end
     end
 

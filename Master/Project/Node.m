@@ -3,10 +3,10 @@ classdef Node < OperLib & GUILib
     %   Detailed explanation goes here
     
     properties
-        MasterFolder;
     end
+    
     methods (Abstract)
-        FillUITab(obj);
+        FillUITab(obj,Tab);
 %         PlotType(obj);
     end
     methods
