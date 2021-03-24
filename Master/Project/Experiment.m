@@ -34,7 +34,7 @@ classdef Experiment < Node
     
     methods
         function obj = Experiment(parent,ID)
-            obj@Node;
+%             obj@Node;
             obj.Parent=parent;
             obj.ID=ID;
             obj.Status=0;

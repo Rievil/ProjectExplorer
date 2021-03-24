@@ -47,7 +47,7 @@ classdef MeasObj < Node
     methods (Access = public)
         %constructor of object
         function obj=MeasObj(ID,ProjectFolder,Parent)
-            obj@Node;
+%             obj@Node;
             
             obj.ID=ID;
             

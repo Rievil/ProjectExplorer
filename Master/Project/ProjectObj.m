@@ -1,4 +1,4 @@
-classdef ProjectObj < handle
+classdef ProjectObj < Node
     properties (SetAccess=public)
         ID;
         Name char; %name of project
@@ -28,7 +28,7 @@ classdef ProjectObj < handle
     methods (Access=public) 
         %creation of project objects
         function obj=ProjectObj(Name,parent)
-            obj@Node;
+%             obj@Node;
             
             obj.Parent=parent;
             obj.Name=Name;

@@ -153,7 +153,7 @@ classdef ProjectOverView < Node
     end %end of public methods
     
     %Abstract methods
-    methods 
+    methods         
         function FillUITab(obj,Tab)
 
         end
@@ -172,7 +172,7 @@ classdef ProjectOverView < Node
             
         end
 
-        function AddNode(obj)
+        function node=AddNode(obj)
 %             CreateProject(obj,Name);
         end      
         

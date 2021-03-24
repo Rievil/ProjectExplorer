@@ -15,9 +15,9 @@ classdef GUILib < handle
     %interface
     methods (Abstract)
         InitializeOption(obj);
-%         PlotType(obj);
+
     end
-    
+    %         PlotType(obj);
     methods (Access = public)
         %Constructor
         function obj=GUILib(~)
