@@ -8,10 +8,8 @@ classdef DbConn < handle
         IPAdress;
         ClientName;
         PortNumber;
-        ConnectionName;
         DriverPath;
         ClientPCName;
-        ClientPassword;
         KeyFilename;
         DatabaseName;
         AuthType;        
@@ -20,10 +18,12 @@ classdef DbConn < handle
         Status=0;
         UserListener;
         User;
+        Parent;
     end
     
     properties (Access = private)
-        Parent;
+        ConnectionName;
+        ClientPassword;
     end
     
 

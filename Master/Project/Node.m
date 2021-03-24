@@ -7,8 +7,11 @@ classdef Node < OperLib & GUILib
     
     methods (Abstract)
         FillUITab(obj,Tab);
-%         PlotType(obj);
+        FillNode(obj);
+        stash=Pack(obj);
+        node=AddNode(obj);
     end
+    
     methods
         function obj = Node(~)
             obj@OperLib;

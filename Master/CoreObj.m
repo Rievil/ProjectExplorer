@@ -3,8 +3,9 @@ classdef CoreObj < handle
     %   Detailed explanation goes here
     
     properties
-        ProjectOverview;
-        App;
+        ProjectOverview; %data structure and containers save load
+        App; 
+        
         Parent;
     end
     

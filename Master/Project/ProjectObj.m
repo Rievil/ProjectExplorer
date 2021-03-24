@@ -8,26 +8,16 @@ classdef ProjectObj < handle
         
         CreationDate datetime;
         LastChange datetime;
-%         Meas struct; 
-        
+
         ExpMainNode;
         Experiments;        
         ExpCount=0;
-%         TypeFig;
-        
-%         MeasCount=0;
+
         TreeNode;    
         
         SelectorSets struct;
-        
-        
+    
         CurrentSelector;
-%         MasterDataTypesTable; 
-        
-%         DataTypesTable;
-        
-%         TotalTable;
-        
         EvListener;
         
         Parent;        
@@ -37,9 +27,12 @@ classdef ProjectObj < handle
     %Main methods, consturction, destruction etc.
     methods (Access=public) 
         %creation of project objects
-        function obj=ProjectObj(Name,SandBox,parent)
+        function obj=ProjectObj(Name,parent)
+            obj@Node;
+            
             obj.Parent=parent;
             obj.Name=Name;
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
             
 %             obj.Meas=struct('Data',[],'ID',[],'Row',[]);
             
@@ -53,23 +46,25 @@ classdef ProjectObj < handle
             else
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
+                error('Folder already exists! use different name!');
             end
 %             AddMainExpNode(obj);
 %             InitSelectorSets(obj,App);
         end
         
         function NewExperiment(obj) %volání aplikací
-            exphan=AddExperiment(obj);
-            exphan.TypeFig=AppTypeSelector(exphan);
+            obj2=AddExperiment(obj);
+            obj2.TypeFig=AppTypeSelector(obj2);
         end
-        
 
-        
-        function exphan=AddExperiment(obj)
+        function obj2=AddExperiment(obj)
             obj.ExpCount=obj.ExpCount+1;
-            exphan=Experiment(obj,obj.ExpCount);   
-            FillNode(exphan);
-            obj.Experiments=[obj.Experiments, exphan];
+            
+            ExpID=OperLib.FindProp(obj,'ExperimentID');
+            
+            obj2=Experiment(obj,ExpID);   
+            FillNode(obj2);
+            obj.Experiments=[obj.Experiments, obj2];
         end
         
         function DeleteExperiment(obj,name)
@@ -163,6 +158,48 @@ classdef ProjectObj < handle
  
     end
     
+    %Abstract methods
+    methods 
+        %showing editable window in project explorer
+        function FillUITab(obj,Tab)
+
+        end
+        
+        %filling the node
+        function FillNode(obj)
+            treenode=uitreenode(obj.Parent.UITree,...
+            'Text',obj.Name,...
+            'NodeData',{obj,'project'}); 
+
+            obj.TreeNode=treenode;
+            AddMainExpNode(obj);
+        end
+        
+        %saving
+        function stash=Pack(obj)
+            stash=struct;
+            stash.Name=obj.Name;
+            stash.ID=obj.ID;
+            stash.ProjectFolder=obj.ProjectFolder;
+            stash.Status=obj.Status;
+            stash.CreationDate=obj.CreationDate;
+            stash.LastChange=obj.LastChange;
+            
+            stash.ExpMainNode=[];
+            n=0;
+            for E=obj.Experiments
+                n=n+1;
+                stash.Experiments(n)=Pack(E);            
+            end
+        end
+        
+        function AddNode(obj)
+            AddExperiment(obj);
+        end
+        
+        function InitializeOption(obj)
+        end
+    end
     %Data selectors
     methods 
         %work with selectors
@@ -235,20 +272,7 @@ classdef ProjectObj < handle
     methods
                 
         function FillPTree(obj,TreeNode)
-            if numel(obj.TreeNode)>0
-                Nodes=TreeNode.Children;
-                Nodes.delete;
-            end
-            
-            if obj.MeasCount>0
-                for i=1:size(obj.Meas,2)
-    %                 tmp=char(datestr(obj.Meas{i}.Date));
-    %                 tmp2=obj.Meas{i}.Name;
-                        obj.TreeNode{i}=uitreenode(obj.ExpMainNode,...
-                                'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
-                                'NodeData',{obj.Meas(i).Data,'meas'}); 
-                end
-            end
+
         end
     end
     
@@ -419,21 +443,5 @@ classdef ProjectObj < handle
             delete(obj.TreeNode);
         end
         
-        function stash=Pack(obj)
-            stash=struct;
-            stash.Name=obj.Name;
-            stash.ID=obj.ID;
-            stash.ProjectFolder=obj.ProjectFolder;
-            stash.Status=obj.Status;
-            stash.CreationDate=obj.CreationDate;
-            stash.LastChange=obj.LastChange;
-            
-            stash.ExpMainNode=[];
-            n=0;
-            for E=obj.Experiments
-                n=n+1;
-                stash.Experiments(n)=Pack(E);            
-            end
-        end
     end
 end

@@ -44,15 +44,11 @@ classdef ExplorerObj < handle
         
         function OpenStructure(obj)
             if obj.Regime==1
-%                 if isempty(obj.App)
-                    obj.App=ProjectExplorer(obj);
-                    obj.Core.App=obj.App;
-%                 end
+                obj.App=ProjectExplorer(obj);
+                obj.Core.App=obj.App;
             end
                 
             if obj.DbConn.Status==true
-%                 SetUserDetails(obj.Users);
-                
                 CreateOverview(obj.Core);
             end
         end

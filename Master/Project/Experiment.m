@@ -1,4 +1,4 @@
-classdef Experiment < handle
+classdef Experiment < Node
     %EXPERIMENT Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -34,31 +34,16 @@ classdef Experiment < handle
     
     methods
         function obj = Experiment(parent,ID)
+            obj@Node;
             obj.Parent=parent;
             obj.ID=ID;
             obj.Status=0;
             
         end
         
-        function FillNode(obj)
-%             if isvalid(obj.TreeNode)
-%                 obj.TreeNode.Text=obj.Name;
-%             else
-                obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
-                    'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\nExp.gif']);
-%             end
-        end
+
         
-        function AddMeas(obj)
-            MeasID=numel(obj.Meas)+1; 
-            
-            MeasFolder=obj.ExpFolder;
-            
-            meas=MeasObj(MeasID,MeasFolder,obj);
-            FillNode(meas);
-            
-            obj.Meas=[obj.Meas, meas];            
-        end
+
         
         function Reload(obj)
                obj.notify('eReload');
@@ -82,16 +67,7 @@ classdef Experiment < handle
             CreateExpFolder(obj);
         end
         
-        function stash=Pack(obj)
-            stash=struct;
-            stash.Name=obj.Name;
-            stash.TypeSettings=obj.TypeSettings;
-            stash.Meas=[];
-            n=0;
-            for M=obj.Meas
-                n=n+1;
-                stash.Meas(n)=Pack(M);            
-            end
+        function InitializeOption(obj)
         end
         
         function Remove(obj)
@@ -106,5 +82,43 @@ classdef Experiment < handle
             delete(obj.TreeNode);
         end
     end
+    
+        
+    %Abstract methods
+    methods 
+        function FillUITab(obj,Tab)
+
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
+            stash.Name=obj.Name;
+            stash.TypeSettings=obj.TypeSettings;
+            stash.Meas=[];
+            n=0;
+            for M=obj.Meas
+                n=n+1;
+                stash.Meas(n)=Pack(M);            
+            end
+        end
+        
+        function FillNode(obj)
+            obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
+                'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\nExp.gif']);
+        end
+        
+        function node=AddNode(obj)
+            MeasID=OperLib.FindProp(obj,'MeasID');
+%             MeasID=numel(obj.Meas)+1; 
+            
+            MeasFolder=obj.ExpFolder;
+            
+            meas=MeasObj(MeasID,MeasFolder,obj);
+            FillNode(meas);
+            
+            obj.Meas=[obj.Meas, meas];            
+        end
+    end
+    
 end
 

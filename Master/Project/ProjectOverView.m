@@ -1,10 +1,9 @@
-classdef ProjectOverView < handle
+classdef ProjectOverView < Node
     properties (SetAccess = public)
-        Projects ProjectObj; %list of projects present in sandbox
+        Projects ProjectObj; %list of projects present in sandbox        
         SandBoxFolder char;
         ProjectCount=0;
-        
-%         TReeNodes;
+
         UITree; %handle to ui tree in project explorer
         UITab;
         
@@ -13,9 +12,40 @@ classdef ProjectOverView < handle
         Parent;
     end
     
+    properties
+        ProjectID=0;
+        ExperimentID=0;
+        MeasID=0;
+        SpecimenID=0;
+    end
+    
+    methods %dependant
+        function ID=get.ProjectID(obj)
+            ID=obj.ProjectID+1;
+            obj.ProjectID=ID;
+        end
+        
+        function ID=get.ExperimentID(obj)
+            ID=obj.ExperimentID+1;
+            obj.ExperimentID=ID;
+        end
+        
+        function ID=get.MeasID(obj)
+            ID=obj.MeasID+1;
+            obj.MeasID=ID;
+        end
+        
+        function ID=get.SpecimenID(obj)
+            ID=obj.SpecimenID+1;
+            obj.SpecimenID=ID;
+        end
+    end
+    
     methods (Access = public)
         %constructor of overview
         function obj=ProjectOverView(SandBoxFolder,UITree,ProjectTab,parent)
+            obj@Node;
+            
             obj.Parent=parent;
             obj.UITree=UITree;
             obj.SandBoxFolder=SandBoxFolder;
@@ -33,29 +63,28 @@ classdef ProjectOverView < handle
             end
         end
         
+        
         function DesignNewProject(obj)
             obj.FigProjectDesign=EditProject(obj);
         end
 
-        function [status,newID]=CreateProject(obj,Name)
-            newID=numel(obj.Projects) + 1;
+        function obj2=CreateProject(obj,Name)
+%             obj.ProjectID=obj.ProjectID+1;
+            newID=obj.ProjectID;
+            
             if newID>0
                 %nový objekt byl v poøádku vytvoøen
-                obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj);                
-                obj.Projects(newID).ID=newID;
-                status=obj.Projects(newID).Status.Value;
-                treenode=uitreenode(obj.UITree,...
-                    'Text',obj.Projects(newID).Name,...
-                    'NodeData',{obj.Projects(newID),'project'}); 
-
-                obj.Projects(newID).TreeNode=treenode;
-                AddMainExpNode(obj.Projects(newID));
+                obj2=ProjectObj(Name,obj);
+%                 obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj);                
+                obj2.ID=newID;
+                status=obj2.Status.Value;
+                
                 switch status
                     case 1
-    
+                        FillNode(obj2);
+                        obj.Projects=[obj.Projects, obj2];
                     case 4
-                        DeleteProject(obj,newID);
-                        
+                        delete(obj2);
                 end                
             end
         end
@@ -123,33 +152,61 @@ classdef ProjectOverView < handle
 %         end
     end %end of public methods
     
+    %Abstract methods
+    methods 
+        function FillUITab(obj,Tab)
+
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
+            n=0;
+            for P=obj.Projects
+                n=n+1;
+                stash(n).ID=n;
+                stash(n).Project=Pack(obj.Projects(n));
+            end
+        end
+
+        function FillNode(obj)
+            
+        end
+
+        function AddNode(obj)
+%             CreateProject(obj,Name);
+        end      
+        
+        function InitializeOption(obj)
+        end
+    end
+    
     %private methods for controling project overview
     methods (Access = public)
         %save object
-        function save(obj)
-            if ~isempty(obj.Projects)
-                Projects=obj.Projects;
-                Meas=Projects.Meas;
-                MTreeNodes=Projects.MTreeNodes;
-                f1=waitbar(0,'Saving Projects ...');
-                for i=1:numel(obj.Projects)
-                    waitbar(i/numel(obj.Projects),f1,'Saving Projects ...');
-                    if obj.Projects(i).MeasCount>0
-                        SaveMeas(obj.Projects(i),obj.SandBoxFolder)
-%                         for j=1:numel(obj.Projects(i).Meas)
-%                             saveobj(obj.Projects(i).Meas(j).Data);
-%                         end
-                         Projects(i).Meas=[];
-                         Projects(i).MTreeNodes=[];
-                    end
-                end
-                close(f1);
-                save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
-                obj.Projects(i).Meas=Meas;
-                obj.Projects(i).MTreeNodes=MTreeNodes;
-                %obj.Projects=ProjectsAll;
-            end
-        end
+%         function save(obj)
+%             if ~isempty(obj.Projects)
+%                 Projects=obj.Projects;
+%                 Meas=Projects.Meas;
+%                 MTreeNodes=Projects.MTreeNodes;
+%                 f1=waitbar(0,'Saving Projects ...');
+%                 for i=1:numel(obj.Projects)
+%                     waitbar(i/numel(obj.Projects),f1,'Saving Projects ...');
+%                     if obj.Projects(i).MeasCount>0
+%                         SaveMeas(obj.Projects(i),obj.SandBoxFolder)
+% %                         for j=1:numel(obj.Projects(i).Meas)
+% %                             saveobj(obj.Projects(i).Meas(j).Data);
+% %                         end
+%                          Projects(i).Meas=[];
+%                          Projects(i).MTreeNodes=[];
+%                     end
+%                 end
+%                 close(f1);
+%                 save ([obj.SandBoxFolder 'Projects.mat'],'Projects');
+%                 obj.Projects(i).Meas=Meas;
+%                 obj.Projects(i).MTreeNodes=MTreeNodes;
+%                 %obj.Projects=ProjectsAll;
+%             end
+%         end
         
 %         function DeleteProject(obj,ID)
 %             %delete folder
@@ -170,15 +227,9 @@ classdef ProjectOverView < handle
 %             end
 %             FillTree(obj);
 %         end
-        
-        function stash=Pack(obj)
-            stash=struct;
-            n=0;
-            for P=obj.Projects
-                n=n+1;
-                stash(n).ID=n;
-                stash(n).Project=Pack(obj.Projects(n));
-            end
+        function save(obj)
+            val=obj;
+            save('test.mat','val');
         end
     end
 end

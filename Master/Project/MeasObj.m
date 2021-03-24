@@ -61,19 +61,9 @@ classdef MeasObj < Node
             obj.Version=0;
         end
         
-        function FillNode(obj)
-            iconName=[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'];
-            obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
-                'Icon',iconName,...
-                'NodeData',{obj,'meas'});
-        end
+
         
-        function FillUITab(obj,Tab)
-            p=OperLib.FindProp(obj,'UITab');
-            SetGuiParent(obj,p);
-            InitializeOption(obj);
-            
-        end
+
         %Výbìr adresáøe s mìøeními
         function GetBruteFolder(obj)
             obj.BruteFolder=uigetdir(cd,'Pick folder with formated data as set in experiment');            
@@ -118,6 +108,34 @@ classdef MeasObj < Node
             Idx=table2array(obj.Selector(:,Set));
             Data=obj.Data(Idx,:);
         end
+    end
+    
+    %Abstract methods
+    methods 
+        function FillUITab(obj,Tab)
+            p=OperLib.FindProp(obj,'UITab');
+            SetGuiParent(obj,p);
+            InitializeOption(obj);
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
+        end
+        
+        function FillNode(obj)
+            iconName=[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'];
+            obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
+                'Icon',iconName,...
+                'NodeData',{obj,'meas'});
+        end
+        
+        function node=AddNode(obj)
+        end
+        
+%         FillUITab(obj,Tab);
+%         FillNode(obj);
+%         stash=Pack(obj);
+%         node=AddNode(obj);
     end
     
     %Events, listeners, callbacks
@@ -171,33 +189,33 @@ classdef MeasObj < Node
     end
     
     %Gui methods
-    methods
-        %fill the table 
-        function FillUITable(obj,UITable,Sel)
-            %if isempty(obj.TotalTable)
-            MakeTotalTable(obj,Sel);
-            %end
-            UITable.Data=obj.TotalTable;
-            UITable.ColumnEditable(2) = true;
-            UITable.ColumnEditable(~2) = false;
-            for i=1:size(obj.TotalTable,2)
-                UITable.ColumnName{i}=obj.TotalTable.Properties.VariableNames{i};
-            end
-        end
-    end
+%     methods
+%         %fill the table 
+%         function FillUITable(obj,UITable,Sel)
+%             %if isempty(obj.TotalTable)
+%             MakeTotalTable(obj,Sel);
+%             %end
+%             UITable.Data=obj.TotalTable;
+%             UITable.ColumnEditable(2) = true;
+%             UITable.ColumnEditable(~2) = false;
+%             for i=1:size(obj.TotalTable,2)
+%                 UITable.ColumnName{i}=obj.TotalTable.Properties.VariableNames{i};
+%             end
+%         end
+%     end
     
     %Save, load, delete, copy methods
     methods
+        function saveobj(obj)
+            disp('Tento objekt se ukládá');
+        end
+        
         function delete(obj)
             
         end
         
         function save(obj)
 
-        end
-        
-        function stash=Pack(obj)
-            stash=struct;
         end
     end
     
