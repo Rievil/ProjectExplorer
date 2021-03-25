@@ -1,13 +1,13 @@
 classdef ProjectOverView < Node
     properties (SetAccess = public)
         Projects ProjectObj; %list of projects present in sandbox        
-        SandBoxFolder char;
+%         SandBoxFolder char;
         ProjectCount=0;
 
         UITree; %handle to ui tree in project explorer
         UITab;
         
-        MasterFolder;
+%         MasterFolder;
         FigProjectDesign;
         Parent;
     end
@@ -43,20 +43,21 @@ classdef ProjectOverView < Node
     
     methods (Access = public)
         %constructor of overview
-        function obj=ProjectOverView(SandBoxFolder,UITree,ProjectTab,parent)
+        function obj=ProjectOverView(parent)
             obj@Node;
             
-            obj.Parent=parent;
-            obj.UITree=UITree;
-            obj.SandBoxFolder=SandBoxFolder;
-            obj.UITab=ProjectTab;
+%             UITree=
             
-            TMPO=obj.Parent.Parent;
             
-            obj.MasterFolder=ParentCare(TMPO,'masterfolder');
+            obj.UITree=OperLib.FindProp(obj,'AppTree');
             
-            if isfile([obj.SandBoxFolder 'Projects.mat'])
-                load([obj.SandBoxFolder 'Projects.mat'],'-mat','Projects');
+            SandBoxFolder=OperLib.FindProp(obj,'SandBoxFolder');
+            
+            obj.UITab=OperLib.FindProp(obj,'AppTabGroup');
+%             obj.MasterFolder=OperLib.FindProp(obj,'MasterFolder');
+            
+            if isfile([SandBoxFolder 'Projects.mat'])
+                load([SandBoxFolder 'Projects.mat'],'-mat','Projects');
                 obj.Projects=Projects;
             else
 
@@ -160,12 +161,32 @@ classdef ProjectOverView < Node
         
         function stash=Pack(obj)
             stash=struct;
-            n=0;
-            for P=obj.Projects
-                n=n+1;
-                stash(n).ID=n;
-                stash(n).Project=Pack(obj.Projects(n));
+            list=string(properties(obj))';
+            for prop=list
+                switch prop
+                    case "ProjectCount"
+                        stash.(prop)=obj.(prop);
+                    case "ProjectID"
+                        stash.(prop)=obj.(prop);
+                    case "ExperimentID"
+                        stash.(prop)=obj.(prop);
+                    case "MeasID"
+                        stash.(prop)=obj.(prop);
+                    case "SpecimenID"
+                        stash.(prop)=obj.(prop);
+                    case "Projects"
+                        
+                    otherwise
+%                         stash.(prop)=obj.(prop);
+                end
             end
+%             
+%             n=0;
+%             for P=obj.Projects
+%                 n=n+1;
+%                 stash(n).ID=n;
+%                 stash(n).Project=Pack(obj.Projects(n));
+%             end
         end
 
         function FillNode(obj)
@@ -177,6 +198,7 @@ classdef ProjectOverView < Node
         end      
         
         function InitializeOption(obj)
+            
         end
     end
     

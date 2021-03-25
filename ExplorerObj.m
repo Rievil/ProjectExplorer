@@ -11,11 +11,13 @@ classdef ExplorerObj < handle
         DbConn;
         Core;
         Users;
+        AppRunning=0;
     end
     
     properties
         RootFolder;
         MasterFolder;
+        SandBoxFolder;
         CurrentUser;
         ClientPCName;
         KeyFileName;
@@ -33,29 +35,34 @@ classdef ExplorerObj < handle
         function obj = ExplorerObj(type)
             obj.Regime=type;
             
-            GetCurrPc(obj);
             
-            obj.Users=Users(obj);            
+            GetCurrPc(obj);
+           
+            obj.Users=Users(obj); 
             obj.DbConn=DbConn(obj,obj.Users);
             obj.Core=CoreObj(obj);
-
+            
+            
+            obj.SandBoxFolder=obj.Users.UserOptions.SandBoxFolder;
             OpenStructure(obj);
         end
         
         function OpenStructure(obj)
-            if obj.Regime==1
-                obj.App=ProjectExplorer(obj);
-                obj.Core.App=obj.App;
-            end
+            if obj.Regime==1 && obj.AppRunning==0
                 
-            if obj.DbConn.Status==true
-                CreateOverview(obj.Core);
+                obj.App=ProjectExplorer(obj);
+                obj.AppRunning=1;
+                AssociateApp(obj.Core,obj.App);
+                if obj.DbConn.Status==true
+                    CreateOverview(obj.Core);
+                end
             end
         end
         
         function GetCurrPc(obj)
             obj.RootFolder=matlabroot;                        
-            obj.MasterFolder=strrep(which('ExplorerObj'),'\ExplorerObj.m','');
+            obj.MasterFolder=strrep(which('ExplorerObj'),'ExplorerObj.m','');
+            
             obj.CurrentUser=getenv('USERNAME');
             obj.ClientPCName=getenv('COMPUTERNAME');
         end

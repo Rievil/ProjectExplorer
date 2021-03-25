@@ -19,15 +19,16 @@ classdef DbConn < handle
         UserListener;
         User;
         Parent;
-    end
-    
-    properties (Access = private)
         ConnectionName;
         ClientPassword;
     end
     
+    properties (Access = private)
 
+    end
     
+
+    %conn operations and constructors
     methods
         function obj = DbConn(parent,user)
             %DBCONN Construct an instance of this class
@@ -54,8 +55,6 @@ classdef DbConn < handle
                 'DatabaseName',obj.DatabaseName,...
                 'JDBCDriverLocation',obj.DriverPath, ...
                 'AuthType','Server');  
-            
-            
             CheckForAccess(obj);
         end
         
@@ -65,6 +64,14 @@ classdef DbConn < handle
         
         function SaveConnection(obj)
             saveAsJDBCDataSource(obj.Opts)
+        end
+        
+        function Connect(obj)
+            obj.Conn = database(obj.ConnectionName,obj.ClientName,obj.ClientPassword);
+        end
+        
+        function Disconnect(obj)
+            close(obj.Conn);
         end
         
         function ChangedUser(obj,src,event)
@@ -158,8 +165,14 @@ classdef DbConn < handle
                 bool=false;
             end
         end
-        
-
+       
+    end
+    
+    %db comm methods
+    methods
+        function InsertFF(obj)
+            sqlwrite(obj.Conn,'ProjectList',testdata)
+        end
     end
 end
 

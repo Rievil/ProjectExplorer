@@ -4,29 +4,34 @@ classdef CoreObj < handle
     
     properties
         ProjectOverview; %data structure and containers save load
-        App; 
-        
+        IsApp=0;
+        App;        
         Parent;
     end
     
-    properties (Access = private)
-        
+    properties
+        AppTree;
+        AppTabGroup;
     end
     
     %----------------------------------------------------------------------
     methods
+        %konstruktor
         function obj = CoreObj(parent)
             obj.Parent=parent;   
-%             CreateOverview(obj);
+        end
+        
+        function AssociateApp(obj,app)
+            obj.App=app;
+            obj.IsApp=1;
+            obj.AppTree=obj.App.PTree;
+            obj.AppTabGroup=obj.App.TabGroup;
         end
     end
     %----------------------------------------------------------------------
     methods
         function CreateOverview(obj)
-            obj.ProjectOverview=ProjectOverView(ParentCare(obj.Parent,'sandbox'),...
-                obj.App.PTree,obj.App.TabGroup,obj);
-            
-%             FillTree(obj.ProjectOverview);
+            obj.ProjectOverview=ProjectOverView(obj);
         end
         
         function Save(obj)

@@ -1,9 +1,9 @@
 classdef MeasObj < Node
     properties (SetAccess = public)
-        
+        ID double; %number 
         FName char;  %filename within the project folder - important for deleting
         Name char;
-        ID double; %number
+        
         Date datetime; %oficial name for measurement, copy erliest date from files
         LastChange datetime; %when change happen
         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
@@ -47,7 +47,7 @@ classdef MeasObj < Node
     methods (Access = public)
         %constructor of object
         function obj=MeasObj(ID,ProjectFolder,Parent)
-%             obj@Node;
+            obj@Node;
             
             obj.ID=ID;
             
@@ -55,7 +55,6 @@ classdef MeasObj < Node
             obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
             
             obj.Parent=Parent;
-            obj.SandBox=obj.Parent.Parent.Parent.SandBoxFolder;
             obj.ProjectFolder=ProjectFolder;
             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;

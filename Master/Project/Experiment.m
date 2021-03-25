@@ -57,8 +57,9 @@ classdef Experiment < Node
 %         end
         
         function CreateExpFolder(obj)
-            obj.ExpFolder=[obj.Parent.ProjectFolder, obj.Name];
-            mkdir([obj.Parent.Parent.SandBoxFolder, obj.ExpFolder]);
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');            
+            obj.ExpFolder=[OperLib.FindProp(obj,'ProjectFolder'), 'E_',num2str(obj.ID)];
+            mkdir([SandBox, obj.ExpFolder]);
         end
         
         function SetTypeSettings(obj,table)
@@ -103,20 +104,21 @@ classdef Experiment < Node
         end
         
         function FillNode(obj)
+            iconfilename=[OperLib.FindProp(obj,'MasterFolder') 'Master\Gui\Icons\nExp.gif'];
             obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
-                'Icon',[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\nExp.gif']);
+                'Icon',iconfilename);
         end
         
         function node=AddNode(obj)
             MeasID=OperLib.FindProp(obj,'MeasID');
-%             MeasID=numel(obj.Meas)+1; 
             
             MeasFolder=obj.ExpFolder;
             
             meas=MeasObj(MeasID,MeasFolder,obj);
             FillNode(meas);
             
-            obj.Meas=[obj.Meas, meas];            
+            obj.Meas=[obj.Meas, meas];   
+            obj.MeasCount=numel(obj.Meas);
         end
     end
     

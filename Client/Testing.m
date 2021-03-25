@@ -3,7 +3,7 @@ clear all;
 %%
 b=ExplorerAppStartMain;
 %%
-
+stash=Pack(b.Core.ProjectOverview);
 %%
 result=Pack(b);
 %%

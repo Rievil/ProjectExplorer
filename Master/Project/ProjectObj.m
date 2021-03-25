@@ -3,6 +3,7 @@ classdef ProjectObj < Node
         ID;
         Name char; %name of project
         ProjectFolder char; %created path in sandbox folder, all MData will be stored there
+        Description;
         
         Status;
         
@@ -58,13 +59,12 @@ classdef ProjectObj < Node
         end
 
         function obj2=AddExperiment(obj)
-            obj.ExpCount=obj.ExpCount+1;
-            
             ExpID=OperLib.FindProp(obj,'ExperimentID');
-            
             obj2=Experiment(obj,ExpID);   
+            
             FillNode(obj2);
             obj.Experiments=[obj.Experiments, obj2];
+            obj.ExpCount=numel(obj.Experiments);
         end
         
         function DeleteExperiment(obj,name)
@@ -186,11 +186,11 @@ classdef ProjectObj < Node
             stash.LastChange=obj.LastChange;
             
             stash.ExpMainNode=[];
-            n=0;
-            for E=obj.Experiments
-                n=n+1;
-                stash.Experiments(n)=Pack(E);            
-            end
+%             n=0;
+%             for E=obj.Experiments
+%                 n=n+1;
+%                 stash.Experiments(n)=Pack(E);            
+%             end
         end
         
         function AddNode(obj)
@@ -444,4 +444,20 @@ classdef ProjectObj < Node
         end
         
     end
+    
+    methods %db
+        function AddProject(obj)
+            Connect(obj);
+            data=table(string(obj.Name),"",'VariableNames',{'ProjectName','Description'});
+            DBWrite(obj,'ProjectList',data);
+            [bool,user]=DBCheckForAlias(obj,alias);
+            
+            Disconnect(obj);
+        end
+        
+        function project=GetProjects(obj)
+            
+        end
+    end
+        
 end

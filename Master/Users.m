@@ -1,13 +1,13 @@
-classdef Users < handle
+classdef Users < OperLib
     properties (SetAccess = public)
         UserOptions;
         UserID;
         UserName;
         Status=0;
+        Parent;
     end
      
     properties (Access = private)
-        Parent;
         Fig;
     end
     
@@ -18,6 +18,7 @@ classdef Users < handle
     methods (Access = public)
         %start the object
         function obj=Users(parent)
+            obj@OperLib;
             
             obj.Parent=parent;
 % 
@@ -55,8 +56,12 @@ classdef Users < handle
             NewUser.PCName=obj.Parent.ClientPCName;
             NewUser.UserName=obj.Parent.CurrentUser;
             NewUser.MasterFolder=obj.Parent.MasterFolder;
+            
             NewUser.KeyFilename=[''];
             NewUser.SandBoxFolder=[''];
+            
+            NewUser.Alias=[''];
+            NewUser.AliasPass=[''];
             
             %NewUser.SandBoxFolder=[uigetdir(cd,'Select folder for saving all work') '\'];
             %obj.UserOptions=UserOptions;
@@ -87,8 +92,16 @@ classdef Users < handle
             uibutton(obj.Fig,'Text','Select key','Position',[550 290 100 20],...
                 'ButtonPushedFcn',@(src,event)ChangeUserField(obj,event),'UserData',{'SandBoxFolder',field2});
             
-            uibutton(obj.Fig,'Text','Save settings','Position',[20 350-100 100 30],...
+            
+            uilabel(obj.Fig,'Text','Alias:','Position',[20 270 210 20]);
+            field3=uieditfield(obj.Fig,'text','value',[obj.UserOptions.Alias],'Position',[235 270 310 20]);
+            uibutton(obj.Fig,'Text','Select key','Position',[550 270 100 20],...
+                'ButtonPushedFcn',@(src,event)ChangeUserField(obj,event),'UserData',{'Alias',field3});
+            
+            
+            uibutton(obj.Fig,'Text','Save settings','Position',[20 220 100 30],...
                 'ButtonPushedFcn',@(src,event)SaveAndClose(obj,event));
+            
         end
         
         function ChangeUserField(obj,event)
@@ -115,6 +128,19 @@ classdef Users < handle
                         uialert(obj.Fig,'Folder doesnt exists','Select different folder');
                         event.Source.UserData{2}.Value=obj.UserOptions.SandBoxFolder;
                     end
+                case 'Alias'
+                    Connect(obj);
+                    obj.UserOptions.Alias=event.Source.UserData{2}.Value;
+                    [bool,user]=DBCheckForAlias(obj,obj.UserOptions.Alias);
+                    if bool 
+                        f = warndlg(sprintf('%s already exists!',user.Alias{1}),'Warning');
+                    else
+                        DBAddUser(obj);
+                        [~,user]=DBCheckForAlias(obj,obj.UserOptions.Alias);
+                        Save(obj);
+                        f = warndlg(sprintf('User %s created',user.Alias{1}),'Warning');
+                    end
+                    Disconnect(obj);
                 otherwise
             end
         end    
@@ -126,5 +152,28 @@ classdef Users < handle
                 OpenStructure(obj.Parent);
             end
         end
+    end
+    
+    methods %db
+        function DBAddUser(obj)
+            data=table(string(obj.UserOptions.Alias),"test","test",'VariableNames',{'Alias','UserName','Password'});
+            DBWrite(obj,'Users',data);
+        end
+        
+        function [bool,user]=DBCheckForAlias(obj,alias)
+            querry=['SELECT * FROM Users WHERE Alias=''',char(alias),''' ;'];
+            user=DBFetch(obj,querry);
+            if size(user,1)==0
+                bool=false;                
+            else
+                bool=true;
+                obj.UserID=user.ID;
+            end
+        end
+        
+        function AddUserProject(obj)
+        end
+        
+        
     end
 end

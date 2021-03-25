@@ -2,8 +2,7 @@ classdef OperLib < handle
     %OPERLIB Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (SetAccess = protected)
-
+    properties (SetAccess = private)
     end
     
     methods (Abstract)
@@ -12,7 +11,6 @@ classdef OperLib < handle
     methods
         %constructor
         function obj = OperLib(~)
-        
         end
     end
     
@@ -196,6 +194,7 @@ classdef OperLib < handle
         
         function val=FindProp(obj2,name)
             val=[];
+%             obj2=obj2.Parent;
             list=properties(obj2);
             while numel(list)>0
                 idx=contains(list,name);
@@ -230,6 +229,45 @@ classdef OperLib < handle
         
         function FillNode(obj,stash)
             
+        end
+    end
+    
+    %Methods for db comm
+    methods
+        function Connect(obj)
+            Conn=ConnGetDBConn(obj);
+            Connect(Conn);
+        end
+        
+        function Disconnect(obj)
+            Conn=ConnGetDBConn(obj);
+            Disconnect(Conn);
+        end
+        
+        function DBWrite(obj,TableName,data)
+            conn=ConnGetDBConn(obj);
+%             Connect(conn);
+            
+            sqlwrite(conn.Conn,TableName,data);
+            
+%             Disconnect(conn);
+        end
+        
+        function fetchdata=DBFetch(obj,querry)
+            conn=ConnGetDBConn(obj);
+            
+%             Connect(conn);
+            
+            fetchdata = select(conn.Conn,querry);
+            
+%             Disconnect(conn);
+        end
+
+    end
+    
+    methods (Access=private)
+        function Conn=ConnGetDBConn(obj)
+            Conn=OperLib.FindProp(obj,'DbConn');
         end
     end
 end
