@@ -45,7 +45,8 @@ classdef ProjectOverView < Node
         %constructor of overview
         function obj=ProjectOverView(parent)
             obj@Node;
-            
+            obj.Parent=parent;
+            GetLastID(obj);
 %             UITree=
             
             
@@ -252,6 +253,21 @@ classdef ProjectOverView < Node
         function save(obj)
             val=obj;
             save('test.mat','val');
+        end
+    end
+    
+    methods %db
+        function GetLastID(obj)
+            Connect(obj);
+            %project ID----------------------------------------------------
+            querry=['SELECT TOP 1 ID FROM ProjectList ORDER BY ID DESC'];
+            lastID=DBFetch(obj,querry);
+            if size(lastID,1)==0
+                obj.ProjectID=0;
+            else
+                obj.ProjectID=lastID.ID;
+            end
+            Disconnect(obj);
         end
     end
 end
