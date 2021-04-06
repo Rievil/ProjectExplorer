@@ -7,7 +7,7 @@ classdef ExplorerObj < handle
     
     
     properties
-        App=[];
+%         App=[];
         DbConn;
         Core;
         Users;
@@ -50,9 +50,8 @@ classdef ExplorerObj < handle
         function OpenStructure(obj)
             if obj.Regime==1 && obj.AppRunning==0
                 
-                obj.App=ProjectExplorer(obj);
-                obj.AppRunning=1;
-                AssociateApp(obj.Core,obj.App);
+
+                AssociateApp(obj.Core);
                 if obj.DbConn.Status==true
                     CreateOverview(obj.Core);
                 end

@@ -55,14 +55,6 @@ classdef ProjectOverView < Node
             SandBoxFolder=OperLib.FindProp(obj,'SandBoxFolder');
             
             obj.UITab=OperLib.FindProp(obj,'AppTabGroup');
-%             obj.MasterFolder=OperLib.FindProp(obj,'MasterFolder');
-            
-            if isfile([SandBoxFolder 'Projects.mat'])
-                load([SandBoxFolder 'Projects.mat'],'-mat','Projects');
-                obj.Projects=Projects;
-            else
-
-            end
         end
         
         
@@ -71,24 +63,21 @@ classdef ProjectOverView < Node
         end
 
         function obj2=CreateProject(obj,Name)
-%             obj.ProjectID=obj.ProjectID+1;
-            newID=obj.ProjectID;
-            
-            if newID>0
-                %nový objekt byl v poøádku vytvoøen
-                obj2=ProjectObj(Name,obj);
-%                 obj.Projects(newID)=ProjectObj(Name,obj.SandBoxFolder,obj);                
-                obj2.ID=newID;
-                status=obj2.Status.Value;
-                
-                switch status
-                    case 1
-                        FillNode(obj2);
-                        obj.Projects=[obj.Projects, obj2];
-                    case 4
-                        delete(obj2);
-                end                
-            end
+%             if newID>0
+            %nový objekt byl v poøádku vytvoøen
+            obj2=ProjectObj(Name,obj);
+            obj2.ID=OperLib.FindProp(obj,'ProjectID');
+
+            status=obj2.Status.Value;
+
+            switch status
+                case 1
+                    FillNode(obj2);
+                    obj.Projects=[obj.Projects, obj2];
+                case 4
+                    delete(obj2);
+            end                
+%             end
         end
         
         function DeleteProject(obj,ID)
@@ -168,13 +157,13 @@ classdef ProjectOverView < Node
                     case "ProjectCount"
                         stash.(prop)=obj.(prop);
                     case "ProjectID"
-                        stash.(prop)=obj.(prop);
+                        stash.(prop)=obj.(prop)-1;
                     case "ExperimentID"
-                        stash.(prop)=obj.(prop);
+                        stash.(prop)=obj.(prop)-1;
                     case "MeasID"
-                        stash.(prop)=obj.(prop);
+                        stash.(prop)=obj.(prop)-1;
                     case "SpecimenID"
-                        stash.(prop)=obj.(prop);
+                        stash.(prop)=obj.(prop)-1;
                     case "Projects"
                         n=0;
                         for Pr=obj.(prop)
@@ -186,16 +175,21 @@ classdef ProjectOverView < Node
 %                         stash.(prop)=obj.(prop);
                 end
             end
-%             
-%             n=0;
-%             for P=obj.Projects
-%                 n=n+1;
-%                 stash(n).ID=n;
-%                 stash(n).Project=Pack(obj.Projects(n));
-%             end
         end
         
-        function Populate(obj)
+        function Populate(obj,stash)
+            obj.ProjectCount=stash.ProjectCount;
+            obj.ProjectID=stash.ProjectID;
+            obj.ExperimentID=stash.ExperimentID;
+            obj.MeasID=stash.MeasID;
+            obj.SpecimenID=stash.SpecimenID;
+            
+            n=0;
+            for St=stash.Projects
+                n=n+1;
+                obj.Projects(n)=ProjectObj('new project',obj);
+                Populate(obj.Projects(n),St);
+            end
         end
 
         function FillNode(obj)

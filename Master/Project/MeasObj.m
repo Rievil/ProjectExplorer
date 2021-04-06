@@ -47,22 +47,23 @@ classdef MeasObj < Node
     %Main methods, consturction, destruction etc.
     methods (Access = public)
         %constructor of object
-        function obj=MeasObj(ID,ProjectFolder,Parent)
+        function obj=MeasObj(Parent)
             obj@Node;
-            
-            obj.ID=ID;
+            obj.Parent=Parent;
+%             obj.ID=ID;
             
             obj.Metadata=struct;
             obj.Metadata.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
-            obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Metadata.Date,'dd.MM.yyyy'));
             
-            obj.Parent=Parent;
+            
 %             obj.ProjectFolder=ProjectFolder;
             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;
         end
         
-
+        function SetName(obj)
+            obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Metadata.Date,'dd.MM.yyyy'));
+        end
         
 
         %Výbìr adresáøe s mìøeními
@@ -127,6 +128,16 @@ classdef MeasObj < Node
             stash.BruteFolder=obj.BruteFolder;
             stash.BruteFolderSet=obj.BruteFolderSet;
             stash.SpecimenCount=obj.SpecimenCount;
+        end
+        
+        function Populate(obj,stash)
+            obj.Name=stash.Name;
+            obj.Metadata=stash.Metadata;
+            obj.BruteFolder=stash.BruteFolder;
+            obj.BruteFolderSet=stash.BruteFolderSet;
+            obj.SpecimenCount=stash.SpecimenCount;
+            
+            FillNode(obj)
         end
         
         function FillNode(obj)

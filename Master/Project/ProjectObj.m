@@ -33,15 +33,20 @@ classdef ProjectObj < Node
             
             obj.Parent=parent;
             obj.Name=Name;
+            SetStatus(obj,1);
+            
+%             obj.ID=OperLib.FindProp(obj,'ProjectID');
+        end
+        
+        function SetFolder(obj)
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');
             
-%             obj.Meas=struct('Data',[],'ID',[],'Row',[]);
-            
-            if ~exist([SandBox obj.Name '\'],'dir')
+            folder=[SandBox 'P_' char(num2str(obj.ID)) '\'];
+            if ~exist(folder,'dir')
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
-                mkdir([SandBox Name '\']);
-                obj.ProjectFolder=[Name '\'];
+                mkdir([SandBox 'P_' char(num2str(obj.ID)) '\']);
+                obj.ProjectFolder=['P_',char(num2str(obj.ID)) '\'];
                 SetStatus(obj,1);
                 
             else
@@ -49,20 +54,19 @@ classdef ProjectObj < Node
                 SetStatus(obj,4);
                 error('Folder already exists! use different name!');
             end
-%             AddMainExpNode(obj);
-%             InitSelectorSets(obj,App);
         end
         
         function NewExperiment(obj) %volání aplikací
             obj2=AddExperiment(obj);
+            FillNode(obj2);
+            ExpID=OperLib.FindProp(obj,'ExperimentID');
+            obj2.ID=ExpID;
+            
             obj2.TypeFig=AppTypeSelector(obj2);
         end
 
         function obj2=AddExperiment(obj)
-            ExpID=OperLib.FindProp(obj,'ExperimentID');
-            obj2=Experiment(obj,ExpID);   
-            
-            FillNode(obj2);
+            obj2=Experiment(obj);   
             obj.Experiments=[obj.Experiments, obj2];
             obj.ExpCount=numel(obj.Experiments);
         end
@@ -195,7 +199,30 @@ classdef ProjectObj < Node
             if n==0
                 stash.Experiments=struct;
             end
+            stash.ExpCount=n;
                 
+        end
+        
+        %fill the object
+        function Populate(obj,stash)
+            obj.Name=stash.Name;
+            obj.ID=stash.ID;
+            obj.ProjectFolder=stash.ProjectFolder;
+            obj.Status=stash.Status;
+            obj.CreationDate=stash.CreationDate;
+            obj.LastChange=stash.LastChange;
+            obj.ExpCount=stash.ExpCount;
+            FillNode(obj);
+            
+            
+            if obj.ExpCount>0
+                n=0;
+                for Ex=stash.Experiments
+                    n=n+1;
+                    obj2=AddExperiment(obj);
+                    Populate(obj2,Ex);
+                end
+            end
         end
         
         function AddNode(obj)

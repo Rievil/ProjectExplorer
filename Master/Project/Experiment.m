@@ -35,10 +35,10 @@ classdef Experiment < Node
     end
     
     methods
-        function obj = Experiment(parent,ID)
+        function obj = Experiment(parent)
 %             obj@Node;
             obj.Parent=parent;
-            obj.ID=ID;
+%             obj.ID=ID;
             obj.Status=0;
             
         end
@@ -97,7 +97,7 @@ classdef Experiment < Node
             stash=struct;
             stash.Name=obj.Name;
             stash.TypeSettings=obj.TypeSettings;
-            
+            stash.MeasCount=obj.MeasCount;
 %             stash.Meas=struct;
             n=0;
             for M=obj.Meas
@@ -117,22 +117,40 @@ classdef Experiment < Node
             
         end
         
+        function Populate(obj,stash)
+
+            obj.Name=stash.Name;
+            obj.TypeSettings=stash.TypeSettings;
+            obj.MeasCount=stash.MeasCount;
+            FillNode(obj);
+            
+            if obj.MeasCount>0
+                n=0;
+                for Me=stash.Meas
+                    n=n+1;
+                    obj2=AddMeas(obj);
+                    Populate(obj2,Me);
+                end
+            end
+        end
+        
         function FillNode(obj)
             iconfilename=[OperLib.FindProp(obj,'MasterFolder') 'Master\Gui\Icons\nExp.gif'];
             obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
                 'Icon',iconfilename);
         end
-        
-        function node=AddNode(obj)
-            MeasID=OperLib.FindProp(obj,'MeasID');
-            
-            MeasFolder=obj.ExpFolder;
-            
-            meas=MeasObj(MeasID,MeasFolder,obj);
-            FillNode(meas);
-            
-            obj.Meas=[obj.Meas, meas];   
+        function obj2=AddMeas(obj)
+            obj2=MeasObj(obj);
+            obj.Meas=[obj.Meas, obj2];   
             obj.MeasCount=numel(obj.Meas);
+        end
+        
+        function node=AddNode(obj) 
+            node=AddMeas(obj);
+            node.ID=OperLib.FindProp(obj,'MeasID');
+            SetName(node);
+            
+            FillNode(node);
         end
     end
     
