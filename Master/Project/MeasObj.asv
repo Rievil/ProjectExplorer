@@ -1,23 +1,23 @@
 classdef MeasObj < Node
     properties (SetAccess = public)
         ID double; %number 
-%         FName char;  %filename within the project folder - important for deleting
+        FName char;  %filename within the project folder - important for deleting
         Name char;
         
-        Metadata struct;
+        Metadata;
 %         Date datetime; %oficial name for measurement, copy erliest date from files
 %         LastChange datetime; %when change happen
 %         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         BruteFolder char; %folder with measured data, from which DataC construct itrs container
-        BruteFolderSet=false;
-%         Row;
-%         ProjectFolder char;
+        
+        Row;
+        ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
         c char;
         %if 'extracted', then we already have DataC created in project
         %folder, and we dont have to check if BruteFolder is avaliable, or
         %not
-%         SandBox char; 
+        SandBox char; 
         %this path may change between instances per users, its important 
         %for creation of new object
         Selector;
@@ -29,9 +29,9 @@ classdef MeasObj < Node
         
         TypeTable table;
         SpecimenCount;
-%         Key logical;
-%         MainTable table;
-        
+        Key logical;
+        MainTable table;
+        BruteFolderSet=false;
     end
     
     
@@ -52,12 +52,11 @@ classdef MeasObj < Node
             
             obj.ID=ID;
             
-            obj.Metadata=struct;
-            obj.Metadata.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
-            obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Metadata.Date,'dd.MM.yyyy'));
+            obj.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
+            obj.Name=sprintf('%d - %s',obj.ID,datestr(obj.Date,'dd.MM.yyyy'));
             
             obj.Parent=Parent;
-%             obj.ProjectFolder=ProjectFolder;
+            obj.ProjectFolder=ProjectFolder;
             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;
         end
@@ -121,12 +120,6 @@ classdef MeasObj < Node
         
         function stash=Pack(obj)
             stash=struct;
-            stash.ID=obj.ID;
-            stash.Name=obj.Name;
-            stash.Metadata=obj.Metadata;
-            stash.BruteFolder=obj.BruteFolder;
-            stash.BruteFolderSet=obj.BruteFolderSet;
-            stash.SpecimenCount=obj.SpecimenCount;
         end
         
         function FillNode(obj)

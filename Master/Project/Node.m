@@ -10,6 +10,7 @@ classdef Node < OperLib & GUILib
         FillNode(obj);
         stash=Pack(obj);
         node=AddNode(obj);
+        Populate(obj);
     end
     
     methods
@@ -17,6 +18,16 @@ classdef Node < OperLib & GUILib
             obj@OperLib;
             obj@GUILib;
 
+        end
+        
+        function sobj = saveobj(obj)
+            switch class(obj)
+                case 'experiment'
+                case 'projectoverview'
+                case 'projectobj'
+                case 'measobj'
+                otherwise
+            end
         end
     end
 end

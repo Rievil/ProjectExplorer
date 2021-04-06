@@ -19,7 +19,7 @@ classdef Experiment < Node
         Specimens; %this is efficiently stored measurements
         SpecimensCount;
         
-        VarTable;
+        
         
         Parent; %ProjectObj
     end
@@ -97,24 +97,12 @@ classdef Experiment < Node
             stash=struct;
             stash.Name=obj.Name;
             stash.TypeSettings=obj.TypeSettings;
-            
-%             stash.Meas=struct;
+            stash.Meas=[];
             n=0;
             for M=obj.Meas
                 n=n+1;
-                TMP=Pack(M);  
-                stash.Meas(n)= TMP;         
+                stash.Meas(n)=Pack(M);            
             end
-            if n==0
-                stash.Meas=struct;
-            end
-            
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            MasterFolder=OperLib.FindProp(obj,'MasterFolder');
-            
-            Filename=[SandBox,obj.ExpFolder,'\Experiment.mat'];
-            save(Filename,'stash');
-            
         end
         
         function FillNode(obj)

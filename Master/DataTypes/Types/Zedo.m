@@ -24,7 +24,12 @@ classdef Zedo < DataFrame
         function Tab=TabRows(obj,InT)
             Tab=obj.Data;
         end
-
+        
+                
+        function [T]=GetVarNames(obj)
+            
+        end
+        
         function obj2=Copy(obj)
             obj2=Zedo;  
             obj2.Data=obj.Data;

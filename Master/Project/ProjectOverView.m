@@ -12,7 +12,7 @@ classdef ProjectOverView < Node
         Parent;
     end
     
-    properties
+    properties (SetAccess = private)
         ProjectID=0;
         ExperimentID=0;
         MeasID=0;
@@ -176,7 +176,12 @@ classdef ProjectOverView < Node
                     case "SpecimenID"
                         stash.(prop)=obj.(prop);
                     case "Projects"
-                        
+                        n=0;
+                        for Pr=obj.(prop)
+                            n=n+1;
+                            TMP=Pack(Pr);
+                            stash.(prop)(n)=TMP;
+                        end
                     otherwise
 %                         stash.(prop)=obj.(prop);
                 end
@@ -188,6 +193,9 @@ classdef ProjectOverView < Node
 %                 stash(n).ID=n;
 %                 stash(n).Project=Pack(obj.Projects(n));
 %             end
+        end
+        
+        function Populate(obj)
         end
 
         function FillNode(obj)

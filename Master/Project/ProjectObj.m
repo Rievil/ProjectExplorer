@@ -186,11 +186,16 @@ classdef ProjectObj < Node
             stash.LastChange=obj.LastChange;
             
             stash.ExpMainNode=[];
-%             n=0;
-%             for E=obj.Experiments
-%                 n=n+1;
-%                 stash.Experiments(n)=Pack(E);            
-%             end
+%             stash.Experiments=struct;
+            n=0;
+            for E=obj.Experiments
+                n=n+1;
+                stash.Experiments(n)=Pack(E);            
+            end
+            if n==0
+                stash.Experiments=struct;
+            end
+                
         end
         
         function AddNode(obj)

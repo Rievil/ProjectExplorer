@@ -33,6 +33,9 @@ classdef MainTable < DataFrame
             Tab=T;
         end
         
+        function [T]=GetVarNames(obj)
+            
+        end
         
         function obj2=Copy(obj)
             obj2=MainTable;
@@ -48,6 +51,7 @@ classdef MainTable < DataFrame
             obj2.Init=obj.Init;
             obj2.Pos=obj.Pos;
         end
+        
         function Data=PackUp(obj)
             TMP=obj.Data;
             P=TMP.Properties;

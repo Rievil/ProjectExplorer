@@ -25,6 +25,11 @@ classdef Press < DataFrame
             Tab=T;
         end
         
+                
+        function [T]=GetVarNames(obj)
+            
+        end
+        
         function obj2=Copy(obj)
             obj2=Press;
             obj2.Name=obj.Name;

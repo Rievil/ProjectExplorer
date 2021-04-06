@@ -1,5 +1,5 @@
-classdef Specimen
-    %SPECIMEN Summary of this class goes here
+classdef untitled
+    %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
@@ -7,8 +7,8 @@ classdef Specimen
     end
     
     methods
-        function obj = Specimen(inputArg1,inputArg2)
-            %SPECIMEN Construct an instance of this class
+        function obj = untitled(inputArg1,inputArg2)
+            %UNTITLED Construct an instance of this class
             %   Detailed explanation goes here
             obj.Property1 = inputArg1 + inputArg2;
         end

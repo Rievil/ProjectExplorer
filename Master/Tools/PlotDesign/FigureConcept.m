@@ -1,23 +1,14 @@
-classdef Specimen < handle
-    %SPECIMEN Summary of this class goes here
+classdef FigureConcept
+    %FIGURECONCEPT Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        ID;
-        KeyName;
-        Data (:,1);
-        Version;
-        Features;
-        
-%         Properties;
-%         DataTypes;
-        Metadata;
+        Property1
     end
     
-    
     methods
-        function obj = Specimen(parent) %parent je experiment
-            %SPECIMEN Construct an instance of this class
+        function obj = FigureConcept(inputArg1,inputArg2)
+            %FIGURECONCEPT Construct an instance of this class
             %   Detailed explanation goes here
             obj.Property1 = inputArg1 + inputArg2;
         end
@@ -26,10 +17,6 @@ classdef Specimen < handle
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             outputArg = obj.Property1 + inputArg;
-        end
-        
-        function stash=Pack(obj)
-            
         end
     end
 end

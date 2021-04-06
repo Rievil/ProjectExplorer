@@ -19,10 +19,11 @@ classdef DataFrame < OperLib & GUILib
         Copy(obj);
         PackUp(obj);
         GetVariables(obj);
+        
+        GetVarNames
+        %GetVarByName
     end
-    
-    
-    
+
     methods
         %constructor
         function obj = DataFrame(~)
