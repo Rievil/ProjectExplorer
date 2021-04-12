@@ -122,7 +122,7 @@ classdef FieldPlotter < handle
             ax=gca;
             
             if obj.Is3D==1
-%                 set(ax,'view',obj.View);
+                set(ax,'view',obj.View);
             end
             
             set(h,'Position',[200 200 800 400]);
@@ -304,7 +304,7 @@ classdef FieldPlotter < handle
                     %________________________________
                 end
 
-                legend(obj.Axes,han,'location','southoutside');
+                legend(obj.Axes,han,'location','northwest');
 %                 SetAxes(obj,obj.Axes);
                 obj.Result(j).Axes=obj.Axes;
                 type=char(AnFun);
@@ -461,18 +461,16 @@ classdef FieldPlotter < handle
 
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles)) ' - ' char(num2str(M.Age))];
 %                 Name=[char(ChangeMixture(obj,M.Mixture)) ' - ' char(M.Enviroment) char(num2str(M.Cycles))];
+                Name=sprintf('%s: %f0.2 mm',M.Name,M.Length);
                 Energy=E{:,13};
-                HitCount=numel(Energy);
-                Name=sprintf('%s: %0.2f mm - %d AE hits',M.Name,M.Length,HitCount);
-                
 %                 if Or<0
 %                     x=E.XDelta+50+35;
 %                 else
 %                     x=E.XDelta+50;
 %                 end
 %               
-                corr=380/2-M.Length/2;
-                x=E.XDelta+corr;
+                corr=380+M.Length/2;
+                x=E.XDelta+50+35;
                 y=ZStrength;
                 z=Energy;
                 
@@ -498,18 +496,11 @@ classdef FieldPlotter < handle
                     end
                 end
                 
-                plot3(obj.Axes,[380/2-240/2;380/2-240/2],[0;1e+3],[0;1e+3],'-k');
-                plot3(obj.Axes,[380/2+240/2;380/2+240/2],[0;1e+3],[0;1e+3],'-k');
-                
-                plot3(obj.Axes,[380/2-M.Length/2;380/2-M.Length/2],[0;1e+3],[0;1e+3],'-r');
-                plot3(obj.Axes,[380/2+M.Length/2;380/2+M.Length/2],[0;1e+3],[0;1e+3],'-r');
-                
-                
                 %legend(obj.Axes);
                 xlabel(obj.Axes,'Location x [mm]');
                 ylabel(obj.Axes,'Bending strength \it f_{m} \rm [N/mm^{2}]');
                 zlabel(obj.Axes,'Hit energy \it E_{AE} \rm [V\cdotHz^{-2}]');
-                xlim(obj.Axes,[0 380]);
+                xlim(obj.Axes,[140 240]);
                 
                 %lgd.NumColumns =2;
                 %obj.Axes.ZAxis.Scale='log';
@@ -519,7 +510,7 @@ classdef FieldPlotter < handle
                 obj.Count=obj.Count-1;
                 han=[];
             end
-            view(obj.Axes,0,0);
+
         end
         function han=PlotVelocity(obj,DataCopy)
             M=GetParams(DataCopy.Data(3).Type);
