@@ -118,8 +118,7 @@ T3=struct('S',[T1, T2]);
 
 T4=struct('S2',[T3, T3]);
 %%
-mystruct=T4;
-fn = fieldnames(mystruct);
+fn = fieldnames(T);
 for k=1:numel(fn)
     if( isnumeric(mystruct.(fn{k})) )
         % do stuff
