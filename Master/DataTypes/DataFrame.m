@@ -54,5 +54,10 @@ classdef DataFrame < OperLib & GUILib
             obj.ContainerType=type;
         end
     end   
+    
+    %Gui for datatypes
+    methods
+        
+    end
 end
 

@@ -8,7 +8,7 @@ classdef GUILib < handle
         Count=0;
         Children;
         TypeSet;
-        Init;
+        Init=0;
         Pos;
     end
     

@@ -5,6 +5,7 @@ classdef MainTable < DataFrame
     %all other types which are present id datatypetable. PILOT has the key variable,
     %by which all other types will be sorted out. This design 
     properties
+       VarTable;
        SpecimensCount;
        KeyNames;
     end
@@ -125,62 +126,109 @@ classdef MainTable < DataFrame
     methods (Access = public)   
         %set property
         function SetVal(obj,src,event)
-            obj.TypeSet{1}=event.Source.Data;
+%             obj.TypeSet{1}=event.Source.Data;
+            obj.VarTable=event.Source.Data;
         end       
         
         %adrow in table
-        function TypeAdRow(obj,Value,idx,Target)
-            obj.TypeSet{idx}=Value;
-            dim=size(Target.Data);
-            if dim(1)~=Value
-                if Value>dim(1)
-                    Target.Data=[Target.Data; OperLib.MTBlueprint];
-                    Target.Data{end,4}=Value;
+        function TypeAdVar(obj,source,event)
+            T=source.Children{3,1}.Data;
+            RowCount=size(T,1);
+            CurrRow=source.Children{3,1}.UserData;
+            if RowCount>0
+                T2=OperLib.MTBlueprint;
+                T2.ColNumber=RowCount+1;
+                if CurrRow>0 && CurrRow<RowCount
+                    A=T(1:CurrRow,:);
+                    B=T(CurrRow+1:end,:);
+                    source.Children{3,1}.Data=[A; T2; B];
                 else
-                    Target.Data(end,:)=[];
+                    source.Children{3,1}.Data=[source.Children{3,1}.Data; T2]; 
                 end
-                obj.TypeSet{Target.UserData{2}}=Target.Data;
             end
+            source.Children{3,1}.UserData=0;
+            obj.VarTable=source.Children{3,1}.Data;
+        end
+        
+        function TypeRemoveVar(obj,source,event)
+            CurrRow=source.Children{3,1}.UserData;
+            if CurrRow>0
+                source.Children{3,1}.Data(CurrRow,:)=[];
+            else
+                source.Children{3,1}.Data(end,:)=[];
+            end
+            source.Children{3,1}.UserData=0;
+        end
+        
+        function SetTabPos(obj,source,event)
+            Row=event.Indices(1);
+            event.Source.UserData=Row;
         end
         
         %will initalize gui for first time
         function InitializeOption(obj)
-            SetParent(obj,'type');
-%             Clear(obj);
-            HideComponents(obj);
             
-            if numel(obj.Children)>0
+%             Clear(obj);
+%             HideComponents(obj);
+            
+            if obj.Init
                 ShowComponents(obj)
             else
+                SetParent(obj,'type');
                 CreateTypeComponents(obj);
             end
-            
-%             
-%             Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal,200);
-%             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-%             DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
-%                            'and choose the type of each column, column position in source file.\n',...
-%                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
         end
         
         function CreateTypeComponents(obj)
+            obj.Init=1;
             g=uigridlayout(obj.GuiParent);
-            g.RowHeight = {22,300,22,22};
-            g.ColumnWidth = {'1x','2x'};
+            g.RowHeight = {22,250,50};
+            g.ColumnWidth = {'1x','2x',44,44};
             
             la=uilabel(g,'Text','Columns selection:');
             la.Layout.Row=1;
-            la.Layout.Column=[1 2];
+            la.Layout.Column=[1 4];
             
             
             uit = uitable(g,'Data',OperLib.MTBlueprint,'ColumnEditable',true,...
-                'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event));
+                'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
+                'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
+            
+            if strcmp(class(obj.VarTable),'table')
+                uit.Data=obj.VarTable;
+            end
+            
             uit.Layout.Row = 2;
-            uit.Layout.Column = [1 2];
+            uit.Layout.Column = [1 4];
             
+            MF=OperLib.FindProp(obj.Parent,'MasterFolder');
             
+            IconFolder=[MF 'Master\GUI\Icons\'];
+            IconFilePlus=[IconFolder 'plus_sign.gif'];
+            IconFileMinus=[IconFolder 'cancel_sign.gif'];
             
-            obj.Children={g;la;uit};
+            but1=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
+            
+            but1.Layout.Row=1;
+            but1.Layout.Column=3;
+            but1.Icon=IconFilePlus;
+            
+            but2=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeRemoveVar(obj,event));
+            but2.Layout.Row=1;
+            but2.Layout.Column=4;
+            but2.Icon=IconFileMinus;
+            
+            txt=sprintf(['Select composition of main table: by spinner select number of columns \n',...
+                           'and choose the type of each column, column position in source file.\n',...
+                           'IMPORTANT: there can be only one KeyColumn']);
+                       
+            la2=uilabel(g,'Text',txt);
+            
+           la2.Layout.Row=3;
+           la2.Layout.Column=[1 4];
+           obj.Children={g;la;uit;but1;but2;la2};
         end
     end
     
@@ -199,4 +247,3 @@ classdef MainTable < DataFrame
         end
     end
 end
-

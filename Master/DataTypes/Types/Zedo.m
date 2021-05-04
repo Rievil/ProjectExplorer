@@ -1,4 +1,4 @@
-classdef Zedo < DataFrame
+classdef Zedo < AE
     %MainTable is a PILOT type for all other possible measurments, ts
     %doesnt has to be present, but is higly recomended for the clarity and
     %clear structure of loaded data. PILOT type means, that it will guid
@@ -14,7 +14,7 @@ classdef Zedo < DataFrame
     
     methods %main methods with abstract interpretations
         function obj = Zedo(parent)
-            obj@DataFrame(parent);
+            obj@AE(parent);
             
             obj.ContainerType=OperLib.GetContainerTypes(2);
             obj.KeyWord="";
