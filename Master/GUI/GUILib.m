@@ -33,13 +33,14 @@ classdef GUILib < handle
         function DrawTypeOption(obj)
             if obj.Init
                 InitializeOption(obj);
-                CheckOptions(obj);
+%                 CheckOptions(obj);
             else
                 InitializeOption(obj);
             end
             
             if numel(obj.Children)>0
-                GuiInit(obj);
+                ShowComponents(obj);
+%                 GuiInit(obj);
             end
         end
         
@@ -61,6 +62,7 @@ classdef GUILib < handle
         end
         
         function p=GetParent(obj,in)
+            %will find saved parent by either name or number
             sz=size(obj.GUIParents,1);
             switch class(in)
                 case 'char'
@@ -120,6 +122,18 @@ classdef GUILib < handle
     
     %methods for drawing gui for options in typetable settings
     methods (Access = public) 
+        
+        function HideComponents(obj)
+            for i=1:numel(obj.Children)
+                obj.Children{i,1}.Visible=false;
+            end
+        end
+        
+        function ShowComponents(obj)
+            for i=1:numel(obj.Children)
+                obj.Children{i,1}.Visible=true;
+            end
+        end
         
         %clear GUI COntainer
         function Clear(obj)

@@ -54,6 +54,7 @@ classdef Experiment < Node
         function EditExperiment(obj)
             obj.TypeFig=AppTypeSelector(obj);
         end
+        
 %         function StartTypeEditor(obj)
 %             obj.TypeSelWin=AppTypeSelector(app.PNodeSelected,app.MasterFolder,obj);
 %         end
@@ -71,6 +72,7 @@ classdef Experiment < Node
         end
         
         function InitializeOption(obj)
+            
         end
         
         function Remove(obj)

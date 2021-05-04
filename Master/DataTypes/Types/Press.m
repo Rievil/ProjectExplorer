@@ -6,8 +6,8 @@ classdef Press < DataFrame
     end
     
     methods %main methods
-        function obj = Press(~)
-            obj@DataFrame;
+        function obj = Press(parent)
+            obj@DataFrame(parent);
             
             obj.ContainerType=OperLib.GetContainerTypes(1);
             obj.KeyWord="";

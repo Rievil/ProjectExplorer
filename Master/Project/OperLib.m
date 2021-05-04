@@ -144,14 +144,14 @@ classdef OperLib < handle
         end  
         
         %Create appropriate type
-        function Out=CreateType(ClassName)
+        function Out=CreateType(ClassName,parent)
             switch lower(char(ClassName))
                 case 'maintable'
-                        Out=MainTable;
+                        Out=MainTable(parent);
                 case 'zedo'
-                        Out=Zedo;
+                        Out=Zedo(parent);
                 case 'press'
-                        Out=Press;
+                        Out=Press(parent);
                 otherwise
             end
         end
@@ -173,7 +173,7 @@ classdef OperLib < handle
         end
         
         function out=GetContainerTypes(varargin)
-            t=["File","Folder"];
+            t=categorical(["File","Folder"],{'File','Folder'},'Ordinal',true);
             if numel(varargin)>0
                 out=t(varargin{1});
             else
@@ -184,11 +184,11 @@ classdef OperLib < handle
         
         function out=GetSuffixTypes(varargin)
             t=[".xls",".xlsx",".csv",".txt",".bin","~"];
-            STypes = categorical(t,{'MainTable','Press','Zedo'},'Ordinal',true);
+            STypes = categorical(t,{'.xls','.xlsx','.csv','.txt','.bin','~'},'Ordinal',true);
             if numel(varargin)>0
-                out=t(varargin{1});
+                out=STypes(varargin{1});
             else
-                out=t;
+                out=STypes;
             end
         end
         

@@ -7,9 +7,15 @@ classdef DataFrame < OperLib & GUILib
         Filename; %for files type
         Folder; %for folder types
         Parent;
+    end
+    
+    properties %File / folder container
         ContainerType;
         KeyWord;
         Sufix;
+        KeyName;
+        SheetName;
+        HeadersRow;
     end
     
     %Interface of class
@@ -20,15 +26,16 @@ classdef DataFrame < OperLib & GUILib
         PackUp(obj);
         GetVariables(obj);
         
-        GetVarNames
+        GetVarNames;
         %GetVarByName
     end
 
     methods
         %constructor
-        function obj = DataFrame(~)
+        function obj = DataFrame(parent)
             obj@GUILib;
             obj@OperLib;
+            obj.Parent=parent;
         end
         
         function SetTypeSet(obj,TypeSet)

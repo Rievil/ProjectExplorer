@@ -13,8 +13,8 @@ classdef Zedo < DataFrame
     end
     
     methods %main methods with abstract interpretations
-        function obj = Zedo(~)
-            obj@DataFrame;
+        function obj = Zedo(parent)
+            obj@DataFrame(parent);
             
             obj.ContainerType=OperLib.GetContainerTypes(2);
             obj.KeyWord="";

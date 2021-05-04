@@ -146,14 +146,8 @@ classdef MainTable < DataFrame
         %will initalize gui for first time
         function InitializeOption(obj)
             SetParent(obj,'type');
-%             Clear(obj);
-            HideComponents(obj);
+            Clear(obj);
             
-            if numel(obj.Children)>0
-                ShowComponents(obj)
-            else
-                CreateTypeComponents(obj);
-            end
             
 %             
 %             Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal,200);
@@ -168,19 +162,13 @@ classdef MainTable < DataFrame
             g.RowHeight = {22,300,22,22};
             g.ColumnWidth = {'1x','2x'};
             
-            la=uilabel(g,'Text','Columns selection:');
-            la.Layout.Row=1;
-            la.Layout.Column=[1 2];
-            
-            
             uit = uitable(g,'Data',OperLib.MTBlueprint,'ColumnEditable',true,...
                 'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event));
             uit.Layout.Row = 2;
             uit.Layout.Column = [1 2];
             
             
-            
-            obj.Children={g;la;uit};
+            obj.Children={g;uit};
         end
     end
     
