@@ -115,7 +115,7 @@ classdef Experiment < Node
             MasterFolder=OperLib.FindProp(obj,'MasterFolder');
             
             Filename=[SandBox,obj.ExpFolder,'\Experiment.mat'];
-            save(Filename,'stash');
+%             save(Filename,'stash');
             
         end
         

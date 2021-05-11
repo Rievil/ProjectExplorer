@@ -5,7 +5,6 @@ classdef MainTable < DataFrame
     %all other types which are present id datatypetable. PILOT has the key variable,
     %by which all other types will be sorted out. This design 
     properties
-       VarTable;
        SpecimensCount;
        KeyNames;
     end
@@ -127,7 +126,7 @@ classdef MainTable < DataFrame
         %set property
         function SetVal(obj,src,event)
 %             obj.TypeSet{1}=event.Source.Data;
-            obj.VarTable=event.Source.Data;
+            obj.TypeSettings=event.Source.Data;
         end       
         
         %adrow in table
@@ -147,7 +146,7 @@ classdef MainTable < DataFrame
                 end
             end
             source.Children{3,1}.UserData=0;
-            obj.VarTable=source.Children{3,1}.Data;
+            obj.TypeSettings=source.Children{3,1}.Data;
         end
         
         function TypeRemoveVar(obj,source,event)
@@ -166,15 +165,12 @@ classdef MainTable < DataFrame
         end
         
         %will initalize gui for first time
-        function InitializeOption(obj)
-            
-%             Clear(obj);
-%             HideComponents(obj);
+        function InitializeOption(obj,name)
             
             if obj.Init
                 ShowComponents(obj)
             else
-                SetParent(obj,'type');
+                SetParent(obj,name);
                 CreateTypeComponents(obj);
             end
         end
@@ -194,8 +190,8 @@ classdef MainTable < DataFrame
                 'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
                 'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
             
-            if strcmp(class(obj.VarTable),'table')
-                uit.Data=obj.VarTable;
+            if strcmp(class(obj.TypeSettings),'table')
+                uit.Data=obj.TypeSettings;
             end
             
             uit.Layout.Row = 2;

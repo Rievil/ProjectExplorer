@@ -117,7 +117,14 @@ classdef GUILib < handle
     end
     
     %methods for drawing of options in plotter object
-    methods (Access = public)
+    methods
+        function delete(obj)
+%             disp('Test');
+%             for i=1:numel(obj.Children)
+%                 delete(obj.Children{i,1});
+%                 obj.Children(i,1)=[];
+%             end
+        end
     end
     
     %methods for drawing gui for options in typetable settings
@@ -127,6 +134,9 @@ classdef GUILib < handle
             for i=1:numel(obj.Children)
                 obj.Children{i,1}.Visible=false;
             end
+%             for i=1:numel(obj.GuiParent)
+%                 obj.GuiParent(i,1).Visible=false;
+%             end
         end
         
         function ShowComponents(obj)

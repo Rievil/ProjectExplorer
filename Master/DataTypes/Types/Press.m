@@ -144,39 +144,93 @@ classdef Press < DataFrame
     
     %Gui for data type selection 
     methods (Access = public)   
-        %set property
-        function SetVal(obj,val,idx)
-            obj.TypeSet{idx}=val;
-        end
         
-        %adrow in table
-        function TypeAdRow(obj,Value,idx,Target)
-            obj.TypeSet{idx}=Value;
-            dim=size(Target.Data);
-            if dim(1)~=Value
-                if Value>dim(1)
-                    Target.Data=[Target.Data; OperLib.PRBlueprint];
-                    Target.Data{end,1}=Value;
-                else
-                    Target.Data(end,:)=[];
-                end
-                obj.TypeSet{Target.UserData{2}}=Target.Data;
+        function InitializeOption(obj,name)
+            
+            if obj.Init
+                ShowComponents(obj)
+            else
+                SetParent(obj,name);
+                CreateTypeComponents(obj);
             end
         end
         
-        %will initalize gui for first time
-        function InitializeOption(obj)
-            SetParent(obj,'type');
-            Clear(obj);
-
-            %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
-            %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            Target=DrawUITable(obj,OperLib.PRBlueprint,@SetVal,200);
-            DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.\n',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+        function CreateTypeComponents(obj)
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,250,50};
+            g.ColumnWidth = {'1x','2x',44,44};
+            
+            la=uilabel(g,'Text','Selection of data variables:');
+            la.Layout.Row=1;
+            la.Layout.Column=[1 4];
+                        
+            uit = uitable(g,'Data',OperLib.PRBlueprint,'ColumnEditable',true,...
+            'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
+            'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
+            
+            cbx = uicheckbox(g,'Text','Order from main table?');
+            cbx.Layout.Row=3;
+            cbx.Layout.Column=[1 4];
+            
+            but1=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
+            
+            MF=OperLib.FindProp(obj.Parent,'MasterFolder');
+            
+            IconFolder=[MF 'Master\GUI\Icons\'];
+            IconFilePlus=[IconFolder 'plus_sign.gif'];
+            IconFileMinus=[IconFolder 'cancel_sign.gif'];
+            
+            but1.Layout.Row=1;
+            but1.Layout.Column=3;
+            but1.Icon=IconFilePlus;
+            
+            but2=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeRemoveVar(obj,event));
+            but2.Layout.Row=1;
+            but2.Layout.Column=4;
+            but2.Icon=IconFileMinus;
         end
+        
+        
+        %set property
+        function SetVal(obj,source,event)
+%             obj.TypeSet{idx}=val;
+        end
+        
+        %adrow in table
+        function TypeAdVar(obj,source,event)
+            T=source.Children{3,1}.Data;
+            RowCount=size(T,1);
+            CurrRow=source.Children{3,1}.UserData;
+            if RowCount>0
+                T2=OperLib.PRBlueprint;
+                T2.ColNumber=RowCount+1;
+                if CurrRow>0 && CurrRow<RowCount
+                    A=T(1:CurrRow,:);
+                    B=T(CurrRow+1:end,:);
+                    source.Children{3,1}.Data=[A; T2; B];
+                else
+                    source.Children{3,1}.Data=[source.Children{3,1}.Data; T2]; 
+                end
+            end
+            source.Children{3,1}.UserData=0;
+            obj.TypeSettings=source.Children{3,1}.Data;
+        end
+        
+        %will initalize gui for first time
+%         function InitializeOption(obj)
+%             SetParent(obj,'type');
+%             Clear(obj);
+% 
+%             %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
+%             %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
+%             Target=DrawUITable(obj,OperLib.PRBlueprint,@SetVal,200);
+%             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
+%             DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
+%                            'and choose the type of each column, column position in source file.\n',...
+%                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+%         end
     end
     
     %Gui for plotter

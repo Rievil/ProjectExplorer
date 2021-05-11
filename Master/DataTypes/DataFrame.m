@@ -16,6 +16,7 @@ classdef DataFrame < OperLib & GUILib
         KeyName;
         SheetName;
         HeadersRow;
+        TypeSettings;
     end
     
     %Interface of class

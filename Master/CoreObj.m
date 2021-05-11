@@ -40,10 +40,16 @@ classdef CoreObj < handle
         end
         
         function Save(obj)
+            tic;
+            disp('Saving work ....');
+            warning ('off','all');
             stash=Pack(obj.ProjectOverview);
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');
             stashFile=[SandBox,'\Stash.mat'];
             save(stashFile,'stash');
+            warning ('on','all');
+            msg=sprintf('Work saved succesfully; it took=%0.3fs',toc);
+            disp(msg);
         end
         
         function Load(obj)
