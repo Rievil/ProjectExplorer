@@ -127,6 +127,7 @@ classdef MainTable < DataFrame
         function SetVal(obj,src,event)
 %             obj.TypeSet{1}=event.Source.Data;
             obj.TypeSettings=event.Source.Data;
+%             source.Children{3,1}.UserData=0;
         end       
         
         %adrow in table
@@ -164,18 +165,10 @@ classdef MainTable < DataFrame
             event.Source.UserData=Row;
         end
         
-        %will initalize gui for first time
-        function InitializeOption(obj,name)
-            
-            if obj.Init
-                ShowComponents(obj)
-            else
-                SetParent(obj,name);
-                CreateTypeComponents(obj);
-            end
-        end
         
         function CreateTypeComponents(obj)
+            
+            
             obj.Init=1;
             g=uigridlayout(obj.GuiParent);
             g.RowHeight = {22,250,50};

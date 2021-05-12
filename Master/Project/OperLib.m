@@ -192,6 +192,51 @@ classdef OperLib < handle
             end
         end
         
+        function T=GetSuffixOptionsTable(type)
+            switch lower(type)
+                case '.xls'
+                    Name=["SheetName","DecimalDelimiter","ColumnDelimiter",...
+                        "HeaderLines"]';
+                    DecimalDelimiter=categorical([".",","],'Ordinal',1);
+                    Value={"Sheet1",DecimalDelimiter(1),";",0}';
+                    T=table(Name,Value);
+                case '.xlsx'
+                    Name=["SheetName","DecimalDelimiter","ColumnDelimiter",...
+                        "HeaderLines"]';
+                    DecimalDelimiter=categorical([".",","],'Ordinal',1);
+                    Value={"Sheet1",DecimalDelimiter(1),";",0}';
+                    T=table(Name,Value);
+                case '.csv'
+                    Name=["SheetName","DecimalDelimiter","ColumnDelimiter",...
+                        "HeaderLines"]';
+                    DecimalDelimiter=categorical([".",","],'Ordinal',1);
+                    Value={"Sheet1",DecimalDelimiter(1),";",0}';
+                    T=table(Name,Value);
+                case '.txt'
+                    Name=["DecimalDelimiter","ColumnDelimiter",...
+                        "HeaderLines"]';
+                    DecimalDelimiter=categorical([".",","],'Ordinal',1);
+                    Value={DecimalDelimiter(1),";",0}';
+                    T=table(Name,Value);
+                case '.bin'
+                    DecimalDelimiter=categorical([".",","],'Ordinal',1);
+                    enctypes=["uint","uint8","uint16","uint32","uint64",...
+                                    "uchar","ushort","ulong","ubitn","int","int8",...
+                                    "int16", "int32","int64","schar","short",...
+                                    "long","bitn","single","double","float",...
+                                    "float32","float64","real*4","real*8","char*1",...
+                                    "char"];
+                    Enc=categorical(enctypes,'Ordinal',1);
+                    Name=["DecimalDelimiter","Encryption"]';
+                    Value={DecimalDelimiter(1),Enc(1)}';
+                    T=table(Name,Value);
+                    
+                case '~'
+                    
+                otherwise
+            end
+        end
+        
         function val=FindProp(obj2,name)
             val=[];
 %             obj2=obj2.Parent;

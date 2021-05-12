@@ -1,4 +1,4 @@
-classdef Zedo < AE
+classdef Zedo < AcousticEmission
     %MainTable is a PILOT type for all other possible measurments, ts
     %doesnt has to be present, but is higly recomended for the clarity and
     %clear structure of loaded data. PILOT type means, that it will guid
@@ -14,7 +14,7 @@ classdef Zedo < AE
     
     methods %main methods with abstract interpretations
         function obj = Zedo(parent)
-            obj@AE(parent);
+            obj@AcousticEmission(parent);
             
             obj.ContainerType=OperLib.GetContainerTypes(2);
             obj.KeyWord="";
@@ -318,6 +318,10 @@ classdef Zedo < AE
 
     %Gui for data type selection 
     methods (Access = public)   
+        
+        function CreateTypeComponents(obj)
+        end
+        
         %set property
         function SetVal(obj,val,idx)
             obj.TypeSet{idx}=val;

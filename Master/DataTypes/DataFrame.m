@@ -7,6 +7,7 @@ classdef DataFrame < OperLib & GUILib
         Filename; %for files type
         Folder; %for folder types
         Parent;
+        ImportOptions;
     end
     
     properties %File / folder container
@@ -17,6 +18,7 @@ classdef DataFrame < OperLib & GUILib
         SheetName;
         HeadersRow;
         TypeSettings;
+        ContChildren;
     end
     
     %Interface of class
@@ -28,6 +30,7 @@ classdef DataFrame < OperLib & GUILib
         GetVariables(obj);
         
         GetVarNames;
+        
         %GetVarByName
     end
 
@@ -49,10 +52,60 @@ classdef DataFrame < OperLib & GUILib
         
         function SetSuffix(obj,suffix)
             obj.Sufix=suffix;
+            ltype=char(suffix);
+            switch ltype
+                case '.xls'
+                    T=OperLib.GetSuffixOptionsTable(ltype);
+                    obj.ContChildren{3}.Data=T;
+                case '.xlsx'
+                    T=OperLib.GetSuffixOptionsTable(ltype);
+                    obj.ContChildren{3}.Data=T;
+                case '.csv'
+                    T=OperLib.GetSuffixOptionsTable(ltype);
+                    obj.ContChildren{3}.Data=T;
+                case '.txt'
+                    T=OperLib.GetSuffixOptionsTable(ltype);
+                    obj.ContChildren{3}.Data=T;
+                case '.bin'
+                    T=OperLib.GetSuffixOptionsTable(ltype);
+                    obj.ContChildren{3}.Data=T;
+                case '~'
+                    
+                otherwise
+            end
         end
         
         function SetConType(obj,type)
             obj.ContainerType=type;
+        end
+        
+        function SetFrameOpt(obj,src,event)
+            obj.ImportOptions=event.Source.Data;
+        end   
+        
+        function CreateContainerComponents(obj)
+            SetParent(obj,'container');
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,'1x'};
+            g.ColumnWidth = {'1x','1x'};
+            
+            la=uilabel(g,'Text','File option');
+            la.Layout.Row=1;
+            la.Layout.Column=1;
+            
+            
+            T=OperLib.GetSuffixOptionsTable('.xls');
+            uit = uitable(g,'Data',T,'ColumnEditable',[false,true],...
+                'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetFrameOpt(obj,event));
+            
+            if size(obj.ImportOptions,1)>0
+                uit.Data=obj.ImportOptions;
+            end
+            uit.Layout.Row=2;
+            uit.Layout.Column=1;
+            
+            obj.ContChildren={g;la;uit};
+            SetParent(obj,'type');
         end
     end   
     

@@ -13,10 +13,9 @@ classdef GUILib < handle
     end
     
     %interface
-    methods (Abstract)
-        InitializeOption(obj);
-
-    end
+%     methods (Abstract)
+%         CreateTypeComponents(obj);
+%     end
     %         PlotType(obj);
     methods (Access = public)
         %Constructor
@@ -29,23 +28,23 @@ classdef GUILib < handle
         function ResetParents(obj)
             obj.GUIParents=struct('Parent',[],'Class',[],'Name',[],'Pos',[]);
         end
-        %will draw options for current data type
-        function DrawTypeOption(obj)
-            if obj.Init
-                InitializeOption(obj);
-%                 CheckOptions(obj);
-            else
-                InitializeOption(obj);
-            end
-            
-            if numel(obj.Children)>0
-                ShowComponents(obj);
-%                 GuiInit(obj);
-            end
-        end
+
         
         function T=GetTypeSpec(obj)
             T=obj.TypeSet{1, 1};  
+        end
+        
+                %will initalize gui for first time
+        function InitTypeOption(obj)
+            
+
+            if obj.Init
+                ShowComponents(obj)
+            else
+                SetParent(obj,'type');
+                CreateTypeComponents(obj);
+                CreateContainerComponents(obj);
+            end
         end
         
         function AddParent(obj,parent,name)
@@ -63,7 +62,7 @@ classdef GUILib < handle
         
         function p=GetParent(obj,in)
             %will find saved parent by either name or number
-            sz=size(obj.GUIParents,1);
+            sz=size(obj.GUIParents,2);
             switch class(in)
                 case 'char'
                     %getting by name
@@ -131,18 +130,29 @@ classdef GUILib < handle
     methods (Access = public) 
         
         function HideComponents(obj)
-            for i=1:numel(obj.Children)
-                obj.Children{i,1}.Visible=false;
-            end
-%             for i=1:numel(obj.GuiParent)
-%                 obj.GuiParent(i,1).Visible=false;
+%             for j=1:numel(obj.GUIParents)
+%                 SetParent(obj,obj.GUIParents(j).Name);
+                for i=1:numel(obj.Children)
+                    obj.Children{i,1}.Visible=false;
+                end
+                
+                for i=1:numel(obj.ContChildren)
+                    obj.ContChildren{i,1}.Visible=false;
+                end
 %             end
+            
         end
         
         function ShowComponents(obj)
-            for i=1:numel(obj.Children)
-                obj.Children{i,1}.Visible=true;
-            end
+
+                for i=1:numel(obj.Children)
+                    obj.Children{i,1}.Visible=true;  
+                end
+                
+                for i=1:numel(obj.ContChildren)
+                    obj.ContChildren{i,1}.Visible=true;
+                end
+%             end
         end
         
         %clear GUI COntainer

@@ -145,16 +145,6 @@ classdef Press < DataFrame
     %Gui for data type selection 
     methods (Access = public)   
         
-        function InitializeOption(obj,name)
-            
-            if obj.Init
-                ShowComponents(obj)
-            else
-                SetParent(obj,name);
-                CreateTypeComponents(obj);
-            end
-        end
-        
         function CreateTypeComponents(obj)
             g=uigridlayout(obj.GuiParent);
             g.RowHeight = {22,250,50};
@@ -166,14 +156,13 @@ classdef Press < DataFrame
                         
             uit = uitable(g,'Data',OperLib.PRBlueprint,'ColumnEditable',true,...
             'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
-            'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
-            
+            'UserData',0);
+            uit.Layout.Row=2;
+            uit.Layout.Column=[1 4];
+        
             cbx = uicheckbox(g,'Text','Order from main table?');
             cbx.Layout.Row=3;
             cbx.Layout.Column=[1 4];
-            
-            but1=uibutton(g,'Text','',...
-                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
             
             MF=OperLib.FindProp(obj.Parent,'MasterFolder');
             
@@ -181,6 +170,8 @@ classdef Press < DataFrame
             IconFilePlus=[IconFolder 'plus_sign.gif'];
             IconFileMinus=[IconFolder 'cancel_sign.gif'];
             
+            but1=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
             but1.Layout.Row=1;
             but1.Layout.Column=3;
             but1.Icon=IconFilePlus;
@@ -190,12 +181,15 @@ classdef Press < DataFrame
             but2.Layout.Row=1;
             but2.Layout.Column=4;
             but2.Icon=IconFileMinus;
+            
+            obj.Children={g;la;uit;cbx;but1;but2};
         end
         
         
         %set property
         function SetVal(obj,source,event)
 %             obj.TypeSet{idx}=val;
+            obj.TypeSettings=event.source.Data;
         end
         
         %adrow in table
@@ -205,7 +199,7 @@ classdef Press < DataFrame
             CurrRow=source.Children{3,1}.UserData;
             if RowCount>0
                 T2=OperLib.PRBlueprint;
-                T2.ColNumber=RowCount+1;
+                T2.ColOrder=RowCount+1;
                 if CurrRow>0 && CurrRow<RowCount
                     A=T(1:CurrRow,:);
                     B=T(CurrRow+1:end,:);
@@ -217,20 +211,6 @@ classdef Press < DataFrame
             source.Children{3,1}.UserData=0;
             obj.TypeSettings=source.Children{3,1}.Data;
         end
-        
-        %will initalize gui for first time
-%         function InitializeOption(obj)
-%             SetParent(obj,'type');
-%             Clear(obj);
-% 
-%             %Target=DrawUITable(obj,MTBlueprint(obj),@SetVal);
-%             %DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-%             Target=DrawUITable(obj,OperLib.PRBlueprint,@SetVal,200);
-%             DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-%             DrawLabel(obj,['Stupid format at the moment \n Select composition of main table: by spinner select number of columns \n',...
-%                            'and choose the type of each column, column position in source file.\n',...
-%                            'IMPORTANT: there can be only one KeyColumn'],[300 60]);
-%         end
     end
     
     %Gui for plotter
