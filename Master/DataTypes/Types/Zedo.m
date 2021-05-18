@@ -318,22 +318,11 @@ classdef Zedo < AcousticEmission
 
     %Gui for data type selection 
     methods (Access = public)   
-        
-        function CreateTypeComponents(obj)
-        end
-        
+
         %set property
         function SetVal(obj,val,idx)
             obj.TypeSet{idx}=val;
         end       
-        
-        %add card to zedo
-        %Key(obj,han.Value,obj.Count,Target);
-        function AddCard(obj,n,~,Parent)
-            %(obj,Parent,Type,Key)
-            DrawUITreeNode(obj,Parent,['Card ' char(num2str(n))],@UpdateCardInfo);
-            
-        end
         
         %add channel
         function AddChannel(obj,Parent,n)
@@ -345,33 +334,125 @@ classdef Zedo < AcousticEmission
             
         end
         
-        %adrow in table
-        function TypeAdRow(obj,Value,idx,Target)
-            obj.TypeSet{idx}=Value;
-            dim=size(Target.Data);
-            if dim(1)~=Value
-                if Value>dim(1)
-                    Target.Data=[Target.Data; OperLib.MTBlueprint];
-                    Target.Data{end,4}=Value;
-                else
-                    Target.Data(end,:)=[];
-                end
-                obj.TypeSet{Target.UserData{2}}=Target.Data;
-            end
+        function AEbox=ZBlueprint(obj)
+            AEbox=struct;
+            AEbox.name='ZedoBox';
+            AEbox.card(1)=ZCard(obj,1);
+
         end
+        
+        function channel=ZChannel(obj,n)
+            channel=struct;
+            channel.name=string(sprintf('Channel %d',n));
+        end
+        
+        function card=ZCard(obj,n)
+            card=struct;
+            card.name=string(sprintf('Card %d',n));
+            card.channel(1)=ZChannel(obj,1);
+            card.channel(2)=ZChannel(obj,2);
+        end
+
         %will initalize gui for first time
-        function InitializeOption(obj)
-            SetParent(obj,'type');
-            Clear(obj);
+        function CreateTypeComponents(obj)
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,250,50};
+            g.ColumnWidth = {'1x','2x',44,44};
             
-%             Target=DrawUITree(obj,@SetVal);
-%             DrawSpinner(obj,[1 20],Target,@AddCard);
-%             DrawUIEditField(obj,"Channel 1",@UpdateCardInfo);
-%             
-            DrawLabel(obj,['SimpleZedo format at the moment \n',...
-                           'Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+   
+            la=uilabel(g,'Text','Columns selection:');
+            
+            la.Layout.Row=1;
+            la.Layout.Column=[1 4];
+            
+            
+            t = uitree(g);
+            t.Layout.Row=2;
+            t.Layout.Column=[1 3];
+            
+            
+           
+            
+            MF=OperLib.FindProp(obj.Parent,'MasterFolder');
+            
+            IconFolder=[MF 'Master\GUI\Icons\'];
+            IconFilePlus=[IconFolder 'plus_sign.gif'];
+            IconFileMinus=[IconFolder 'cancel_sign.gif'];
+            
+            
+            
+            but1=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.AddCard(obj,event));
+            
+            but1.Layout.Row=1;
+            but1.Layout.Column=3;
+            but1.Icon=IconFilePlus;
+            
+            but2=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.RemoveCard(obj,event));
+            but2.Layout.Row=1;
+            but2.Layout.Column=4;
+            but2.Icon=IconFileMinus;
+            
+            
+             
+            AEbox=ZBlueprint(obj);
+            if strcmp(class(obj.TypeSettings),'struct')
+                FillTree(obj,obj.TypeSettings,t)
+            else
+                FillTree(obj,AEbox,t);
+            end
+            
+            
+            
+            obj.Children=[g;la;t;but1;but2];
+        end
+        
+        function FillTree(obj,AEbox,tree)
+            
+            a=tree.Children;
+            a.delete;
+            
+            ZB=uitreenode(tree,'Text',AEbox.name);
+            for i=1:size(AEbox.card,2)
+                CardNode{i}=uitreenode(ZB,'Text',AEbox.card(i).name);
+                
+                for j=1:size(AEbox.card(i).channel,2)
+                    ChNode{i,j}=uitreenode(CardNode{i},'Text',AEbox.card(i).channel(j).name);
+                end
+            end
+            
+            
+            obj.TypeSettings=AEbox;
+        end
+        
+        function AddCard(obj,event,source)
+            AEbox=event.TypeSettings;
+            
+            cardcount=size(AEbox.card,2);
+            card=ZCard(obj,cardcount+1);
+            
+            AEbox.card(cardcount+1)=card;
+            
+            node=event.Children(3, 1).Children;
+            
+            
+            cardNode=uitreenode(node,'Text',card.name);
+            cha1Node=uitreenode(cardNode,'Text',card.channel(1).name);
+            cha2Node=uitreenode(cardNode,'Text',card.channel(2).name);
+            
+            event.TypeSettings=AEbox;
+        end
+        
+        function RemoveCard(obj,event,source)
+            AEbox=event.TypeSettings;
+            last=size(AEbox.card,2);
+            if last>1
+                a=event.Children(3, 1).Children.Children;
+                a(end).delete;
+                AEbox.card(last)=[];
+                event.TypeSettings=AEbox;
+            end
         end
     end
     

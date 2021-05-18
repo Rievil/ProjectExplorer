@@ -13,16 +13,16 @@ classdef GUILib < handle
     end
     
     %interface
-%     methods (Abstract)
-%         CreateTypeComponents(obj);
-%     end
+    methods (Abstract)
+
+    end
     %         PlotType(obj);
     methods (Access = public)
         %Constructor
         function obj=GUILib(~)
             obj.Init=false;
             ResetParents(obj);
-%             obj.DrawNode=DrawNode;
+
         end
         
         function ResetParents(obj)
@@ -34,13 +34,13 @@ classdef GUILib < handle
             T=obj.TypeSet{1, 1};  
         end
         
-                %will initalize gui for first time
         function InitTypeOption(obj)
             
 
             if obj.Init
                 ShowComponents(obj)
             else
+                obj.Init=1;
                 SetParent(obj,'type');
                 CreateTypeComponents(obj);
                 CreateContainerComponents(obj);
@@ -95,18 +95,15 @@ classdef GUILib < handle
         end
         
         function SetGuiParent(obj,Parent)
-%             if obj.Init==0
-                ResetParents(obj);
-                tst=class(Parent);
-                switch class(Parent)
-                    case 'matlab.ui.container.TabGroup'
-                        for ch=Parent.Children'
-                            AddParent(obj,ch,lower(ch.Title));
-                        end
-                    otherwise
-                        obj.GuiParent=Parent;
-                end
-%             end
+            ResetParents(obj);
+            switch class(Parent)
+                case 'matlab.ui.container.TabGroup'
+                    for ch=Parent.Children'
+                        AddParent(obj,ch,lower(ch.Title));
+                    end
+                otherwise
+                    obj.GuiParent=Parent;
+            end
         end
         
         function NewRow(obj)
@@ -118,11 +115,6 @@ classdef GUILib < handle
     %methods for drawing of options in plotter object
     methods
         function delete(obj)
-%             disp('Test');
-%             for i=1:numel(obj.Children)
-%                 delete(obj.Children{i,1});
-%                 obj.Children(i,1)=[];
-%             end
         end
     end
     
@@ -133,11 +125,11 @@ classdef GUILib < handle
 %             for j=1:numel(obj.GUIParents)
 %                 SetParent(obj,obj.GUIParents(j).Name);
                 for i=1:numel(obj.Children)
-                    obj.Children{i,1}.Visible=false;
+                    obj.Children(i,1).Visible=false;
                 end
                 
                 for i=1:numel(obj.ContChildren)
-                    obj.ContChildren{i,1}.Visible=false;
+                    obj.ContChildren(i,1).Visible=false;
                 end
 %             end
             
@@ -146,13 +138,12 @@ classdef GUILib < handle
         function ShowComponents(obj)
 
                 for i=1:numel(obj.Children)
-                    obj.Children{i,1}.Visible=true;  
+                    obj.Children(i,1).Visible=true;  
                 end
                 
                 for i=1:numel(obj.ContChildren)
-                    obj.ContChildren{i,1}.Visible=true;
+                    obj.ContChildren(i,1).Visible=true;
                 end
-%             end
         end
         
         %clear GUI COntainer
@@ -173,7 +164,6 @@ classdef GUILib < handle
                         obj.GUIParents(i).Parent.InnerPosition(4),...
                         obj.GUIParents(i).Parent.InnerPosition(3),...
                         20];
-    %                 obj.Pos=
                 end
             end
             

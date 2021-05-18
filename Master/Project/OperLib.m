@@ -123,6 +123,10 @@ classdef OperLib < handle
             T=table(Num,Label,Unit,ColNames(1),'VariableNames',{'ColOrder','VariableName','Unit','Type'});
         end
         
+        
+        
+        
+        
         %Get All types that are present in datatype library
         function out=GetTypes(varargin)
             STRTypes=["MainTable","Press","Zedo"];
@@ -230,9 +234,10 @@ classdef OperLib < handle
                     Name=["DecimalDelimiter","Encryption"]';
                     Value={DecimalDelimiter(1),Enc(1)}';
                     T=table(Name,Value);
-                    
                 case '~'
-                    
+                    Name=["No prop"]';
+                    Value=categorical("");
+                    T=table(Name,Value);
                 otherwise
             end
         end

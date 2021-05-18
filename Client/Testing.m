@@ -125,3 +125,9 @@ for k=1:numel(fn)
         % do stuff
     end
 end
+%%
+AEbox=struct;
+AEbox.box='ZedoBox';
+AEbox.card(1).name='Card 1';
+AEbox.card(1).channel(1).name='Channel 1';
+AEbox.card(1).channel(2).name='Channel 2';

@@ -153,12 +153,19 @@ classdef Press < DataFrame
             la=uilabel(g,'Text','Selection of data variables:');
             la.Layout.Row=1;
             la.Layout.Column=[1 4];
-                        
+            
+            T=OperLib.PRBlueprint;
             uit = uitable(g,'Data',OperLib.PRBlueprint,'ColumnEditable',true,...
             'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
             'UserData',0);
             uit.Layout.Row=2;
             uit.Layout.Column=[1 4];
+            
+            if strcmp(class(obj.TypeSettings),'table')
+                uit.Data=obj.TypeSettings;
+            else
+                obj.TypeSettings=T;
+            end
         
             cbx = uicheckbox(g,'Text','Order from main table?');
             cbx.Layout.Row=3;
@@ -182,14 +189,13 @@ classdef Press < DataFrame
             but2.Layout.Column=4;
             but2.Icon=IconFileMinus;
             
-            obj.Children={g;la;uit;cbx;but1;but2};
+            obj.Children=[g;la;uit;cbx;but1;but2];
         end
         
         
         %set property
         function SetVal(obj,source,event)
-%             obj.TypeSet{idx}=val;
-            obj.TypeSettings=event.source.Data;
+            source.TypeSettings=event.Source.Data;
         end
         
         %adrow in table
@@ -210,6 +216,13 @@ classdef Press < DataFrame
             end
             source.Children{3,1}.UserData=0;
             obj.TypeSettings=source.Children{3,1}.Data;
+        end
+        
+        %remove variable
+        function TypeRemoveVar(obj,source,event)
+            if size(source.Children{3,1}.Data,1)>1
+                source.Children{3,1}.Data(end,:)=[];
+            end
         end
     end
     

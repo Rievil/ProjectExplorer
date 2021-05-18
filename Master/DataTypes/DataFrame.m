@@ -3,11 +3,11 @@ classdef DataFrame < OperLib & GUILib
     %   Detailed explanation goes here
     
     properties
+        ImportOptions;
         Data; %universal container, Data might be table, array, structure
         Filename; %for files type
         Folder; %for folder types
         Parent;
-        ImportOptions;
     end
     
     properties %File / folder container
@@ -30,7 +30,7 @@ classdef DataFrame < OperLib & GUILib
         GetVariables(obj);
         
         GetVarNames;
-        
+        CreateTypeComponents(obj);
         %GetVarByName
     end
 
@@ -53,30 +53,16 @@ classdef DataFrame < OperLib & GUILib
         function SetSuffix(obj,suffix)
             obj.Sufix=suffix;
             ltype=char(suffix);
-            switch ltype
-                case '.xls'
-                    T=OperLib.GetSuffixOptionsTable(ltype);
-                    obj.ContChildren{3}.Data=T;
-                case '.xlsx'
-                    T=OperLib.GetSuffixOptionsTable(ltype);
-                    obj.ContChildren{3}.Data=T;
-                case '.csv'
-                    T=OperLib.GetSuffixOptionsTable(ltype);
-                    obj.ContChildren{3}.Data=T;
-                case '.txt'
-                    T=OperLib.GetSuffixOptionsTable(ltype);
-                    obj.ContChildren{3}.Data=T;
-                case '.bin'
-                    T=OperLib.GetSuffixOptionsTable(ltype);
-                    obj.ContChildren{3}.Data=T;
-                case '~'
+            
+            T=OperLib.GetSuffixOptionsTable(ltype);
+            obj.ContChildren(3).Data=T;
+            obj.ImportOptions=T;
                     
-                otherwise
-            end
         end
         
         function SetConType(obj,type)
             obj.ContainerType=type;
+            obj.ImportOptions=obj.ContChildren{3}.Data;
         end
         
         function SetFrameOpt(obj,src,event)
@@ -98,13 +84,16 @@ classdef DataFrame < OperLib & GUILib
             uit = uitable(g,'Data',T,'ColumnEditable',[false,true],...
                 'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetFrameOpt(obj,event));
             
-            if size(obj.ImportOptions,1)>0
+            if strcmp(class(obj.ImportOptions),'table')
                 uit.Data=obj.ImportOptions;
+            else
+                obj.ImportOptions=T;
             end
+            
             uit.Layout.Row=2;
             uit.Layout.Column=1;
             
-            obj.ContChildren={g;la;uit};
+            obj.ContChildren=[g;la;uit];
             SetParent(obj,'type');
         end
     end   

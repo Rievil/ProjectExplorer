@@ -167,9 +167,6 @@ classdef MainTable < DataFrame
         
         
         function CreateTypeComponents(obj)
-            
-            
-            obj.Init=1;
             g=uigridlayout(obj.GuiParent);
             g.RowHeight = {22,250,50};
             g.ColumnWidth = {'1x','2x',44,44};
@@ -178,13 +175,15 @@ classdef MainTable < DataFrame
             la.Layout.Row=1;
             la.Layout.Column=[1 4];
             
-            
-            uit = uitable(g,'Data',OperLib.MTBlueprint,'ColumnEditable',true,...
+            T=OperLib.MTBlueprint;
+            uit = uitable(g,'Data',T,'ColumnEditable',true,...
                 'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
                 'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
             
             if strcmp(class(obj.TypeSettings),'table')
                 uit.Data=obj.TypeSettings;
+            else
+                obj.TypeSettings=T;
             end
             
             uit.Layout.Row = 2;
@@ -217,11 +216,11 @@ classdef MainTable < DataFrame
             
            la2.Layout.Row=3;
            la2.Layout.Column=[1 4];
-           obj.Children={g;la;uit;but1;but2;la2};
+           obj.Children=[g;la;uit;but1;but2;la2];
         end
     end
+
     
-    %Gui for plotter
     methods 
         function han=PlotType(obj,ax)
 

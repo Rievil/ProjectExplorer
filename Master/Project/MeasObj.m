@@ -417,21 +417,52 @@ classdef MeasObj < Node
     
     %Gui methods
     methods 
-        function ChangeName(obj,name)
-            obj.Name=name;
-            obj.TreeNode.Text=name;
+        function ChangeName(obj,event)
+            obj.Name=event.Value;
+            obj.TreeNode.Text=event.Value;
         end
         
+        function ChangeBruteFolder(obj,event)
+            GetBruteFolder(obj);
+            event.Source.UserData.Text=obj.BruteFolder;
+        end
+        
+        
         function InitializeOption(obj)
+            
             SetParent(obj,'project');
             Clear(obj);
-            DrawLabel(obj,['Great new description of Measurement:'],[300 60]);
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,22,22,250,50};
+            g.ColumnWidth = {150,'2x',44,44};
             
-            han=DrawUIEditField(obj,'My text',@ChangeName);
-            han.Value=obj.Name;
+            la=uilabel(g,'Text','Options of Measurement:');
+            la.Layout.Row=1;
+            la.Layout.Column=[1 4];
             
-            DrawLabel(obj,['Description of measurement'],[300 60]);
-%             han=DrawUIEditField(obj,'My text',@ChangeName);
+            la2=uilabel(g,'Text','Name of measurement:');
+            la2.Layout.Row=2;
+            la2.Layout.Column=1;
+            
+            text=uieditfield(g,'Value',obj.Name,...
+            'ValueChangedFcn',@(src,event)ChangeName(obj,event));
+            text.Layout.Row=2;
+            text.Layout.Column=2;
+            
+            la3=uilabel(g,'Text','Raw data folder:');
+            la3.Layout.Row=3;
+            la3.Layout.Column=1;
+            
+            la4=uilabel(g,'Text',obj.BruteFolder);
+            la4.Layout.Row=3;
+            la4.Layout.Column=2;
+            
+            but1=uibutton(g,'Text','Change folder',...
+                'ButtonPushedFcn',@(src,event)ChangeBruteFolder(obj,event),'UserData',la4);
+            but1.Layout.Row=3;
+            but1.Layout.Column=[3 4];
+          
+            
         end
     end
 
