@@ -13,6 +13,7 @@ classdef Experiment < Node
         
         %meas purpose is for reading a new data, changing it to specimens
         %with properties and then saving to specimens
+        MeasGroup;
         Meas; %this can be erased, and can be sizely
         MeasCount; 
         
@@ -20,8 +21,6 @@ classdef Experiment < Node
         SpecimensCount;
         
         VarTable;
-        
-        Parent; %ProjectObj
     end
     
     events
@@ -36,28 +35,28 @@ classdef Experiment < Node
     
     methods
         function obj = Experiment(parent)
-%             obj@Node;
             obj.Parent=parent;
-%             obj.ID=ID;
             obj.Status=0;
             
+            %ovládací prvky meas
+            AddMeasGroup(obj);
+        end
+        
+        
+        function AddMeasGroup(obj)
+%             obj2=MeasGroup(obj);
+            obj.MeasGroup=MeasGroup(obj)
         end
         
 
         
 
-        
-        function Reload(obj)
-               obj.notify('eReload');
-        end
         
         function EditExperiment(obj)
             obj.TypeFig=AppTypeSelector(obj);
         end
         
-%         function StartTypeEditor(obj)
-%             obj.TypeSelWin=AppTypeSelector(app.PNodeSelected,app.MasterFolder,obj);
-%         end
+
         
         function CreateExpFolder(obj)
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');            
@@ -99,60 +98,27 @@ classdef Experiment < Node
             stash=struct;
             stash.Name=obj.Name;
             stash.TypeSettings=obj.TypeSettings;
-            stash.MeasCount=obj.MeasCount;
-%             stash.Meas=struct;
-            n=0;
-            for M=obj.Meas
-                n=n+1;
-                TMP=Pack(M);  
-                stash.Meas(n)= TMP;         
-            end
-            if n==0
-                stash.Meas=struct;
-            end
-            
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            MasterFolder=OperLib.FindProp(obj,'MasterFolder');
-            
-            Filename=[SandBox,obj.ExpFolder,'\Experiment.mat'];
-%             save(Filename,'stash');
-            
+
+            stash.MeasGroup=Pack(obj.MeasGroup);
         end
         
         function Populate(obj,stash)
-
             obj.Name=stash.Name;
             obj.TypeSettings=stash.TypeSettings;
-            obj.MeasCount=stash.MeasCount;
+
             FillNode(obj);
-            
-            if obj.MeasCount>0
-                n=0;
-                for Me=stash.Meas
-                    n=n+1;
-                    obj2=AddMeas(obj);
-                    Populate(obj2,Me);
-                end
-            end
+            Populate(obj.MeasGroup,stash.MeasGroup);
         end
         
         function FillNode(obj)
             iconfilename=[OperLib.FindProp(obj,'MasterFolder') 'Master\Gui\Icons\nExp.gif'];
             obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
                 'Icon',iconfilename);
-        end
-        function obj2=AddMeas(obj)
-            obj2=MeasObj(obj);
-            obj.Meas=[obj.Meas, obj2];   
-            obj.MeasCount=numel(obj.Meas);
+            FillNode(obj.MeasGroup);
         end
         
-        function node=AddNode(obj) 
-            node=AddMeas(obj);
-            node.ID=OperLib.FindProp(obj,'MeasID');
-            SetName(node);
-            
-            FillNode(node);
+        function AddNode(obj) 
+            NewMeas(obj.MeasGroup);
         end
     end
     

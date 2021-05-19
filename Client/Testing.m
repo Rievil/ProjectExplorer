@@ -2,6 +2,7 @@
 clear all;
 %%
 b=ExplorerAppStartMain;
+% clear all;
 %%
 stash=Pack(b.Core.ProjectOverview);
 %%
@@ -131,3 +132,5 @@ AEbox.box='ZedoBox';
 AEbox.card(1).name='Card 1';
 AEbox.card(1).channel(1).name='Channel 1';
 AEbox.card(1).channel(2).name='Channel 2';
+%%
+txt = jsonencode(AEbox);

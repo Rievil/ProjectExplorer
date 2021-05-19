@@ -132,32 +132,32 @@ classdef MainTable < DataFrame
         
         %adrow in table
         function TypeAdVar(obj,source,event)
-            T=source.Children{3,1}.Data;
+            T=source.Children(3,1).Data;
             RowCount=size(T,1);
-            CurrRow=source.Children{3,1}.UserData;
+            CurrRow=source.Children(3,1).UserData;
             if RowCount>0
                 T2=OperLib.MTBlueprint;
                 T2.ColNumber=RowCount+1;
                 if CurrRow>0 && CurrRow<RowCount
                     A=T(1:CurrRow,:);
                     B=T(CurrRow+1:end,:);
-                    source.Children{3,1}.Data=[A; T2; B];
+                    source.Children(3,1).Data=[A; T2; B];
                 else
-                    source.Children{3,1}.Data=[source.Children{3,1}.Data; T2]; 
+                    source.Children(3,1).Data=[source.Children(3,1).Data; T2]; 
                 end
             end
-            source.Children{3,1}.UserData=0;
-            obj.TypeSettings=source.Children{3,1}.Data;
+            source.Children(3,1).UserData=0;
+            obj.TypeSettings=source.Children(3,1).Data;
         end
         
         function TypeRemoveVar(obj,source,event)
-            CurrRow=source.Children{3,1}.UserData;
+            CurrRow=source.Children(3,1).UserData;
             if CurrRow>0
-                source.Children{3,1}.Data(CurrRow,:)=[];
+                source.Children(3,1).Data(CurrRow,:)=[];
             else
-                source.Children{3,1}.Data(end,:)=[];
+                source.Children(3,1).Data(end,:)=[];
             end
-            source.Children{3,1}.UserData=0;
+            source.Children(3,1).UserData=0;
         end
         
         function SetTabPos(obj,source,event)

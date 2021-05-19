@@ -14,16 +14,10 @@ classdef MeasObj < Node
 %         ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
         c char;
-        %if 'extracted', then we already have DataC created in project
-        %folder, and we dont have to check if BruteFolder is avaliable, or
-        %not
-%         SandBox char; 
-        %this path may change between instances per users, its important 
-        %for creation of new object
+        Key=0;
         Selector;
         ClonedTypes=0;
         TotalTable;
-        Parent;
         Version;
         TreeNode;
         
@@ -50,13 +44,10 @@ classdef MeasObj < Node
         function obj=MeasObj(Parent)
             obj@Node;
             obj.Parent=Parent;
-%             obj.ID=ID;
-            
+
             obj.Metadata=struct;
             obj.Metadata.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
-            
-            
-%             obj.ProjectFolder=ProjectFolder;
+
             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;
         end
@@ -131,6 +122,7 @@ classdef MeasObj < Node
         end
         
         function Populate(obj,stash)
+            obj.ID=stash.ID;
             obj.Name=stash.Name;
             obj.Metadata=stash.Metadata;
             obj.BruteFolder=stash.BruteFolder;
@@ -145,15 +137,23 @@ classdef MeasObj < Node
             obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
                 'Icon',iconName,...
                 'NodeData',{obj,'meas'});
+            UIFig=OperLib.FindProp(obj,'UIFig');
+            cm = uicontextmenu(UIFig);
+            m1 = uimenu(cm,'Text','Remove','MenuSelectedFcn',@obj.RemoveNode);%,...
+            m2 = uimenu(cm,'Text','Read','MenuSelectedFcn',@obj.MenuRead);
+            obj.TreeNode.ContextMenu=cm;
         end
         
         function node=AddNode(obj)
+            
         end
         
-%         FillUITab(obj,Tab);
-%         FillNode(obj);
-%         stash=Pack(obj);
-%         node=AddNode(obj);
+        function RemoveNode(obj,src,~)
+            DeleteMeas(obj.Parent,obj.ID);
+            delete(obj.TreeNode);
+            obj.delete;
+        end
+        
     end
     
     %Events, listeners, callbacks
@@ -206,21 +206,7 @@ classdef MeasObj < Node
         end
     end
     
-    %Gui methods
-%     methods
-%         %fill the table 
-%         function FillUITable(obj,UITable,Sel)
-%             %if isempty(obj.TotalTable)
-%             MakeTotalTable(obj,Sel);
-%             %end
-%             UITable.Data=obj.TotalTable;
-%             UITable.ColumnEditable(2) = true;
-%             UITable.ColumnEditable(~2) = false;
-%             for i=1:size(obj.TotalTable,2)
-%                 UITable.ColumnName{i}=obj.TotalTable.Properties.VariableNames{i};
-%             end
-%         end
-%     end
+
     
     %Save, load, delete, copy methods
     methods
@@ -238,32 +224,11 @@ classdef MeasObj < Node
     end
     
     methods %Reading methods
-        function ReLoadData(obj)
-            obj.Data=[];
-            
-%             SavedSelectors=obj.Selector;
-%             SaveCount=obj.Count;
-            
-            if ~exist(obj.BruteFolder, 'dir')
-                GetBruteFolder(obj)  
-                if obj.BruteFolderSet==1
-                    ReadData(obj);
-                end
-                
-            else
-                if obj.BruteFolderSet==1
-                    ReadData(obj);
-                end
-            end
-            
-%             if obj.Count~=SaveCount || isempty(SavedSelectors)
-%                 ResetSelectors(obj);
-%             else
-%                 obj.Selector=SavedSelectors;
-%             end
+        
+        function MenuRead(obj,src,~)
+            ReadData(obj);
         end
         
-        %funkce pro ètení
         function ReadData(obj)
             if obj.BruteFolderSet==0
                 GetBruteFolder(obj);
@@ -271,38 +236,39 @@ classdef MeasObj < Node
             
             try
                 obj.Version=obj.Version+1;
-                Types=obj.TypeTable.DataType;
+                Types=OperLib.FindProp(obj,'TypeSettings');
                 TP=DataFrame.GetTypes;
 
-                ChTypes=sort(obj.TypeTable.DataType);
+                ChTypes=sort(Types.DataType);
 
-                Lia = ismember(ChTypes,TP(1));
+                Lia = find(ChTypes==TP(1));
                 f1 = waitbar(0,'Please wait...','Name','Loading data');
 
                 %èekni jestli má MainTable
                 if sum(Lia)>0
                     %yes, this profile has main maintable
-                    obj.MainTable=GetTypeSpec(obj.TypeTable.TypesObj{Lia});
-                    if sum(obj.MainTable.Key)>0
+                    MainTable=Types.TypesObj{Lia,1}.TypeSettings;
+                    if sum(MainTable.Key)>0
                         %yes, this profile has key column
                         obj.Key=true;                    
                     end
                 else
                     %no, this profile does not has maintable
                 end   
+                
                 %--------------------------------------------------------------
-                F1Lim=size(obj.TypeTable,1);
+                F1Lim=size(Types,1);
                 for i=1:F1Lim
-                    CharDataType=lower(char(obj.TypeTable.Container(i)));
+                    CharDataType=lower(char(Types.Container(i)));
                     waitbar(i/F1Lim,f1,['Processing ''' CharDataType ''' ...']);
                     switch CharDataType
                         case 'file'
-                            items=dir([obj.BruteFolder '*' char(obj.TypeTable.Sufix(i))]);
+                            items=dir([obj.BruteFolder '*' char(Types.Sufix(i))]);
                             Names=OperLib.SeparateFileName(items);
 
-                            if ~strcmp(obj.TypeTable.KeyWord(i),"")
+                            if ~strcmp(Types.KeyWord(i),"")
 
-                                Index=find(contains(lower(Names),lower(obj.TypeTable.KeyWord(i))));
+                                Index=find(contains(lower(Names),lower(Types.KeyWord(i))));
                                 if numel(Index)>1
                                     %there is more maintables, which is forbidden
                                     %-> error
@@ -318,7 +284,7 @@ classdef MeasObj < Node
                             end
 
                             %filename=ReadDir(obj,i);
-                            obj1=Copy(obj.TypeTable.TypesObj{i});
+                            obj1=Copy(Types.TypesObj{i});
                             obj1.Parent=obj;
                             OutPut=Read(obj1,filename);
 
@@ -330,8 +296,8 @@ classdef MeasObj < Node
                             end
 
                             obj.Data=[obj.Data, TabRows(obj1)];
-    %                         obj.Data.DataTypeName{i}=char(obj.TypeTable.DataType(i));
-    %                         obj.Data.Data{i}=obj.TypeTable.TypesObj{i};
+    %                         obj.Data.DataTypeName{i}=char(Types.DataType(i));
+    %                         obj.Data.Data{i}=Types.TypesObj{i};
 
                         case 'folder'
                             %i got all folders from brute folder
@@ -355,11 +321,11 @@ classdef MeasObj < Node
                                     waitbar(j/F2Lim,f2,['Processing: ''' char(obj.Data.Name(j)) '''']);
                                     folder=[char(items(j).folder) '\' char(obj.Data.Name(j)) '\'];
                                     %'obj2 = copy(obj1)'
-                                    obj2=Copy(obj.TypeTable.TypesObj{i});
+                                    obj2=Copy(Types.TypesObj{i});
                                     obj2.Parent=obj;
                                     Read(obj2,folder);
                                     F2File=[F2File; table(obj2,...
-                                        'VariableNames',{char(obj.TypeTable.DataType(i))})];
+                                        'VariableNames',{char(Types.DataType(i))})];
                                 end
                             end
                             close(f2);
@@ -385,7 +351,25 @@ classdef MeasObj < Node
             end
         end
         
-        %Will create overview of descriptive variables from maintable
+        function ReLoadData(obj)
+            obj.Data=[];
+
+            
+            if ~exist(obj.BruteFolder, 'dir')
+                GetBruteFolder(obj)  
+                if obj.BruteFolderSet==1
+                    ReadData(obj);
+                end
+                
+            else
+                if obj.BruteFolderSet==1
+                    ReadData(obj);
+                end
+            end
+            
+
+        end
+
         function [Cat]=StackCat(obj)
             Cat=table;
             if obj.Key==true
@@ -406,7 +390,7 @@ classdef MeasObj < Node
         
         %Set datatypetable
         function SetDataTypes(obj,TypeTable)
-            obj.TypeTable=TypeTable;
+            Types=TypeTable;
         end
         
         %set brute folder
@@ -438,7 +422,14 @@ classdef MeasObj < Node
             
             la=uilabel(g,'Text','Options of Measurement:');
             la.Layout.Row=1;
-            la.Layout.Column=[1 4];
+            la.Layout.Column=[1 3];
+            
+            
+            la3=uilabel(g,'Text',sprintf('ID: %d',obj.ID),...
+                'HorizontalAlignment','center',...
+                'BackgroundColor',[0.7 0.7 0.7]);
+            la3.Layout.Row=1;
+            la3.Layout.Column=[3 4];
             
             la2=uilabel(g,'Text','Name of measurement:');
             la2.Layout.Row=2;

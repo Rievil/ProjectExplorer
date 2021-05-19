@@ -318,40 +318,53 @@ classdef Zedo < AcousticEmission
 
     %Gui for data type selection 
     methods (Access = public)   
+        
 
-        %set property
-        function SetVal(obj,val,idx)
-            obj.TypeSet{idx}=val;
-        end       
         
-        %add channel
-        function AddChannel(obj,Parent,n)
-            DrawUITreeNode(obj,Parent,['Channel ' char(double2str(n))],@UpdateCardInfo);
+        function T=GetZBl(obj)
+            loctype=LocType(obj);
+            Name={'AE device','Number of cards','Channels per card','Localization','Local type'}';
+            Value={'Zedo',...
+                1,2,...
+                false,...
+                loctype(1)}';
+            T=table(Name,Value);
         end
         
-        %function edit card
-        function UpdateCardInfo(obj,value,node)
-            
-        end
         
-        function AEbox=ZBlueprint(obj)
-            AEbox=struct;
-            AEbox.name='ZedoBox';
-            AEbox.card(1)=ZCard(obj,1);
 
+        function SetVal(obj,event)
+            sensorCount=event.Source.Data.Value{2}*event.Source.Data.Value{3};
+            loctype=LocType(obj);
+            test=false;
+            while test==false
+                switch char(event.Source.Data.Value{5})
+                    case '~'
+                        test=1;
+                    case '1D'
+                        if sensorCount<2
+                            event.Source.Data.Value{5}=loctype(1);
+                        else
+                            test=1;
+                        end
+                    case '2D'
+                        if sensorCount<3
+                            event.Source.Data.Value{5}=loctype(2);
+                        else 
+                            test=1;
+                        end
+                    case '3D'
+                        if sensorCount<5
+                            event.Source.Data.Value{5}=loctype(3);
+                        else 
+                            test=1;
+                        end
+                end
+            end
+            obj.TypeSettings=event.Source.Data;
         end
         
-        function channel=ZChannel(obj,n)
-            channel=struct;
-            channel.name=string(sprintf('Channel %d',n));
-        end
-        
-        function card=ZCard(obj,n)
-            card=struct;
-            card.name=string(sprintf('Card %d',n));
-            card.channel(1)=ZChannel(obj,1);
-            card.channel(2)=ZChannel(obj,2);
-        end
+
 
         %will initalize gui for first time
         function CreateTypeComponents(obj)
@@ -365,11 +378,16 @@ classdef Zedo < AcousticEmission
             la.Layout.Row=1;
             la.Layout.Column=[1 4];
             
+            T=GetZBl(obj);
+            uit = uitable(g,'Data',T,'ColumnEditable',[false,true],...
+                'ColumnWidth','auto','CellEditCallback',@(src,event)SetVal(obj,event));
             
-            t = uitree(g);
-            t.Layout.Row=2;
-            t.Layout.Column=[1 3];
+            if strcmp(class(obj.TypeSettings),'table')
+                uit.Data=obj.TypeSettings;
+            end
             
+            uit.Layout.Row = 2;
+            uit.Layout.Column = [1 4];
             
            
             
@@ -378,82 +396,11 @@ classdef Zedo < AcousticEmission
             IconFolder=[MF 'Master\GUI\Icons\'];
             IconFilePlus=[IconFolder 'plus_sign.gif'];
             IconFileMinus=[IconFolder 'cancel_sign.gif'];
+
             
-            
-            
-            but1=uibutton(g,'Text','',...
-                'ButtonPushedFcn',@(src,event)obj.AddCard(obj,event));
-            
-            but1.Layout.Row=1;
-            but1.Layout.Column=3;
-            but1.Icon=IconFilePlus;
-            
-            but2=uibutton(g,'Text','',...
-                'ButtonPushedFcn',@(src,event)obj.RemoveCard(obj,event));
-            but2.Layout.Row=1;
-            but2.Layout.Column=4;
-            but2.Icon=IconFileMinus;
-            
-            
-             
-            AEbox=ZBlueprint(obj);
-            if strcmp(class(obj.TypeSettings),'struct')
-                FillTree(obj,obj.TypeSettings,t)
-            else
-                FillTree(obj,AEbox,t);
-            end
-            
-            
-            
-            obj.Children=[g;la;t;but1;but2];
+            obj.Children=[g;la;uit];
         end
         
-        function FillTree(obj,AEbox,tree)
-            
-            a=tree.Children;
-            a.delete;
-            
-            ZB=uitreenode(tree,'Text',AEbox.name);
-            for i=1:size(AEbox.card,2)
-                CardNode{i}=uitreenode(ZB,'Text',AEbox.card(i).name);
-                
-                for j=1:size(AEbox.card(i).channel,2)
-                    ChNode{i,j}=uitreenode(CardNode{i},'Text',AEbox.card(i).channel(j).name);
-                end
-            end
-            
-            
-            obj.TypeSettings=AEbox;
-        end
-        
-        function AddCard(obj,event,source)
-            AEbox=event.TypeSettings;
-            
-            cardcount=size(AEbox.card,2);
-            card=ZCard(obj,cardcount+1);
-            
-            AEbox.card(cardcount+1)=card;
-            
-            node=event.Children(3, 1).Children;
-            
-            
-            cardNode=uitreenode(node,'Text',card.name);
-            cha1Node=uitreenode(cardNode,'Text',card.channel(1).name);
-            cha2Node=uitreenode(cardNode,'Text',card.channel(2).name);
-            
-            event.TypeSettings=AEbox;
-        end
-        
-        function RemoveCard(obj,event,source)
-            AEbox=event.TypeSettings;
-            last=size(AEbox.card,2);
-            if last>1
-                a=event.Children(3, 1).Children.Children;
-                a(end).delete;
-                AEbox.card(last)=[];
-                event.TypeSettings=AEbox;
-            end
-        end
     end
     
     %Gui for plotter

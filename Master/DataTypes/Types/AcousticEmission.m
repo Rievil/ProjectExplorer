@@ -11,5 +11,11 @@ classdef AcousticEmission < DataFrame
         end
         
     end
+    
+    methods (Access=public)
+        function loctype=LocType(obj)
+            loctype=categorical(["~","1D","2D","3D"],'Ordinal',true);
+        end
+    end
 end
 

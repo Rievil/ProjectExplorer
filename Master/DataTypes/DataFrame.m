@@ -33,6 +33,8 @@ classdef DataFrame < OperLib & GUILib
         CreateTypeComponents(obj);
         %GetVarByName
     end
+    
+    
 
     methods
         %constructor
@@ -44,6 +46,15 @@ classdef DataFrame < OperLib & GUILib
         
         function SetTypeSet(obj,TypeSet)
             obj.TypeSet=TypeSet;
+        end
+        
+        function ClearGUI(obj)
+            obj.Init=0;
+            obj.Children=[];
+            obj.ContChildren=[];
+            obj.GUIParents=[];
+            obj.GuiParent=[];
+            obj.Parent=[];
         end
         
         function SetKeyWord(obj,key)

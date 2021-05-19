@@ -20,8 +20,6 @@ classdef ProjectObj < Node
     
         CurrentSelector;
         EvListener;
-        
-        Parent;        
     end
 
     
@@ -171,7 +169,7 @@ classdef ProjectObj < Node
         
         %filling the node
         function FillNode(obj)
-            treenode=uitreenode(obj.Parent.UITree,...
+            treenode=uitreenode(obj.Parent.TreeNode,...
             'Text',obj.Name,...
             'NodeData',{obj,'project'}); 
 

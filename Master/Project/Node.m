@@ -3,6 +3,7 @@ classdef Node < OperLib & GUILib
     %   Detailed explanation goes here
     
     properties
+        Parent;
     end
     
     methods (Abstract)

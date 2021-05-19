@@ -200,28 +200,28 @@ classdef Press < DataFrame
         
         %adrow in table
         function TypeAdVar(obj,source,event)
-            T=source.Children{3,1}.Data;
+            T=source.Children(3,1).Data;
             RowCount=size(T,1);
-            CurrRow=source.Children{3,1}.UserData;
+            CurrRow=source.Children(3,1).UserData;
             if RowCount>0
                 T2=OperLib.PRBlueprint;
                 T2.ColOrder=RowCount+1;
                 if CurrRow>0 && CurrRow<RowCount
                     A=T(1:CurrRow,:);
                     B=T(CurrRow+1:end,:);
-                    source.Children{3,1}.Data=[A; T2; B];
+                    source.Children(3,1).Data=[A; T2; B];
                 else
-                    source.Children{3,1}.Data=[source.Children{3,1}.Data; T2]; 
+                    source.Children(3,1).Data=[source.Children(3,1).Data; T2]; 
                 end
             end
-            source.Children{3,1}.UserData=0;
-            obj.TypeSettings=source.Children{3,1}.Data;
+            source.Children(3,1).UserData=0;
+            obj.TypeSettings=source.Children(3,1).Data;
         end
         
         %remove variable
         function TypeRemoveVar(obj,source,event)
-            if size(source.Children{3,1}.Data,1)>1
-                source.Children{3,1}.Data(end,:)=[];
+            if size(source.Children(3,1).Data,1)>1
+                source.Children(3,1).Data(end,:)=[];
             end
         end
     end

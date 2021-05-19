@@ -9,6 +9,7 @@ classdef CoreObj < handle
 %         App=[];
         AppRunning=0;
         Parent;
+        UIFig;
     end
     
     properties
@@ -30,12 +31,14 @@ classdef CoreObj < handle
 %             obj.IsApp=1;
             obj.AppTree=obj.App.PTree;
             obj.AppTabGroup=obj.App.TabGroup;
+            obj.UIFig=obj.App.UIFigure;
         end
     end
     %----------------------------------------------------------------------
     methods
         function CreateOverview(obj)
             obj.ProjectOverview=ProjectOverView(obj);
+            FillNode(obj.ProjectOverview);
             Load(obj);
         end
         
