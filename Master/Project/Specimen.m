@@ -4,32 +4,29 @@ classdef Specimen < handle
     
     properties
         ID;
-        KeyName;
-        Data (:,1);
+        MeasID;
+        Key;
+        Data;
         Version;
-        Features;
-        
-%         Properties;
-%         DataTypes;
-        Metadata;
+        Parent;
+%         Features;
+%         Metadata;
     end
     
     
     methods
         function obj = Specimen(parent) %parent je experiment
-            %SPECIMEN Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+            obj.Parent=parent;
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
-        end
-        
-        function stash=Pack(obj)
-            
+        function T=GetT(obj)
+            if numel(obj.ID)>0
+                T=table(obj.ID,obj.Key,obj.MeasID,{obj.Data},...
+                    'VariableNames',{'ID','Key','MeasID','Data'});
+            else
+                T=table(0,obj.Key,obj.MeasID,{obj.Data},...
+                    'VariableNames',{'ID','Key','MeasID','Data'});                
+            end
         end
     end
 end

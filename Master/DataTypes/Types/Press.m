@@ -58,22 +58,25 @@ classdef Press < DataFrame
     
     methods %reading methods
                 %will read data started from dataloader
-        function Out=Read(obj,filename)
-            obj.ColNumbers=3;
-            obj.Filename=filename;
-            opts=detectImportOptions(filename,'NumHeaderLines',2,...
-                'Sheet','Test Curve Data');
+        function result=Read(obj,filename,opts)
             
-            %K:\ZEDO_DATA_Export\200408_Melichar_THIS
+            obj.Filename=filename;
+
             INData=readtable(filename,opts);    
             %INData=ResamplePressData(obj,INData);
             
             DCount=size(INData,2);
-            VarNames={'Time','Force','Deff'};
+            VarNames=obj.TypeSettings.VariableName;
+            obj.ColNumbers=size(obj.TypeSettings,1);
+            
             T=table;
             n=0;
+            result=struct;
+            result=struct;
             try
                 for i=1:obj.ColNumbers:DCount
+                    n=n+1;
+                    
                     Arr2=INData(:,i:i+obj.ColNumbers-1);
                     Arr=zeros([size(Arr2,1), obj.ColNumbers]);
                     for j=1:size(Arr,2)
@@ -87,15 +90,30 @@ classdef Press < DataFrame
                     end
                     
                     Arr(isnan(Arr(:,1)),:)=[];
-                    PR=Press;
+%                     PR=Press;
+                    T3=table;
                     for j=1:obj.ColNumbers
-                        PR.Data=[PR.Data, table(Arr(:,j),'VariableNames',VarNames(j))];
+                        switch obj.TypeSettings.Type(j)
+                            case 'seconds'
+                                arr2=seconds(Arr(:,j));
+                            case 'double'
+                                arr2=double(Arr(:,j));
+                            otherwise
+                                arr2=Arr(:,j);
+                        end
+                        T2=table(arr2,'VariableNames',VarNames(j));
+                        T3=[T3, T2];
                     end
-                    n=n+1;
-                    T.Press(n)=PR;
+                    T3.Properties.VariableUnits=obj.TypeSettings.Unit;
+                    
+                    result.data(n).meas=T3;
                 end
-                obj.Data=T;
-                Out=T;
+                
+%                 result.data=Data;
+                result.key=[];
+                result.count=n;
+                result.type=class(obj);
+
             catch ME
                 error(['Error with file: ''' filename, ...
                     ''' with specimen: ''' char(num2str(n)) '''\n', ...

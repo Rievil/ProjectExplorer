@@ -15,17 +15,17 @@ classdef MeasObj < Node
         ExtractionState; %status of extraction of data from brute folder
         c char;
         Key=0;
+        MainTable;
+        TypeTable table;
+        
         Selector;
         ClonedTypes=0;
         TotalTable;
         Version;
         TreeNode;
         
-        TypeTable table;
-        SpecimenCount;
-%         Key logical;
-%         MainTable table;
         
+        SpecimenCount;    
     end
     
     
@@ -59,13 +59,24 @@ classdef MeasObj < Node
 
         %Výbìr adresáøe s mìøeními
         function GetBruteFolder(obj)
-            obj.BruteFolder=uigetdir(cd,'Pick folder with formated data as set in experiment');            
-            if obj.BruteFolder==0
-                obj.BruteFolder="none";
-                obj.BruteFolderSet=0;
+            msg='Pick folder with formated data as set in experiment';
+            if numel(obj.BruteFolder)==0
+                obj.BruteFolder=uigetdir(cd,msg);  
+                if numel(obj.BruteFolder)>1
+                    obj.BruteFolderSet=1;
+                else
+                    obj.BruteFolder="none";
+                    obj.BruteFolderSet=0;
+                end
             else
-                obj.BruteFolder=[obj.BruteFolder '\'];
-                obj.BruteFolderSet=1;
+                folder=uigetdir(cd,msg);  
+                if numel(folder)<2
+                    
+                else
+                    obj.BruteFolder=[folder '\'];
+                    obj.BruteFolderSet=1;
+                end
+                
             end
         end
         
@@ -134,9 +145,11 @@ classdef MeasObj < Node
         
         function FillNode(obj)
             iconName=[OperLib.FindProp(obj,'MasterFolder') '\Master\Gui\Icons\Meas.gif'];
-            obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',obj.Name,...
+            Name=char(sprintf('%d - %s',obj.ID,obj.Name));
+            obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text',Name,...
                 'Icon',iconName,...
                 'NodeData',{obj,'meas'});
+            
             UIFig=OperLib.FindProp(obj,'UIFig');
             cm = uicontextmenu(UIFig);
             m1 = uimenu(cm,'Text','Remove','MenuSelectedFcn',@obj.RemoveNode);%,...
@@ -151,6 +164,9 @@ classdef MeasObj < Node
         function RemoveNode(obj,src,~)
             DeleteMeas(obj.Parent,obj.ID);
             delete(obj.TreeNode);
+            
+            SpecGroup=OperLib.FindProp(obj,'SpecGroup');
+            RemoveSpecimens(SpecGroup,'MeasID',obj.ID);
             obj.delete;
         end
         
@@ -225,11 +241,101 @@ classdef MeasObj < Node
     
     methods %Reading methods
         
+        
+        
         function MenuRead(obj,src,~)
             ReadData(obj);
         end
         
         function ReadData(obj)
+            if obj.BruteFolderSet==0
+                GetBruteFolder(obj);
+            end
+            obj.Version=obj.Version+1;
+            obj.TypeTable=OperLib.FindProp(obj,'TypeSettings');
+            
+            AllTypes=OperLib.GetTypes;
+            CurrentTypes=sort(obj.TypeTable.DataType);
+            
+            MTIdx=find(CurrentTypes==AllTypes(1));
+            
+            if MTIdx>0
+                %Experiemnts has a maintable
+                obj.Key=sum(obj.TypeTable.TypesObj{MTIdx,1}.TypeSettings.Key);
+            else
+                %Experiment doesnt has a maintable
+            end
+            
+
+            FileMap = OperLib.GetTypeDir(obj.BruteFolder);
+            
+            result=struct;
+            
+            for i=1:size(obj.TypeTable,1)
+                obj2=obj.TypeTable.TypesObj{i,1};
+                subresult=ReadContainer(obj2,FileMap);
+                if i==1
+                    result=subresult;
+                else
+                    result=[result, subresult];
+                end
+            end
+            
+            %check for key similarities
+            ch=0;
+            for i=1:size(result,2)
+                if i==1
+                    keyold=result(i).key;
+                else
+                    key=result(i).key;
+                    if numel(key)==numel(keyold)
+                        [A]=intersect(keyold,key);
+                        if numel(A)==numel(key)
+                            ch=1;
+                            keyold=key;
+                        else
+                            break;
+                            ch=0;
+                        end
+                    else
+                        result(i).key=keyold;
+                    end
+                end
+            end
+            
+            if ch==1
+                finalkey=keyold;
+            else
+                %key is corupted
+            end
+            
+            MakeSpecimens(obj,result,finalkey);
+            
+        end
+        
+        function MakeSpecimens(obj,result,key)
+            SpecGroup=OperLib.FindProp(obj,'SpecGroup');
+            for i=1:numel(key)
+                data=struct;
+                for j=1:size(result,2)
+                    Idx=find(result(j).key==key(i));
+                    data(j).data=result(j).data(Idx).meas;
+                    data(j).type=result(j).type;
+                end
+                
+%                 SpecimenID=OperLib.FindProp(obj,'SpecimenID');
+                spec=Specimen(SpecGroup);
+                spec.MeasID=obj.ID;
+                spec.Data=data;
+                spec.Key=key(i);
+                
+                AddSpecimen(SpecGroup,spec);
+                
+            end
+            
+        end
+        
+        function ReadData2(obj)
             if obj.BruteFolderSet==0
                 GetBruteFolder(obj);
             end
@@ -296,8 +402,6 @@ classdef MeasObj < Node
                             end
 
                             obj.Data=[obj.Data, TabRows(obj1)];
-    %                         obj.Data.DataTypeName{i}=char(Types.DataType(i));
-    %                         obj.Data.Data{i}=Types.TypesObj{i};
 
                         case 'folder'
                             %i got all folders from brute folder
@@ -351,6 +455,8 @@ classdef MeasObj < Node
             end
         end
         
+        
+        
         function ReLoadData(obj)
             obj.Data=[];
 
@@ -380,6 +486,16 @@ classdef MeasObj < Node
         end
     end
     
+    methods (Access = private)
+        function ReadFile(obj)
+            
+        end
+        
+        function ReadFolder(obj)
+            
+        end
+    end
+    
     %static methods
     methods (Static)
         
@@ -403,7 +519,7 @@ classdef MeasObj < Node
     methods 
         function ChangeName(obj,event)
             obj.Name=event.Value;
-            obj.TreeNode.Text=event.Value;
+            obj.TreeNode.Text=[char(num2str(obj.ID)) ' - ' char(event.Value)];
         end
         
         function ChangeBruteFolder(obj,event)

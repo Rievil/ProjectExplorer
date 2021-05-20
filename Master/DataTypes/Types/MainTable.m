@@ -47,7 +47,7 @@ classdef MainTable < DataFrame
             obj2.GuiParent=obj.GuiParent;
             obj2.Count=obj.Count;
             obj2.Children=obj.Children;
-            obj2.TypeSet=obj.TypeSet;
+            obj2.TypeSettings=obj.TypeSettings;
             obj2.Init=obj.Init;
             obj2.Pos=obj.Pos;
         end
@@ -75,44 +75,50 @@ classdef MainTable < DataFrame
     
     %reading methods
     methods 
-                %will read data started from dataloader
-        function Data=Read(obj,filename)
-            obj.Filename=filename;
-            T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
-            Data=table;
-            TypeSet=obj.TypeSet{1,1};
-            SpecNum=size(obj.TypeSet{1},1);
-            Desc=strings([SpecNum 1]);
-            Desc(TypeSet.IsDescriptive,1)="Descriptive";
+        
+        %will read data started from dataloader
+        function result=Read(obj,filename,opts)
+%             obj.Filename=filename;
+            result=struct;
             
-            for i=1:SpecNum
-                type=char(obj.TypeSet{1}.ColType(i));
+            T=readtable(filename,opts);
+            Data=table;
+            TypeSettings=obj.TypeSettings;
+            ColNum=size(TypeSettings,1);
+            
+            Desc=strings(ColNum,1);
+            Desc(TypeSettings.IsDescriptive,1)="Descriptive";
+            
+            for i=1:ColNum
+                type=char(obj.TypeSettings.ColType(i));
                 
-                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
-                SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
+                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSettings.ColNumber(i)}));
+                SmallTable.Properties.VariableNames=obj.TypeSettings.Label(i);
                 
                 Data=[Data, SmallTable];
-                if TypeSet.IsDescriptive(i)==1
+                if TypeSettings.IsDescriptive(i)==1
                     
                 end
-                %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
-                
             end
             Data.Properties.VariableDescriptions=Desc;
             
+            for i=1:size(Data,1)
+                result.data(i).meas=Data(i,:);
+            end
             
-            KeyRow=obj.TypeSet{1,1}(obj.TypeSet{1,1}.Key>0,:);
-            obj.SpecimensCount=size(Data,1);
-            obj.KeyNames=Data{:,KeyRow.ColNumber};
-            
-            obj.Data=Data;
+            KeyRow=obj.TypeSettings(obj.TypeSettings.Key>0,:);
+
+%             result.data=Data;
+            result.key=Data{:,KeyRow.ColNumber};
+            result.count=size(Data,1);
+            result.type=class(obj);
         end
         
         function Cat=GetCat(obj)
             Cat=table;
             for i=1:size(obj.Data,2)
                 ClassName=lower(class(obj.Data{1,i}));
-                Desc=obj.TypeSet{1, 1}.IsDescriptive;
+                Desc=obj.TypeSettings{1, 1}.IsDescriptive;
                 if Desc(i,1)==true
                     Cat=[Cat, obj.Data(:,i)];
                 end
@@ -125,8 +131,8 @@ classdef MainTable < DataFrame
     methods (Access = public)   
         %set property
         function SetVal(obj,src,event)
-%             obj.TypeSet{1}=event.Source.Data;
-            obj.TypeSettings=event.Source.Data;
+%             obj.TypeSettings{1}=event.Source.Data;
+            obj.TypeSettingstings=event.Source.Data;
 %             source.Children{3,1}.UserData=0;
         end       
         
@@ -147,7 +153,7 @@ classdef MainTable < DataFrame
                 end
             end
             source.Children(3,1).UserData=0;
-            obj.TypeSettings=source.Children(3,1).Data;
+            obj.TypeSettingstings=source.Children(3,1).Data;
         end
         
         function TypeRemoveVar(obj,source,event)

@@ -17,7 +17,7 @@ classdef Experiment < Node
         Meas; %this can be erased, and can be sizely
         MeasCount; 
         
-        Specimens; %this is efficiently stored measurements
+        SpecGroup; %this is efficiently stored measurements
         SpecimensCount;
         
         VarTable;
@@ -25,6 +25,7 @@ classdef Experiment < Node
     
     events
         eReload;
+        
     end
     
     properties
@@ -39,14 +40,15 @@ classdef Experiment < Node
             obj.Status=0;
             
             %ovládací prvky meas
-            AddMeasGroup(obj);
+            obj.MeasGroup=MeasGroup(obj);
+            obj.SpecGroup=SpecGroup(obj);
         end
         
         
-        function AddMeasGroup(obj)
-%             obj2=MeasGroup(obj);
-            obj.MeasGroup=MeasGroup(obj)
-        end
+%         function AddMeasGroup(obj)
+% %             obj2=MeasGroup(obj);
+%             obj.MeasGroup=MeasGroup(obj)
+%         end
         
 
         
@@ -100,6 +102,7 @@ classdef Experiment < Node
             stash.TypeSettings=obj.TypeSettings;
 
             stash.MeasGroup=Pack(obj.MeasGroup);
+            stash.SpecGroup=Pack(obj.SpecGroup);
         end
         
         function Populate(obj,stash)
@@ -108,6 +111,10 @@ classdef Experiment < Node
 
             FillNode(obj);
             Populate(obj.MeasGroup,stash.MeasGroup);
+            
+            if isfield(stash,'SpecGroup')
+                Populate(obj.SpecGroup,stash.SpecGroup);
+            end
         end
         
         function FillNode(obj)
@@ -115,6 +122,7 @@ classdef Experiment < Node
             obj.TreeNode=uitreenode(obj.Parent.ExpMainNode,'Text',obj.Name,'NodeData',{obj,'experiment'},...
                 'Icon',iconfilename);
             FillNode(obj.MeasGroup);
+            FillNode(obj.SpecGroup);
         end
         
         function AddNode(obj) 

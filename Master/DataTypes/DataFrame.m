@@ -109,6 +109,65 @@ classdef DataFrame < OperLib & GUILib
         end
     end   
     
+    methods (Access=public)
+        function result=ReadContainer(obj,map)
+            %filter by container
+            switch obj.ContainerType
+                case 'File'
+                    T=map(map.isdir==0,:);
+                    
+                    %filter by suffix
+                    T=T(T.suffix==char(obj.Sufix),:);
+                    
+                case 'Folder'
+                    T=map(map.isdir==1,:);
+            end
+            
+            %filter by keyword
+            name=T.name;
+            Idx=find(contains(lower(T.name),lower(obj.KeyWord)));
+            
+            if Idx>0
+                %i got exactly one type
+                filename=[char(T.folder(Idx))  '\' (char(T.file(Idx)))];
+                opts=MakeReadOpt(obj,filename,T.suffix);
+                result=Read(obj,filename,opts);
+                
+%                 dat=readtable(Filename,opts);
+                
+            elseif Idx>1
+                %i got multiple types
+                
+            end
+            
+        end
+        
+        function opts=MakeReadOpt(obj,filename,suffix)
+%             opts = detectImportOptions(filename);
+%             for i=1:size(obj.ImportOptions)
+                switch suffix
+                    case '.txt'
+                    case '.csv'
+                        opts = detectImportOptions(filename,'Sheet',obj.ImportOptions.Value{1},...
+                            'NumHeaderLines',obj.ImportOptions.Value{4});
+                    case '.xls'
+                        opts = detectImportOptions(filename,'Sheet',obj.ImportOptions.Value{1},...
+                            'NumHeaderLines',obj.ImportOptions.Value{4});
+
+                    case '.xlsx'
+                        opts = detectImportOptions(filename,'Sheet',obj.ImportOptions.Value{1},...
+                            'NumHeaderLines',obj.ImportOptions.Value{4});
+                    otherwise
+                        disp('zedo');
+                        opts=[];
+                end
+                
+                
+%             end
+        end
+        
+    end
+    
     %Gui for datatypes
     methods
         

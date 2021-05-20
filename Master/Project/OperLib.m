@@ -124,7 +124,40 @@ classdef OperLib < handle
         end
         
         
+        %Map directory for types in reading process
+        function FileMap=GetTypeDir(folder)
+            map = dir(fullfile(folder)); 
+            map([1 2])=[];
+            
+            name=string({map(:).name})';
+            
+            folder=string({map(:).folder})';
+            date=datetime({map(:).date},'Format','dd.MM.yyyy hh:mm:ss','Locale','system')';
+            dirlog=logical(cell2mat({map(:).isdir}))';
+            
+            suffix=strings(numel(name),1);
+            suffix(~dirlog,1)=name(~dirlog,1);
+            filename=strings(numel(name),1);
+            
+            for i=1:numel(suffix)
+                suff=split(suffix(i,1),'.');
+                suffix(i,1)=['.' char(suff(end))];
+                filename(i,1)=replace(name(i,1),['.' char(suff(end))],'');
+            end
+            
+            colnames={'name','file','suffix','folder','date','isdir'};
+            FileMap=table(filename,name,suffix,folder,date,dirlog,'VariableNames',colnames);
+        end
         
+        function result=GetResultStruct
+%             result=struct('data',{},'key',{},'count',[],'type','');
+%             
+%             result.data=Data;
+%             result.key=Data{:,KeyRow.ColNumber};
+%             result.count=size(Data,1);
+%             result.type=class(obj);
+            
+        end
         
         
         %Get All types that are present in datatype library

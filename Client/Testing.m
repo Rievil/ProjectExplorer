@@ -134,3 +134,6 @@ AEbox.card(1).channel(1).name='Channel 1';
 AEbox.card(1).channel(2).name='Channel 2';
 %%
 txt = jsonencode(AEbox);
+%%
+filename='G:\Můj disk\Škola\Sandbox\Stash.mat';
+tst=matfile(filename);

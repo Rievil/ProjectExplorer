@@ -21,6 +21,8 @@ classdef Node < OperLib & GUILib
 
         end
         
+        
+        
         function sobj = saveobj(obj)
             switch class(obj)
                 case 'experiment'

@@ -50,7 +50,25 @@ classdef Zedo < AcousticEmission
     
     methods %reading
        %will read data started from dataloader
-        function Data=Read(obj,folder)
+       function result=Read(obj,folder,~)
+           result=struct;
+           measfolder=dir(folder);
+           measfolder([1,2])=[];
+           
+           result.key=string({measfolder(:).name})';
+           result.count=numel(result.key);
+           result.type=class(obj);
+
+
+           for i=1:result.count
+               folder=[measfolder(i).folder '\' measfolder(i).name];
+               Data=Read2(obj,folder);
+               result.data(i).meas=Data;
+           end
+       end
+       
+       
+        function data=Read2(obj,folder)
             obj.Folder=folder;
             alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             warning('off','all');
@@ -84,7 +102,7 @@ classdef Zedo < AcousticEmission
             
             IdxE=find(contains(fileName,'event'));
             if length(IdxE)>0
-                filename=[files(IdxE).folder '\' files(IdxE).name];
+                filename=[folder '\' filesORG(IdxE).name];
                 [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
                 
                 Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine);
@@ -119,7 +137,7 @@ classdef Zedo < AcousticEmission
                             case 1 %parameters
                                 
                                 Records(iCard).Param.Name=paterrns{i};
-                                Records(iCard).Param.Data=readtable([CardFiles(Idx).folder '\' CardFiles(Idx).name],'ReadVariableNames',true);                                
+                                Records(iCard).Param.Data=readtable([folder '\' CardFiles(Idx).name],'ReadVariableNames',true);                                
                                 CardNames(Idx)=[];    
                                 CardFiles(Idx)=[]; 
                             case 2 %detector
@@ -134,7 +152,7 @@ classdef Zedo < AcousticEmission
                                     DetectorName=[SignalPatterns{2} num2str(DecNum(s))];
                                     %AEFiles(2).Detec(s).Name=DetectorName;                                        
                                     Records(iCard).Detector(s).Name=DetectorName;
-                                    Records(iCard).Detector(s).Data=readtable([DetectorsFiles(s).folder '\' DetectorsFiles(s).name],'ReadVariableNames',true,'HeaderLines', 2);
+                                    Records(iCard).Detector(s).Data=readtable([folder '\' DetectorsFiles(s).name],'ReadVariableNames',true,'HeaderLines', 2);
                                     
                                     NHitDet(1:size(Records(iCard).Detector(s).Data,1),1)=s;
                                     Records(iCard).Detector(s).Data=[Records(iCard).Detector(s).Data table(NHitDet)];
@@ -165,8 +183,8 @@ classdef Zedo < AcousticEmission
                 T=ConnTables(obj,TMPS);
                 Records(iCard).ConDetector=T;
             end
-            Zedo=struct('Speed',speed,'Events',Events,'Records',Records);
-            obj.Data=Zedo;
+            
+            data=struct('Speed',speed,'Events',Events,'Records',Records);
             %ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
         end
