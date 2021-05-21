@@ -27,6 +27,7 @@ classdef Inspector < handle
         Depth;
         GUI;
         GUIParent;
+        Nodes;
     end
     
     properties
@@ -91,7 +92,7 @@ classdef Inspector < handle
         function Select(obj,i)
             if i>0 && i<=obj.Count
                  obj.CurrArrIdx=i;
-                 obj.CurrArr=obj.MemArray(obj.CurrArrIdx);
+                 obj.CurrArr=obj.MemArray{obj.CurrArrIdx};
             else
                 disp('Out of scope');
             end
@@ -133,6 +134,25 @@ classdef Inspector < handle
             ClearGui(obj);
         end
         
+        function Reset(obj)
+            obj.CurrArr=[];
+            obj.MemArray=[];
+            obj.MemName=[];
+            obj.Count=0;
+            obj.ArrCount=[];
+            obj.Row=1;
+            tree=obj.GUI(4);
+            a=tree.Children;
+            a.delete;
+        end
+        
+        function Show(obj)
+            if obj.Fig==1
+                tree=obj.GUI(4);
+                tree.Children=obj.Nodes;
+            end
+        end
+        
         function DrawGUI(obj)
             if obj.Fig==0
                 fig = uifigure;
@@ -140,11 +160,18 @@ classdef Inspector < handle
                 fig=obj.GUIParent;
             end
             
-            fig.CloseRequestFcn=@obj.FigWindowClose;
+            trida=class(fig);
+            switch trida
+                case 'matlab.ui.container.Panel'
+                case 'test'
+                    fig.CloseRequestFcn=@obj.FigWindowClose;
+                otherwise
+            end
+            
             
             g=uigridlayout(fig);
             g.RowHeight = {'1x','2x'};
-            g.ColumnWidth = {'1x','2x'};
+            g.ColumnWidth = {260,'1x'};
             uit=uitable(g);
             uit.Layout.Row=1;
             uit.Layout.Column=2;
@@ -171,6 +198,7 @@ classdef Inspector < handle
         end
         
         function Run3(obj)
+            DefineTable(obj);
             for i=1:obj.Count
                 obj.CurrArrIdx=i;
                 obj.CurrArr=obj.MemArray{i};
@@ -186,6 +214,7 @@ classdef Inspector < handle
                 end
                 Run(obj);
             end
+            obj.Nodes=obj.GUI(4).Children;
         end
         
         function Run(obj)
@@ -211,9 +240,12 @@ classdef Inspector < handle
         
         function [A,name]=GetVar(obj,ID)
             row=ID;
+            Select(obj,obj.T(row).CurrArr);
             path=obj.T(row).Path;
             numpath=obj.T(row).Num';
             name=obj.T(row).Name;
+            
+            
             
             A=obj.CurrArr;
             for i=1:numel(path)
@@ -239,7 +271,8 @@ classdef Inspector < handle
             Path=strings(0,0);
             Num=zeros(0,0);
             Size=[0,0];
-            obj.T=struct("ID",[],"ParID",[],"Depth",[],"Type",Type,"Path",Path,"Num",Num,"Size",Size,"Name",'');
+            obj.Row=1;
+            obj.T=struct("CurrArr",[],"ID",[],"ParID",[],"Depth",[],"Type",Type,"Path",Path,"Num",Num,"Size",Size,"Name",'');
         end
         
         function LoopStruct(obj)
@@ -346,8 +379,10 @@ classdef Inspector < handle
 
         end
         
+        
         function AddPathFin(obj,type,path,num,size)
-%             
+%           
+            obj.T(obj.Row).CurrArr=obj.CurrArrIdx;
             obj.T(obj.Row).ID=obj.Row;
 %             sz=size(obj.T(obj.Row).Type,1);
             obj.T(obj.Row).Type=type;
@@ -361,7 +396,9 @@ classdef Inspector < handle
             obj.T(obj.Row).Name=obj.T(obj.Row).Path(end);
             
 %             AddNode(obj,obj.T(obj.Row).Name)
+%                 if obj.Child==1
             obj.Row=obj.Row+1;
+%                 end
         end
         
         function ID=GetLastParID(obj)

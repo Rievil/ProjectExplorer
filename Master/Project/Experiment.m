@@ -18,6 +18,7 @@ classdef Experiment < Node
         MeasCount; 
         
         SpecGroup; %this is efficiently stored measurements
+        VarExp;
         SpecimensCount;
         
         VarTable;
@@ -42,15 +43,8 @@ classdef Experiment < Node
             %ovládací prvky meas
             obj.MeasGroup=MeasGroup(obj);
             obj.SpecGroup=SpecGroup(obj);
+            obj.VarExp=VarExp(obj);
         end
-        
-        
-%         function AddMeasGroup(obj)
-% %             obj2=MeasGroup(obj);
-%             obj.MeasGroup=MeasGroup(obj)
-%         end
-        
-
         
 
         
@@ -103,6 +97,7 @@ classdef Experiment < Node
 
             stash.MeasGroup=Pack(obj.MeasGroup);
             stash.SpecGroup=Pack(obj.SpecGroup);
+            stash.VarExp=Pack(obj.VarExp);
         end
         
         function Populate(obj,stash)
@@ -115,6 +110,10 @@ classdef Experiment < Node
             if isfield(stash,'SpecGroup')
                 Populate(obj.SpecGroup,stash.SpecGroup);
             end
+            
+            if isfield(stash,'VarExp')
+                Populate(obj.VarExp,stash.VarExp);
+            end
         end
         
         function FillNode(obj)
@@ -123,6 +122,7 @@ classdef Experiment < Node
                 'Icon',iconfilename);
             FillNode(obj.MeasGroup);
             FillNode(obj.SpecGroup);
+            FillNode(obj.VarExp);
         end
         
         function AddNode(obj) 

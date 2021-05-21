@@ -17,6 +17,10 @@ classdef SpecGroup < Node
                 {'ID','Key','MeasID','Data'});
         end
         
+        function data=GetVarSample(obj)
+            data=obj.Specimens.Data(1);
+        end
+        
         function RemoveSpecimens(obj,varargin)
             
             while numel(varargin)>0
