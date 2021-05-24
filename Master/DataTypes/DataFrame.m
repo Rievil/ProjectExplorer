@@ -44,6 +44,22 @@ classdef DataFrame < OperLib & GUILib
             obj.Parent=parent;
         end
         
+%         function value=GetTypeProp(obj,name)
+%             idx=0;
+%             for i=1:size(obj.TypeSettings,1)
+%                 if strcmp(lower(name),lower(obj.TypeSettings.Name(i,1)))
+%                     idx=1;
+%                     break;
+%                 end
+%             end
+%             
+%             if idx>0
+%                 value=obj.TypeSettings.Name(idx,1);
+%             else
+%                 idx=nan;
+%             end
+%         end
+        
         function SetTypeSet(obj,TypeSet)
             obj.TypeSet=TypeSet;
         end

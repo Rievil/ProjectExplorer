@@ -113,12 +113,19 @@ classdef Zedo < AcousticEmission
                 Events=addvars(Events,Order,'Before','Hits_IDs');
                 Events.Properties.VariableNames{4}='Sensors_Order';
                 
-                Order=split(string(Events{:,5}),',');
-                Order2=double(Order);
+                Order=split(string(Events{:,5},',');
+                Order2=zeros(size(Order));
+                for i=1:size(Order,2)
+                    Order2(:,i)=cell2mat(Order(:,i));
+                end
+                Order2=cellfun(@cell2mat,Order,'UniformOutput',0);
                 Events(:,5)=[];
-                Events=addvars(Events,Order2,'Before','First_Hit_Start_Relative_sec_');
+                Events=addvars(Events,Order,'Before','First_Hit_Start_Relative_sec_');
                 Events.Properties.VariableNames{5}='Hits_IDs';
                 
+                
+%                 Events.DateTime=time;
+
                 [speed,Cards]=GetSpeed(obj,filename);     
             else
                 Events=[];

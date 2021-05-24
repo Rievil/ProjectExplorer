@@ -17,5 +17,13 @@ classdef AcousticEmission < DataFrame
             loctype=categorical(["~","1D","2D","3D"],'Ordinal',true);
         end
     end
+    
+    %Data parts (channels, sensors, etc.)
+    methods
+        function chann=GetChannel(obj)
+            chann=struct("CardKey",[],"Card",[],"CardID",[],"Channel",[],"ChannelID",[],...
+                "Records",[]);
+        end
+    end
 end
 

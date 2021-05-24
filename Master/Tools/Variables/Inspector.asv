@@ -101,7 +101,6 @@ classdef Inspector < handle
         
         function DrawVar(obj,evnt,src)
             uit=src.Source.UserData;
-            if evnt.SelectedNodes.NodeData~=0
             [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData);
 
                 R=A;
@@ -124,7 +123,6 @@ classdef Inspector < handle
                     end
                 end
                 uit.Data=tab;
-            end
         end
         
         function SetGuiParent(obj,fig)
@@ -149,13 +147,14 @@ classdef Inspector < handle
         end
         
         function Show(obj)
-%             if obj.Fig==1
-%                 tree=obj.GUI(4);
-%                 for i=1:size(obj.Nodes)
-% r
-%                 end
-% %                 move(tree,obj.Nodes);
-%             end
+            if obj.Fig==1
+                tree=obj.GUI(4);
+                for i=1:size(obj.Nodes)
+                    node=uitreenode(tree);
+                    node=obj.Nodes(i,1);
+                end
+%                 move(tree,obj.Nodes);
+            end
         end
         
         function DrawGUI(obj)
@@ -340,7 +339,7 @@ classdef Inspector < handle
         function AddSepNode(obj)
           icon='C:\Users\Richard\OneDrive - Vysoké učení technické v Brně\Dokumenty\Github\ProjectExplorer\Master\GUI\Icons\SepNode.gif';
             if obj.Child>0
-                obj.SepNode=uitreenode(obj.Node,'Text','Sep Node','Icon',icon,'NodeData',0);
+                obj.SepNode=uitreenode(obj.Node,'Text','Sep Node','Icon',icon);
                 obj.SepNodeBool=true;
             end
         end

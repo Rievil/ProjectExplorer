@@ -108,11 +108,18 @@ classdef SpecGroup < Node
             arr(1)=true;
             
             uit = uitable(g,'Data',T,...
-                'ColumnWidth','auto','ColumnEditable',arr,'CellEditCallback',@obj.SetSel,...
-                'ColumnSortable',true);
+                'ColumnWidth',{30,50, 'auto',70,'auto'},'ColumnEditable',arr,'CellEditCallback',@obj.SetSel,...
+                'ColumnSortable',true,'FontSize',10);
                 %'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
             uit.Layout.Row=2;
-            uit.Layout.Column=[1 2];
+            uit.Layout.Column=1;
+            
+            s = uistyle; 
+            s.HorizontalAlignment  = 'left'; 
+            addStyle(uit,s); 
+            
+            lbox = uilistbox(g);
+            lbox.La
         end
         
         function SetSel(obj,evnt,src)

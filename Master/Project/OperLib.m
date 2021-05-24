@@ -12,10 +12,18 @@ classdef OperLib < handle
         %constructor
         function obj = OperLib(~)
         end
+        
+        
     end
     
     %Static methods for basic frames and variables
     methods (Static)
+        
+        
+        
+        function alpha=GetAlpha
+            alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        end
         
         function [HeaderLine]=GetHeadersLine(filename,StrCell)
             fid=fopen(filename);% to open the file (a test for success is strongly recommended)
@@ -144,9 +152,10 @@ classdef OperLib < handle
                 suffix(i,1)=['.' char(suff(end))];
                 filename(i,1)=replace(name(i,1),['.' char(suff(end))],'');
             end
+            row=linspace(1,i,i)';
             
-            colnames={'name','file','suffix','folder','date','isdir'};
-            FileMap=table(filename,name,suffix,folder,date,dirlog,'VariableNames',colnames);
+            colnames={'row','name','file','suffix','folder','date','isdir'};
+            FileMap=table(row,filename,name,suffix,folder,date,dirlog,'VariableNames',colnames);
         end
         
         function result=GetResultStruct
