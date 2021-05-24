@@ -4,6 +4,7 @@ classdef VarExp < Node
     
     properties
         Inspector;
+        Forge;
         TreeNode;
     end
     
@@ -11,9 +12,13 @@ classdef VarExp < Node
         function obj = VarExp(parent)
             obj.Parent=parent;
             obj.Inspector=Inspector;
+            obj.Forge=Forge;
         end
         
-        
+        function row=GetEmptyVar(obj)
+            row=table([],[],[],[],[]);
+            row.Properties.VariableNames={'ID','Name','Coord','Size','Type'};
+        end
 
     end
     
@@ -31,7 +36,7 @@ classdef VarExp < Node
         
         function stash=Pack(obj)
             stash=struct;
-            stash.Inspector=obj.Inspector.T;
+            stash.Inspector=obj.Inspector;
 %             obj.Inspector
         end
         
@@ -59,28 +64,41 @@ classdef VarExp < Node
             SetParent(obj,'project');
             Clear(obj);
             g=uigridlayout(obj.GuiParent);
-            g.RowHeight = {22,'1x'};
-            g.ColumnWidth = {'1x',30};
+            g.RowHeight = {25,'1x'};
+            g.ColumnWidth = {'1x',120};
+%             
+
             
             la=uilabel(g,'Text','Variables used in experiment:');
             la.Layout.Row=1;
             la.Layout.Column=1;
             
+            but1=uibutton(g,'Text','Check variables',...
+                'ButtonPushedFcn',@obj.CheckVar);
+                        
+            but1.Layout.Row=1;
+            but1.Layout.Column=2;
+            
             p = uipanel(g,'Title','Options','FontSize',12);
             p.Layout.Row=2;
             p.Layout.Column=[1 2];
             
-            but1=uibutton(g,'Text','Check variables',...
-                'ButtonPushedFcn',@obj.CheckVar);
+            g2=uigridlayout(p);
+            g2.RowHeight = {'1x'};
+            g2.ColumnWidth = {'1x','1x'};
             
-            but1.Layout.Row=1;
-            but1.Layout.Column=2;
-            
-            SetGuiParent(obj.Inspector,p);
             obj.Inspector.Fig=1;
+            SetGuiParent(obj.Inspector,p);
             DrawGUI(obj.Inspector);
-            Show(obj.Inspector);
+            
+%             uit=uitable(g2);
+%             uit.Layout.Row=1;
+%             uit.Layout.Column=1;
+%             uit.Data=GetEmptyVar(obj);
+            
+
         end
+        
+        
     end
 end
-

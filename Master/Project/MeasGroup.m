@@ -48,6 +48,9 @@ classdef MeasGroup < Node
             NewMeas(obj);
         end
         
+        function MenuReload(obj,src,~)
+            Reload(obj);
+        end
         
     end
     
@@ -64,6 +67,9 @@ classdef MeasGroup < Node
             cm = uicontextmenu(UITab);
             m1 = uimenu(cm,'Text','New meas',...
                 'MenuSelectedFcn',@obj.MenuAddMeas);
+            m2 = uimenu(cm,'Text','Reload all',...
+                'MenuSelectedFcn',@obj.MenuReload);
+            
             obj.TreeNode.ContextMenu=cm;
             
         end

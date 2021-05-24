@@ -116,6 +116,14 @@ classdef GUILib < handle
     methods
         function delete(obj)
         end
+        
+        function saveobj(obj)
+            obj.GUIParents=[];
+            obj.GuiParent=[];
+            obj.Children=[];
+            obj.TypeSet=[];
+            obj.GUICount=0;
+        end
     end
     
     %methods for drawing gui for options in typetable settings
@@ -156,7 +164,9 @@ classdef GUILib < handle
                     delete(Ch.Children);
                     if numel(obj.Children)>0
                         for j=1:numel(obj.Children)
-                        delete(obj.Children{j});
+                            if isvalid(obj.Children(j,1))
+                                delete(obj.Children(j,1));
+                            end
                         end
                         obj.Children=[];
                     end
@@ -357,6 +367,7 @@ classdef GUILib < handle
             end
         end
         
+
     end
 end
 

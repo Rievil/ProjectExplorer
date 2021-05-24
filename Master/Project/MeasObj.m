@@ -457,10 +457,8 @@ classdef MeasObj < Node
         
         
         
-        function ReLoadData(obj)
-            obj.Data=[];
+        function ReLoadData(obj,src,~)
 
-            
             if ~exist(obj.BruteFolder, 'dir')
                 GetBruteFolder(obj)  
                 if obj.BruteFolderSet==1
@@ -472,7 +470,6 @@ classdef MeasObj < Node
                     ReadData(obj);
                 end
             end
-            
 
         end
 

@@ -32,6 +32,8 @@ classdef Node < OperLib & GUILib
                 otherwise
             end
         end
+        
+        
     end
 end
 

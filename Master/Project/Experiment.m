@@ -19,6 +19,7 @@ classdef Experiment < Node
         
         SpecGroup; %this is efficiently stored measurements
         VarExp;
+        Plotter;
         SpecimensCount;
         
         VarTable;
@@ -44,6 +45,7 @@ classdef Experiment < Node
             obj.MeasGroup=MeasGroup(obj);
             obj.SpecGroup=SpecGroup(obj);
             obj.VarExp=VarExp(obj);
+            obj.Plotter=Plotter(obj);
         end
         
 
@@ -98,6 +100,7 @@ classdef Experiment < Node
             stash.MeasGroup=Pack(obj.MeasGroup);
             stash.SpecGroup=Pack(obj.SpecGroup);
             stash.VarExp=Pack(obj.VarExp);
+            stash.Plotter=Pack(obj.Plotter);
         end
         
         function Populate(obj,stash)
@@ -114,6 +117,11 @@ classdef Experiment < Node
             if isfield(stash,'VarExp')
                 Populate(obj.VarExp,stash.VarExp);
             end
+            
+            if isfield(stash,'Plotter')
+                Populate(obj.Plotter,stash.Plotter);
+                
+            end
         end
         
         function FillNode(obj)
@@ -123,6 +131,7 @@ classdef Experiment < Node
             FillNode(obj.MeasGroup);
             FillNode(obj.SpecGroup);
             FillNode(obj.VarExp);
+            FillNode(obj.Plotter);
         end
         
         function AddNode(obj) 

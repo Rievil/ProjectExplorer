@@ -6,6 +6,7 @@ classdef Zedo < AcousticEmission
     %by which all other types will be sorted out. This design 
     properties
        HasEvents logical;
+       SensorCoordinates;
     end
     
     properties (Access = private)
@@ -19,6 +20,7 @@ classdef Zedo < AcousticEmission
             obj.ContainerType=OperLib.GetContainerTypes(2);
             obj.KeyWord="";
             obj.Sufix="";
+            obj.SensorCoordinates=table([],[],[],[],[],[],'VariableNames',{'ID','x','y','z','OrientHor','OrientVert'});
         end
         
         function Tab=TabRows(obj,InT)
@@ -109,6 +111,7 @@ classdef Zedo < AcousticEmission
                 Events.Properties.VariableNames{7}='DateTime';
                 
                 Order=split(Events{:,4},',');
+                Order(:,1)=replace(Order(:,1),',','');
                 Events(:,4)=[];
                 Events=addvars(Events,Order,'Before','Hits_IDs');
                 Events.Properties.VariableNames{4}='Sensors_Order';

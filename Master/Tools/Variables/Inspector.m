@@ -28,6 +28,7 @@ classdef Inspector < handle
         GUI;
         GUIParent;
         Nodes;
+        ObjParent;
     end
     
     properties
@@ -55,6 +56,12 @@ classdef Inspector < handle
             obj.ChildNode=[];
         end
         
+        function saveobj(obj)
+            obj.GUIParent=[];
+            obj.GUI=[];
+            obj.ObjParent=[];
+        end
+        
         function AddArray(obj,varargin)
             if numel(varargin)==1
                 AppendArray(obj,varargin{1});
@@ -65,6 +72,8 @@ classdef Inspector < handle
                            AppendArray(obj,varargin{2});
                        case 'name'
                            AddName(obj,varargin{2})
+                       case 'parent'
+                           obj.ObjParent=varargin{2};
                    end
                    varargin(1:2)=[];
                end
@@ -124,6 +133,9 @@ classdef Inspector < handle
                     end
                 end
                 uit.Data=tab;
+                s = uistyle; 
+                s.HorizontalAlignment  = 'left'; 
+                addStyle(uit,s); 
             end
         end
         
@@ -149,13 +161,7 @@ classdef Inspector < handle
         end
         
         function Show(obj)
-%             if obj.Fig==1
-%                 tree=obj.GUI(4);
-%                 for i=1:size(obj.Nodes)
-% r
-%                 end
-% %                 move(tree,obj.Nodes);
-%             end
+
         end
         
         function DrawGUI(obj)
@@ -176,12 +182,18 @@ classdef Inspector < handle
             
             g=uigridlayout(fig);
             g.RowHeight = {'1x','2x'};
-            g.ColumnWidth = {260,'1x'};
+            g.ColumnWidth = {300,600,'1x'};
+            
+
+            
+            
             uit=uitable(g);
             uit.Layout.Row=1;
-            uit.Layout.Column=2;
+            uit.Layout.Column=[2 3];
+            
 
-            t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit);
+            
+            t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit,'FontSize',10);
             t.Layout.Row=[1 2];
             t.Layout.Column=1;
 
@@ -190,7 +202,7 @@ classdef Inspector < handle
 
             p = uipanel(g,'Title','Options','FontSize',12);
             p.Layout.Row=2;
-            p.Layout.Column=2;
+            p.Layout.Column=[2 3];
 
             g2=uigridlayout(p);
             g2.RowHeight = {25,25,'1x'};
@@ -357,7 +369,15 @@ classdef Inspector < handle
                     icon=[path 'VarIcon.gif'];
             end
             
-            name=[char(num2str(obj.ID)) ' - ' char(obj.CurPath)];
+%             if numel(obj.Sz)>0
+% %                 name=char(sprintf('%d - %s - type: %s [%d,%d]',obj.ID,obj.CurPath,obj.Type,obj.Sz(1,1),obj.Sz(1,2)));
+%                   name=char(sprintf('%d - %s [%d]',obj.ID,obj.CurPath,size(obj.CurrArr,1)));
+%             else
+%                   name=char(sprintf('%d - %s',obj.ID,obj.CurPath));
+% %                 name=char(sprintf('%d - %s - type: %s',obj.ID,obj.CurPath,obj.Type));
+%             end
+            name=char(sprintf('%d - %s [%d]',obj.ID,obj.CurPath,size(obj.CurrArr,1)));
+%             name=char(sprintf('%d - %s [%d,%d]',obj.ID,obj.CurPath,obj.VarSz(1),obj.VarSz(2)));
             if obj.Child==0
                 obj.ChildNode=uitreenode(obj.Node,'Text',name,'NodeData',obj.ID,'Icon',icon);
             else
