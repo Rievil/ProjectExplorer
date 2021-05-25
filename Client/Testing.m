@@ -135,5 +135,58 @@ AEbox.card(1).channel(2).name='Channel 2';
 %%
 txt = jsonencode(AEbox);
 %%
-filename='G:\Můj disk\Škola\Sandbox\Stash.mat';
-tst=matfile(filename);
+data=b.Core.ProjectOverview.Projects(1, 1).Experiments.SpecGroup.Specimens.Data{1,1};
+save('TestVar.mat','data');
+%%
+load('TestVar.mat');
+%%
+IntObj = Inter;
+
+figure;
+hold on;
+
+%-----načtení z adresy
+x1=data(3).data.Records(1).Detector(1).Data{:,4};
+y1=data(3).data.Records(1).Detector(1).Data{:,17};
+c1=data(3).data.Records(1).Detector(1).Data{:,12};
+
+s1=data(3).data.Records(1).Detector(1).Data{:,11};
+
+x2=data(2).data.Time;
+
+y2=data(2).data.Defformation;
+y2b=data(2).data.Force;
+
+%-----matematické operace
+c1=c1-min(c1);
+
+c1=c1+2;
+c1=c1.^4;
+
+
+%----konverze datových typů
+x2=IntObj.ConvertToNum(x2);
+
+%---- interpolace dat
+IntObj.SetMainX(x1);
+IntObj.SetSupX(x2);
+IntObj.SetSupY(y2);
+IntObj.SelectType(2);
+newy1=IntObj.MainY;
+
+%---- vykreslení proměnných
+plot(y2,y2b,'-','DisplayName','Press','Color',[0.2 0.5 0.7]);
+scatter(newy1,y1,c1,'filled','DisplayName','AE','MarkerFaceColor',[0.2 0.5 0.7]);
+
+%----vykreslení legendy
+legend;
+
+%----formátování os
+xlabel('Defformation');
+ylabel('Counts');
+
+
+
+legend;
+%%
+

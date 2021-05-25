@@ -1,18 +1,14 @@
-classdef Forge < handle
+classdef Forge < Item
     %FORGE Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        Adress;
-        Input;
-        Size;
-        DoList;
-        Output;
+        Variables;
     end
     
     methods
-        function obj = Forge(parent)
-%             obj.Parent=parent;
+        function obj = Forge(~)
+
         end
         
         function Operations(obj)
@@ -21,11 +17,37 @@ classdef Forge < handle
             TimeCat={'ToNumber','ToTime','Reduce to start time'};
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+        function ListOperators(obj)
+            
+        end
+        
+        function AddOperator(obj,variable,id)
+            
         end
     end
+    
+        methods %abstract
+            function DrawGui(obj)
+                ClearGUI(obj);
+                g=uigridlayout(obj.Fig);
+                g.RowHeight = {25,'1x'};
+                g.ColumnWidth = {80,'1x',25};
+                
+                lbox = uilistbox(g);
+                lbox.Layout.Row=[1 2];
+                lbox.Layout.Column=1;
+                
+                p=uipanel(g,'Title','Operation');
+                p.Layout.Row=2;
+                p.Layout.Column=[2 3];
+            end
+        
+        
+            function stash=Pack(obj)
+            end
+            
+            function Populate(obj)
+            end
+        end
 end
 

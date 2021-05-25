@@ -33,16 +33,25 @@ classdef Inspector < handle
     
     properties
         StorePath;
+        IconPath;
     end
     
     methods
         function obj = Inspector(varargin)
-            if numel(varargin)==0
-            elseif numel(varargin)==1
-                obj.CurrArr=varargin{1};
-            elseif numel(varargin)>1
-                AddArray(obj,varargin);
+            while numel(varargin)>0
+               switch lower(varargin{1})
+                   case 'data'
+                       AppendArray(obj,varargin{2});
+                   case 'name'
+                       AddName(obj,varargin{2})
+                   case 'parent'
+                       obj.ObjParent=varargin{2};
+                       MF=OperLib.FindProp(obj.ObjParent,'MasterFolder');            
+                       obj.IconPath=[MF 'Master\GUI\Icons\'];
+               end
+               varargin(1:2)=[];
             end
+            
         end
         
         function ClearGui(obj)
@@ -74,9 +83,11 @@ classdef Inspector < handle
                            AddName(obj,varargin{2})
                        case 'parent'
                            obj.ObjParent=varargin{2};
+                           MF=OperLib.FindProp(obj.ObjParent,'MasterFolder');            
+                           obj.IconPath=[MF 'Master\GUI\Icons\'];
                    end
                    varargin(1:2)=[];
-               end
+                end
             end
         end
         
@@ -110,9 +121,19 @@ classdef Inspector < handle
         
         function DrawVar(obj,evnt,src)
             uit=src.Source.UserData;
-            if evnt.SelectedNodes.NodeData~=0
-            [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData);
-
+            if numel(evnt.SelectedNodes.NodeData)~=0
+            [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData{1});
+                
+                if numel(src.PreviousSelectedNodes)==0
+                    SelectedVarIcon=[obj.IconPath 'VarIconSelected.gif'];
+                else
+                    SelectedVarIcon=[obj.IconPath 'VarIconSelected.gif'];
+                    if numel(src.PreviousSelectedNodes.NodeData)>0
+                        src.PreviousSelectedNodes.Icon=[obj.IconPath src.PreviousSelectedNodes.NodeData{2}];
+                    end
+                end
+                
+                evnt.SelectedNodes.Icon=SelectedVarIcon;
                 R=A;
                 bool=false;
                 while bool==0
@@ -200,18 +221,18 @@ classdef Inspector < handle
             
             obj.Fig=1;
 
-            p = uipanel(g,'Title','Options','FontSize',12);
+            p = uipanel(g,'Title','Variable forge','FontSize',12);
             p.Layout.Row=2;
             p.Layout.Column=[2 3];
 
-            g2=uigridlayout(p);
-            g2.RowHeight = {25,25,'1x'};
-            g2.ColumnWidth = {50,'3x','1x'};
-
-            lbl = uilabel(g2,'Text','Size:');
-            lbl.Layout.Row=1;
-            lbl.Layout.Column=[1 2];
-            obj.GUI=[fig,g,uit,t,p,g2,lbl];
+%             g2=uigridlayout(p);
+%             g2.RowHeight = {25,25,'1x'};
+%             g2.ColumnWidth = {50,'3x','1x'};
+% 
+%             lbl = uilabel(g2,'Text','Size:');
+%             lbl.Layout.Row=1;
+%             lbl.Layout.Column=[1 2];
+            obj.GUI=[fig,g,uit,t,p];
         end
         
         function Run3(obj)
@@ -350,41 +371,38 @@ classdef Inspector < handle
         end
         
         function AddSepNode(obj)
-          icon='C:\Users\Richard\OneDrive - Vysoké učení technické v Brně\Dokumenty\Github\ProjectExplorer\Master\GUI\Icons\SepNode.gif';
+          icon=[obj.IconPath 'SepNode.gif'];
             if obj.Child>0
-                obj.SepNode=uitreenode(obj.Node,'Text','Sep Node','Icon',icon,'NodeData',0);
+                obj.SepNode=uitreenode(obj.Node,'Text','Sep Node','Icon',icon,'NodeData',{0,''});
                 obj.SepNodeBool=true;
             end
         end
         
         function AddNode(obj)
-            path='C:\Users\Richard\OneDrive - Vysoké učení technické v Brně\Dokumenty\Github\ProjectExplorer\Master\GUI\Icons\';
             
+            MF=OperLib.FindProp(obj.ObjParent,'MasterFolder');            
+            obj.IconPath=[MF 'Master\GUI\Icons\'];
             switch obj.CurType
                 case 'table'
-                    icon=[path 'TableIcon.gif'];
+                    icon=[obj.IconPath 'TableIcon.gif'];
+                    suffix='TableIcon.gif';
                 case 'struct'
-                    icon=[path 'StructIcon.gif'];
+                    icon=[obj.IconPath 'StructIcon.gif'];
+                    suffix='StructIcon.gif';
                 otherwise
-                    icon=[path 'VarIcon.gif'];
+                    icon=[obj.IconPath 'VarIcon.gif'];
+                    suffix='VarIcon.gif';
             end
             
-%             if numel(obj.Sz)>0
-% %                 name=char(sprintf('%d - %s - type: %s [%d,%d]',obj.ID,obj.CurPath,obj.Type,obj.Sz(1,1),obj.Sz(1,2)));
-%                   name=char(sprintf('%d - %s [%d]',obj.ID,obj.CurPath,size(obj.CurrArr,1)));
-%             else
-%                   name=char(sprintf('%d - %s',obj.ID,obj.CurPath));
-% %                 name=char(sprintf('%d - %s - type: %s',obj.ID,obj.CurPath,obj.Type));
-%             end
             name=char(sprintf('%d - %s [%d]',obj.ID,obj.CurPath,size(obj.CurrArr,1)));
 %             name=char(sprintf('%d - %s [%d,%d]',obj.ID,obj.CurPath,obj.VarSz(1),obj.VarSz(2)));
             if obj.Child==0
-                obj.ChildNode=uitreenode(obj.Node,'Text',name,'NodeData',obj.ID,'Icon',icon);
+                obj.ChildNode=uitreenode(obj.Node,'Text',name,'NodeData',{obj.ID,suffix},'Icon',icon);
             else
                 if obj.SepNodeBool==false
-                    obj.ChildNode=uitreenode(obj.Node,'Text',name,'NodeData',obj.ID,'Icon',icon);
+                    obj.ChildNode=uitreenode(obj.Node,'Text',name,'NodeData',{obj.ID,suffix},'Icon',icon);
                 else
-                    obj.ChildNode=uitreenode(obj.SepNode,'Text',name,'NodeData',obj.ID,'Icon',icon);
+                    obj.ChildNode=uitreenode(obj.SepNode,'Text',name,'NodeData',{obj.ID,suffix},'Icon',icon);
                 end
             end
         end

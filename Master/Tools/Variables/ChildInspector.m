@@ -7,7 +7,7 @@ classdef ChildInspector < Inspector
     
     methods
         function obj=ChildInspector(InArr,parent)
-            obj@Inspector(InArr);
+            obj@Inspector('data',InArr);
             obj.Child=1;            
             obj.Parent=parent;
             obj.Node=obj.Parent.ChildNode;

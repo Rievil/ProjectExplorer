@@ -271,8 +271,11 @@ classdef MeasObj < Node
             
             result=struct;
             
-            for i=1:size(obj.TypeTable,1)
+            TypeCount=size(obj.TypeTable,1);
+            f=waitbar(0,'Loading all data');
+            for i=1:TypeCount
                 obj2=obj.TypeTable.TypesObj{i,1};
+                waitbar(i/(TypeCount+2),f,char(sprintf('Loading: ''%s'' data type',class(obj2)))); 
                 subresult=ReadContainer(obj2,FileMap);
                 if i==1
                     result=subresult;
@@ -280,6 +283,8 @@ classdef MeasObj < Node
                     result=[result, subresult];
                 end
             end
+            waitbar((i+1)/(TypeCount+2),f,'Storing variables');
+
             
             %check for key similarities
             ch=0;
@@ -310,6 +315,9 @@ classdef MeasObj < Node
             end
             
             MakeSpecimens(obj,result,finalkey);
+            waitbar(1,f,'Finished');
+            pause(1);
+            close(f);
             
         end
         
