@@ -31,7 +31,7 @@ classdef Item < handle
             end
         end
         
-        function AssociateParent(obj,parent)
+        function SetParent(obj,parent)
             obj.Parent=parent;
         end
         

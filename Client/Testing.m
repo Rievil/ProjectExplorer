@@ -188,5 +188,4 @@ ylabel('Counts');
 
 
 legend;
-%%
-
+%% Image in ui table

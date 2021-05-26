@@ -86,6 +86,8 @@ classdef VarExp < Node
             g3=uigridlayout(p2);
             g3.RowHeight = {'1x',25};
             g3.ColumnWidth = {'1x'};
+            
+            
              
             uit=uitable(g);
             uit.Layout.Row=2;

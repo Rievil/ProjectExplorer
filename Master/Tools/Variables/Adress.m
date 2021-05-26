@@ -23,8 +23,9 @@ classdef Adress < VarConcept
         
         function GetVar(obj)
             for i=1:obj.Count
-                [A,~]=GetVar(obj.Inspector,ID);
-                obj.Out{i}=A;
+                [A,name]=GetVar(obj.Inspector,ID);
+                obj.Out{i,1}=A;
+                obj.Out{i,2}=name;
             end
         end
     end
@@ -44,4 +45,5 @@ classdef Adress < VarConcept
         end
     end
 end
+
 
