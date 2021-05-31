@@ -3,10 +3,6 @@ clear all;
 %%
 b=ExplorerAppStartMain;
 % clear all;
-%% Get Inspector table
-IT=b.Core.ProjectOverview.Projects(1, 1).Experiments.VarExp.Inspector.T;
-%% GetInspector
-IS=b.Core.ProjectOverview.Projects(1, 1).Experiments.VarExp.Inspector;
 %%
 stash=Pack(b.Core.ProjectOverview);
 %%

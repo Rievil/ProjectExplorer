@@ -58,7 +58,7 @@ classdef VarExp < Node
                 obj.Inspector.AddArray('data',tst(i).data,'name',tst(i).type);
             end
             obj.Inspector.AddArray('parent',obj);
-            obj.Inspector.FirstRun;
+            obj.Inspector.Run3;
         end
         
         function InitializeOption(obj)
@@ -107,7 +107,6 @@ classdef VarExp < Node
             obj.Inspector.Fig=1;
             SetGuiParent(obj.Inspector,p);
             DrawGUI(obj.Inspector);
-            DrawNodes(obj.Inspector);
             
             panel=obj.Inspector.GUI(5);
             obj.Forge.SetGui(panel);
