@@ -1,4 +1,4 @@
-classdef Adress < VarConcept
+classdef Adress < VarOperator
     %ADRESS Summary of this class goes here
     %   Detailed explanation goes here
     

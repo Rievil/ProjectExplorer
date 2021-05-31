@@ -1,4 +1,4 @@
-classdef Operator < NumOper & Item
+classdef VarOperator < NumOper & Item
     %VARCONCEPT Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -20,7 +20,7 @@ classdef Operator < NumOper & Item
     end
     
     methods
-        function obj = VarConcept(~)
+        function obj = VarOperator(~)
             obj@NumOper;
             obj@Item;
         end

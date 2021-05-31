@@ -235,7 +235,9 @@ classdef Inspector < handle
             obj.GUI=[fig,g,uit,t,p];
         end
         
-        function Run3(obj)
+        function FirstRun(obj)
+            MF=OperLib.FindProp(obj.ObjParent,'MasterFolder');            
+            obj.IconPath=[MF 'Master\GUI\Icons\'];
             DefineTable(obj);
             for i=1:obj.Count
                 obj.CurrArrIdx=i;
@@ -380,8 +382,7 @@ classdef Inspector < handle
         
         function AddNode(obj)
             
-            MF=OperLib.FindProp(obj.ObjParent,'MasterFolder');            
-            obj.IconPath=[MF 'Master\GUI\Icons\'];
+
             switch obj.CurType
                 case 'table'
                     icon=[obj.IconPath 'TableIcon.gif'];

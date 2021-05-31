@@ -36,8 +36,9 @@ classdef VarExp < Node
         
         function stash=Pack(obj)
             stash=struct;
-            stash.Inspector=obj.Inspector;
-%             obj.Inspector
+            stash.Inspector=obj.Inspector.T;
+            stash.Forge=Pack(obj.Forge);
+            
         end
         
         function node=AddNode(obj)
@@ -46,6 +47,7 @@ classdef VarExp < Node
         
         function Populate(obj,stash)
             obj.Inspector.T=stash.Inspector;
+            Populate(obj.Forge,stash.Forge);
         end
     end
     
@@ -58,8 +60,9 @@ classdef VarExp < Node
                 obj.Inspector.AddArray('data',tst(i).data,'name',tst(i).type);
             end
             obj.Inspector.AddArray('parent',obj);
-            obj.Inspector.Run3;
+            obj.Inspector.FirstRun;
         end
+        
         
         function InitializeOption(obj)
             SetParent(obj,'project');
@@ -84,15 +87,31 @@ classdef VarExp < Node
             p2.Layout.Row=3;
             p2.Layout.Column=1;
             g3=uigridlayout(p2);
-            g3.RowHeight = {'1x',25};
-            g3.ColumnWidth = {'1x'};
+            g3.RowHeight = {25,25,'1x'};
+            g3.ColumnWidth = {150,'1x',150};
+%             obj.Forge.VarPanel=p2;
+
+            but1=uibutton(g3,'Text','New variable',...
+                'ButtonPushedFcn',@obj.AddVariable);
+            but1.Layout.Row=1;
+            but1.Layout.Column=1;
+            
+            but2=uibutton(g3,'Text','Delete variable');
+            but2.Layout.Row=2;
+            but2.Layout.Column=1;
+            
+            lbox = uilistbox(g);
+            lbox.Layout.Row=2;
+            lbox.Layout.Column=1;
+            
+            obj.Forge.UIList=lbox;
             
             
-             
-            uit=uitable(g);
-            uit.Layout.Row=2;
-            uit.Layout.Column=1;
-            uit.Data=GetEmptyVar(obj);
+            if obj.Forge.Count>0
+                obj.Forge.FillList;
+            else
+                lbox.Items={''};
+            end
             
             p = uipanel(g,'Title','Variable designer','FontSize',12);
             p.Layout.Row=[2 3];
@@ -101,9 +120,7 @@ classdef VarExp < Node
             g2=uigridlayout(p);
             g2.RowHeight = {'1x'};
             g2.ColumnWidth = {'1x','1x'};
-            
-            
-            
+
             obj.Inspector.Fig=1;
             SetGuiParent(obj.Inspector,p);
             DrawGUI(obj.Inspector);
@@ -111,16 +128,16 @@ classdef VarExp < Node
             panel=obj.Inspector.GUI(5);
             obj.Forge.SetGui(panel);
             DrawGui(obj.Forge);
-            
-            
-%             uit=uitable(g2);
-%             uit.Layout.Row=1;
-%             uit.Layout.Column=1;
-%             uit.Data=GetEmptyVar(obj);
-            
 
         end
         
         
+    end
+    
+    methods %callbacks
+        function AddVariable(obj,src,~)
+            obj.Forge.AddVariable;
+            obj.Forge.FillList;
+        end
     end
 end

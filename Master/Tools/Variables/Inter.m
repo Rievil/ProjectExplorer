@@ -1,4 +1,4 @@
-classdef Inter < VarConcept
+classdef Inter < VarOperator
     %INTER Summary of this class goes here
     %   Detailed explanation goes here
     

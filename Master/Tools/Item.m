@@ -29,6 +29,7 @@ classdef Item < handle
                 a=obj.Fig.Children;
                 a.delete;
             end
+%             obj.Fig=[];
         end
         
         function SetParent(obj,parent)
@@ -36,11 +37,15 @@ classdef Item < handle
         end
         
         function saveobj(obj)
-            
+            ClearGUI(obj);
+            obj.Parent=[];
         end
         
+%         function 
+        
         function delete(obj)
-            
+%             ClearGUI(obj);
+            obj.Parent=[];
         end
       
     end

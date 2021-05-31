@@ -3,11 +3,20 @@ classdef Forge < Item
     %   Detailed explanation goes here
     
     properties
-        Variables;
+        Variables (1,:);
+        Count;
+        UIList;
+%         T;
+        VarPanel;
+    end
+    
+    properties (Dependent)
+        VarList;
     end
     
     methods
         function obj = Forge(~)
+            obj@Item;
 
         end
         
@@ -21,19 +30,44 @@ classdef Forge < Item
             list={'Adress','ConCat','Inter'};
         end
         
-        function AddVariable(obj,var)
-            newSmith=VarSmith;
-            SetParent(newSmith,obj);
-            row=GetEmptyVariable(obj);
+        function AddVariable(obj)
+            Smith=VarSmith(obj);
+            obj.Variables=[obj.Variables, Smith];
+            obj.Count=numel(obj.Variables);
+            
+
+%             row=GetEmptyVariable(obj);
+%             row.ID(1)=Smith.ID;
+%             row.Name(1)=sprintf('Variable %d',row.ID(1));
+%             row.Index(1)=false;
+%             
+%             obj.T=[obj.T; row];
+%             
+%             obj.UITable.Data=obj.T;
+%             obj.Count=numel(obj.Variables);
+%             row=GetEmptyVariable(obj);
         end
         
-        function AddOperator(obj,variable,id)
-            
-        end
         
         function row=GetEmptyVariable(obj)
-            row=table([],[],[],[],[]);
-            row.Properties.VariableNames={'ID','Name','Coord','Size','Type'};
+            num=zeros(1,1);
+            name=strings(1,1);
+            bool=logical(zeros(1,1));
+            
+            row=table(num,name,bool,'VariableNames',{'ID','Name','Index'});
+%             row.Properties.VariableNames={'ID','Name','Index'};
+        end
+        
+        function list=get.VarList(obj)
+            list=strings(obj.Count,1);
+            for i=1:obj.Count
+                list(i,1)=obj.Variables(i).Name;
+            end
+        end
+        
+        function FillList(obj)
+            obj.UIList.Items=obj.VarList;
+            obj.UIList.ItemsData=1:1:obj.Count;
         end
     end
     
@@ -52,7 +86,6 @@ classdef Forge < Item
             
                 but1.Layout.Row=1;
                 but1.Layout.Column=1;
-%                 but1.Icon=IconFilePlus;
 
                 p=uipanel(g,'Title','Operation');
                 p.Layout.Row=2;
@@ -61,10 +94,25 @@ classdef Forge < Item
         
         
             function stash=Pack(obj)
+                stash=struct;
+                stash.Count=obj.Count;
+                n=0;
+                for VS=obj.Variables
+                    n=n+1;
+                    TMP=Pack(VS);  
+                    stash.Variables(n)=TMP;
+                end
             end
             
-            function Populate(obj)
+            function Populate(obj,stash)
+                obj.Count=stash.Count;
+                for i=1:obj.Count
+                    Smith=VarSmith(obj);
+                    Smith.Populate(stash.Variables(i));
+                    obj.Variables=[obj.Variables, Smith];
+                end
             end
         end
 end
+
 

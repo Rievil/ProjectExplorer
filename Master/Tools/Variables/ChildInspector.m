@@ -12,7 +12,7 @@ classdef ChildInspector < Inspector
             obj.Parent=parent;
             obj.Node=obj.Parent.ChildNode;
             obj.MainParent=FindParent(obj);
-            
+            obj.IconPath=obj.Parent.IconPath;
             Run(obj);
         end
         

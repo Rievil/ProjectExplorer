@@ -29,8 +29,13 @@ classdef SpecGroup < Node
         end
         
         function sel=GetSel(obj)
-            if numel(obj.Sel)==0
+            if size(obj.Specimens,1)==numel(obj.Sel)
+%                 sel=obj.Sel;
+            elseif size(obj.Specimens,1)>numel(obj.Sel)
                 obj.Sel=GetEmptySel(obj);
+            elseif size(obj.Specimens,1)<numel(obj.Sel)
+                obj.Sel=GetEmptySel(obj);
+                
             end
             sel=obj.Sel;
         end
@@ -124,7 +129,7 @@ classdef SpecGroup < Node
                 spec.ID=OperLib.FindProp(obj,'SpecimenID');
                 T=GetT(spec);
                 obj.Specimens=[obj.Specimens; T];
-                CreateSelector(obj);
+%                 CreateSelector(obj);
             elseif size(T2,1)==1
                 idx=find(obj.Specimens.MeasID==spec.MeasID & obj.Specimens.Key==spec.Key);
                 T=GetT(spec);

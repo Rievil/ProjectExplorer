@@ -1,4 +1,4 @@
-classdef ConCat < VarConcept
+classdef ConCat < VarOperator
     %CONCAT Summary of this class goes here
     %   Detailed explanation goes here
     
