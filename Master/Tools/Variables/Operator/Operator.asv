@@ -22,16 +22,11 @@ classdef Operator < NumOper & Item
     end
     
     methods
-        function obj = Operator(~)
+        function obj = Operator(parent)
             obj@NumOper;
             obj@Item;
-%             obj.Parent=parent;
-            
-
-        end
-        
-        function SetParent(obj,parent)
             obj.Parent=parent;
+            
             if strcmp(class(obj.Parent),'VarSmith')
                 obj.First=1;
             end
@@ -58,22 +53,7 @@ classdef Operator < NumOper & Item
             AssociateParent(obj.Children,obj);
         end
         
-        function stash=OpPack(obj)
-            stash=struct;
-            stash.Name=obj.Name;
-            stash.Title=obj.Title;
-            
-            TMP=Pack(obj);
-            stash.Spec=TMP;
-        end
-        
-        function OpPopulate(obj,stash)
-            obj.Name=stash.Name;
-            obj.Title=stash.Title;
-            
-            Populate(obj,stash.Spec);
-        end
+        f
     end
 end
-
 

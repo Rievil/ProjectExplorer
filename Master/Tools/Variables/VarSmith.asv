@@ -9,17 +9,23 @@ classdef VarSmith < Item
         CurrOperator;
         ID;
         Name (1,1) string;
-        Description (1,1) string;
+        Description cell;
         Coord;
         Size;
         Type;
         UIList;
         UIOpPanel;
+        Index;
     end
     
     properties (Dependent)
         OperList;
         Count;
+        LastOperator;
+    end
+    
+    properties 
+        eOperator;
     end
     
     methods
@@ -27,42 +33,47 @@ classdef VarSmith < Item
             obj.Parent=parent;
             obj.ID=numel(obj.Parent.Variables)+1;
             obj.Name=sprintf('Variable %d',obj.ID);
-            obj.Description="";
+            obj.Description={''};
+%             obj.eOperator=addlistener(obj.Parent.OperatorPicker,'eReload',@obj.ReLoadData);
         end
         
-        function Operator=AddOperator(obj)
-            DrawPickFig(obj.Parent);
-%             Smith=VarSmith(obj);
-%             SetParent(Smith,obj);
-%             SetGui(Smith,obj.Fig(2));
-%             
-%             obj.Variables=[obj.Variables, Smith];
-%             obj.Count=numel(obj.Variables);
-%             SetVariable(obj,obj.Count);
+        function obj2=get.LastOperator(obj)
+            count=obj.Count;
+            if count>0
+                obj2=obj.Operators(count);
+            else
+                obj2=obj;
+            end
         end
         
-%         function Smith=AddVariable(obj)
-%             Smith=VarSmith(obj);
-%             SetParent(Smith,obj);
-%             SetGui(Smith,obj.Fig(2));
-%             
-%             obj.Variables=[obj.Variables, Smith];
-%             obj.Count=numel(obj.Variables);
-%             SetVariable(obj,obj.Count);
-%             
-% %             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
-%         end
+        function num=get.Count(obj)
+            num=numel(obj.Operators);
+        end
         
-                
+        
+        
+        function OpenPicker(obj)
+            Picker=obj.Parent.OperatorPicker;
+            SetSmith(Picker,obj);
+            DrawGui(Picker);
+%             DrawPickFig(obj.Parent);
+        end
+        
+        function AddOperator(obj,operator)
+            SetGui(operator,obj.UIOpPanel);
+            obj.Operators=[obj.Operators, operator];
+            FillList(obj);
+        end
+          
         function list=get.OperList(obj)
             list=strings(obj.Count,1);
             for i=1:obj.Count
-                list(i,1)=obj.Operators(i).Name;
+                list(i,1)=obj.Operators(i).Title;
             end
         end
         
         function FillList(obj)
-            obj.UIList.Items=obj.VarList;
+            obj.UIList.Items=obj.OperList;
             obj.UIList.ItemsData=1:1:obj.Count;
         end
     end
@@ -81,6 +92,7 @@ classdef VarSmith < Item
                 
                 obj.UIList=lbox;
                 if obj.Count>0
+                    FillList(obj);
                     if obj.CurrOperator>0
                         SetGui(obj.Operators(obj.CurrOperator),obj.Fig);
                         DrawGui(obj.Operators(obj.CurrOperator));
@@ -96,7 +108,7 @@ classdef VarSmith < Item
                     lbox.ItemsData=[];
                 end
                 
-                but2=uibutton(g,'Text','New operator','ButtonPushedFcn',@obj.MNewOperator);
+                but2=uibutton(g,'Text','New operator','ButtonPushedFcn',@obj.MOpenPicker);
                 but2.Layout.Row=1;
                 but2.Layout.Column=1;
                 
@@ -114,19 +126,32 @@ classdef VarSmith < Item
             stash=struct;
             stash.ID=obj.ID;
             stash.Name=obj.Name;
-            stash.Description.obj.Description;
+            stash.Description=obj.Description;
+            
+            n=0;
+            for OP=obj.Operators
+                n=n+1;
+                TMP=Pack(OP);
+                stash.Operators(n)=TMP;
+            end
         end
         
         function Populate(obj,stash) 
             obj.ID=stash.ID;
             obj.Name=stash.Name;
             obj.Description=stash.Description;
+            
+            n=0;
+            for OP=obj.Operators
+                n=n+1;
+                OpPicker.GetType(obj.CurrOperator);
+            end
         end
     end
     
     methods %callbacks
-        function MNewOperator(obj,src,~)
-            AddOperator(obj);
+        function MOpenPicker(obj,src,~)
+            OpenPicker(obj);
         end
     end
         

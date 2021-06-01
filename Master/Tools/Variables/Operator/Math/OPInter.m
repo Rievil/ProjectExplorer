@@ -1,4 +1,4 @@
-classdef Inter < VarOperator
+classdef OPInter < Operator
     %INTER Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -16,8 +16,10 @@ classdef Inter < VarOperator
     end
     
     methods
-        function obj = Inter(~)
-            obj@VarConcept;
+        function obj = OPInter(~)
+            obj@Operator;
+            obj.Name='OPInter';
+            obj.Title='1D interpolace';
             obj.Type={'spline','linear','nearest','next','previous','pchip','cubic','makima'};
             obj.PointReq=[2,2,2,2,4,3,2,4];
         end
@@ -60,9 +62,18 @@ classdef Inter < VarOperator
         end
         
         function stash=Pack(obj)
+            stash=struct;
+            stash.MainX=obj.MainX;
+            stash.SupX=obj.SupY;
+            stash.Type=obj.Type;
+            stash.SelType=obj.SelType;
         end
         
-        function Populate(obj)
+        function Populate(obj,stash)
+            obj.MainX=stash.MainX;
+            obj.SupY=stash.SupX;
+            obj.Type=stash.Type;
+            obj.SelType=stash.SelType;
         end
     end
 end

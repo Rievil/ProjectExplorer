@@ -140,7 +140,7 @@ save('TestVar.mat','data');
 %%
 load('TestVar.mat');
 %%
-IntObj = Inter;
+IntObj = OPInter;
 
 figure;
 hold on;

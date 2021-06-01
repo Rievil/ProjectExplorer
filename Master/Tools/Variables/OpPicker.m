@@ -18,6 +18,7 @@ classdef OpPicker < Item
     methods
         function obj = OpPicker(parent)
             obj@Item;
+            obj.Parent=parent;
 
         end
         
@@ -63,6 +64,14 @@ classdef OpPicker < Item
             obj.Fig.CloseRequestFcn=@obj.MOutType;
         end
         
+        function obj2=PickOperator(obj)
+            Last=obj.VarSmith.LastOperator;
+            
+            obj2=OpPicker.GetType(obj.CurrOperator);
+            SetParent(obj2,Last);
+            obj.Type=obj2;
+        end
+        
         function CloseWindow(obj)
             close(obj.Fig)
         end
@@ -101,7 +110,7 @@ classdef OpPicker < Item
             p.Layout.Column=2;
             FillList(obj);
             
-            but1=uibutton(g,'Text','Select operator','ButtonPushedFcn',@obj.MRemoveVariable);
+            but1=uibutton(g,'Text','Select operator','ButtonPushedFcn',@obj.MSelectOperator);
             but1.Layout.Row=2;
             but1.Layout.Column=2;
         end
@@ -117,11 +126,31 @@ classdef OpPicker < Item
     
     methods %callbacks
         function MOperatorSelected(obj,src,~)
-            classObj=src.SelectedNodes.NodeData;
-            if classObj~=0
-                disp('operator node');
+            obj.CurrOperator=src.SelectedNodes.NodeData;
+            if obj.CurrOperator~=0
+                PickOperator(obj);
+%                 disp('operator node');
+            end
+        end
+        
+        function MSelectOperator(obj,src,~)
+            if obj.CurrOperator~=0
+                ChAddOperator(obj.Type);
+            end
+            close(obj.Fig);
+        end
+    end
+    
+    methods (Static)
+        function obj2=GetType(name)
+
+            switch name
+                case 'OPInter'
+                    obj2=OPInter;
+                otherwise
             end
         end
     end
+        
 end
 
