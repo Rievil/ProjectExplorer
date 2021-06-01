@@ -13,7 +13,7 @@ classdef Forge < Item
         
         OperatorPanel;
         
-%         eChange;
+        eChange;
         OperatorPicker;
     end
     
@@ -40,12 +40,10 @@ classdef Forge < Item
         end
         
         function Smith=AddVariable(obj)
-            
             Smith=VarSmith(obj);
             SetParent(Smith,obj);
-            if obj.FigBool==1
-                SetGui(Smith,obj.Fig(2));
-            end
+            SetGui(Smith,obj.Fig(2));
+            
             obj.Variables=[obj.Variables, Smith];
 %             obj.Count=numel(obj.Variables);
             SetVariable(obj,obj.Count);
@@ -72,13 +70,11 @@ classdef Forge < Item
         end
         
         function SetVariable(obj,num)
-            if obj.FigBool==1
-                obj.CurrVariable=num;
-                obj.UIVarName.Value=obj.Variables(obj.CurrVariable).Name;
-                obj.UIVarDesc.Value=obj.Variables(obj.CurrVariable).Description;
-                SetGui(obj.Variables(obj.CurrVariable),obj.Fig(2));
-                DrawGui(obj.Variables(obj.CurrVariable));
-            end
+            obj.CurrVariable=num;
+            obj.UIVarName.Value=obj.Variables(obj.CurrVariable).Name;
+            obj.UIVarDesc.Value=obj.Variables(obj.CurrVariable).Description;
+            SetGui(obj.Variables(obj.CurrVariable),obj.Fig(2));
+            DrawGui(obj.Variables(obj.CurrVariable));
         end
         
         function VarChangeName(obj,newname)
@@ -98,8 +94,8 @@ classdef Forge < Item
         
         function type=DrawPickFig(obj)
             OpenWindow(obj.OperatorPicker);
-            DrawGui(obj.OperatorPicker);
-%             type=obj.OperatorPicker.Type;
+            DrawGui(obj.OperatorPicker)
+            type=obj.OperatorPicker.Type;
         end
         
         function list=get.VarList(obj)
@@ -167,7 +163,6 @@ classdef Forge < Item
                         lbox.Value=obj.CurrVariable;
                         obj.UIVarDesc.Value=obj.Variables(obj.CurrVariable).Description;
                     else
-                        SetGui(obj.Variables(1),obj.Fig(2));
                         DrawGui(obj.Variables(1));
                         nametext.Value=obj.Variables(1).Name;
                     end
@@ -176,7 +171,7 @@ classdef Forge < Item
                     lbox.ItemsData=[];
                 end
                 
-                obj.FigBool=1;
+
             end
         
         
@@ -193,9 +188,9 @@ classdef Forge < Item
             end
             
             function Populate(obj,stash)
-%                 obj.Count;
+                obj.Count=stash.Count;
                 obj.CurrVariable=stash.CurrVariable;
-                for i=1:stash.Count
+                for i=1:obj.Count
                     Smith=AddVariable(obj);
                     Smith.Populate(stash.Variables(i));
                 end

@@ -9,13 +9,12 @@ classdef VarSmith < Item
         CurrOperator;
         ID;
         Name (1,1) string;
-        Description cell;
+        Description (1,1) string;
         Coord;
         Size;
         Type;
         UIList;
         UIOpPanel;
-        Index;
     end
     
     properties (Dependent)
@@ -23,30 +22,23 @@ classdef VarSmith < Item
         Count;
     end
     
-    properties 
-        eOperator;
-    end
-    
     methods
         function obj = VarSmith(parent)
             obj.Parent=parent;
             obj.ID=numel(obj.Parent.Variables)+1;
             obj.Name=sprintf('Variable %d',obj.ID);
-            obj.Description={''};
-%             obj.eOperator=addlistener(obj.Parent.OperatorPicker,'eReload',@obj.ReLoadData);
+            obj.Description="";
         end
         
-        function num=get.Count(obj)
-            num=numel(obj.Operators);
-        end
-        
-        
-        
-        function OpenPicker(obj)
-            Picker=obj.Parent.OperatorPicker;
-            SetSmith(Picker,obj);
-            DrawGui(Picker);
-%             DrawPickFig(obj.Parent);
+        function Operator=AddOperator(obj)
+            DrawPickFig(obj.Parent);
+%             Smith=VarSmith(obj);
+%             SetParent(Smith,obj);
+%             SetGui(Smith,obj.Fig(2));
+%             
+%             obj.Variables=[obj.Variables, Smith];
+%             obj.Count=numel(obj.Variables);
+%             SetVariable(obj,obj.Count);
         end
         
 %         function Smith=AddVariable(obj)
@@ -104,7 +96,7 @@ classdef VarSmith < Item
                     lbox.ItemsData=[];
                 end
                 
-                but2=uibutton(g,'Text','New operator','ButtonPushedFcn',@obj.MOpenPicker);
+                but2=uibutton(g,'Text','New operator','ButtonPushedFcn',@obj.MNewOperator);
                 but2.Layout.Row=1;
                 but2.Layout.Column=1;
                 
@@ -122,7 +114,7 @@ classdef VarSmith < Item
             stash=struct;
             stash.ID=obj.ID;
             stash.Name=obj.Name;
-            stash.Description=obj.Description;
+            stash.Description.obj.Description;
         end
         
         function Populate(obj,stash) 
@@ -133,8 +125,8 @@ classdef VarSmith < Item
     end
     
     methods %callbacks
-        function MOpenPicker(obj,src,~)
-            OpenPicker(obj);
+        function MNewOperator(obj,src,~)
+            AddOperator(obj);
         end
     end
         

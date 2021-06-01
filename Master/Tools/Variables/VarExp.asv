@@ -12,7 +12,7 @@ classdef VarExp < Node
         function obj = VarExp(parent)
             obj.Parent=parent;
             obj.Inspector=Inspector('parent',obj);
-            obj.Forge=Forge(obj);
+            obj.Forge=Forge;
         end
         
         function row=GetEmptyVar(obj)
@@ -72,25 +72,15 @@ classdef VarExp < Node
             g.ColumnWidth = {'1x','2x',300};
 %             
             
-            p = uipanel(g,'Title','Variable operations','FontSize',12);
-            p.Layout.Row=[2 3];
-            p.Layout.Column=1;
-            
-%             SetGuiParent(obj.Forge,p);
-            
-%             la=uilabel(g,'Text','Designed variables per signle specimen:');
-%             la.Layout.Row=1;
-%             la.Layout.Column=1;
-            
-            obj.Forge.Fig=p;
-            
-            p2 = uipanel(g,'Title','Variable designer','FontSize',12);
+            p2 = uipanel(g,'Title','Variable operations','FontSize',12);
             p2.Layout.Row=[2 3];
-            p2.Layout.Column=[2 3];
+            p2.Layout.Column=1;
             
-            obj.Forge.Fig(2)=p2;
             
-            DrawGui(obj.Forge);
+            
+            la=uilabel(g,'Text','Designed variables per signle specimen:');
+            la.Layout.Row=1;
+            la.Layout.Column=1;
             
 %             but1=uibutton(g,'Text','Check variables',...
 %                 'ButtonPushedFcn',@obj.CheckVar);
@@ -127,7 +117,10 @@ classdef VarExp < Node
 %                 lbox.Items={''};
 %             end
             
-
+            p = uipanel(g,'Title','Variable designer','FontSize',12);
+            p.Layout.Row=[2 3];
+            p.Layout.Column=[2 3];
+            
 %             g2=uigridlayout(p);
 %             g2.RowHeight = {'1x'};
 %             g2.ColumnWidth = {'1x','1x'};
