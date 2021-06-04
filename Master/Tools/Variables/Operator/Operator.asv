@@ -7,14 +7,15 @@ classdef Operator < NumOper & Item
         Adress table;
         Name char; %class name
         Title char; %civil name
-%         Type;
-%         Operations;
+        Description cell;
+        
         Input;
         Output;
         
         Children;
         ChildrenBool=0;
         First=0;
+        VarSmith;
     end
     
     methods (Abstract)
@@ -22,11 +23,13 @@ classdef Operator < NumOper & Item
     end
     
     methods
-        function obj = Operator(parent)
+        function obj = Operator(~)
             obj@NumOper;
             obj@Item;
+        end
+        
+        function SetParent(obj,parent)
             obj.Parent=parent;
-            
             if strcmp(class(obj.Parent),'VarSmith')
                 obj.First=1;
             end
@@ -39,12 +42,26 @@ classdef Operator < NumOper & Item
             end
         end
         
-        function ChAddOperator(obj)
+        function ChAddOperator(obj,obj2)
             if obj.First==1
-                AddOperator(obj.Parent,obj);
+                AddOperator(obj.Parent,obj2);
             else
-                ChAddOperator(obj.Parent);
+                ChAddOperator(obj.Parent,obj2);
             end
+        end
+        
+        function OpDrawGui(obj)
+%             function 
+            ClearGUI(obj);
+            DrawGui(obj)
+        end
+        
+        function obj2=GetInspector(obj)
+            obj2=OperLib.FindProp(obj.VarSmith,'Inspector');
+        end
+        
+        function obj2=GetVarExo(obj)
+            
         end
         
         function AddChildren(obj,children)
@@ -53,7 +70,22 @@ classdef Operator < NumOper & Item
             AssociateParent(obj.Children,obj);
         end
         
-        f
+        function stash=OpPack(obj)
+            stash=struct;
+            stash.Name=obj.Name;
+            stash.Title=obj.Title;
+            
+            TMP=Pack(obj);
+            stash.Spec=TMP;
+        end
+        
+        function OpPopulate(obj,stash)
+            obj.Name=stash.Name;
+            obj.Title=stash.Title;
+            
+            Populate(obj,stash.Spec);
+        end
     end
 end
+
 

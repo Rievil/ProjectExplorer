@@ -13,17 +13,12 @@ classdef Adress < handle
         Parent;
         CurrArr;
         ArrType;
-        Label (1,1) string;
     end
     
     methods
         function obj = Adress(parent,t)
             obj.Parent=parent;
             setAdress(obj,t);
-        end
-        
-        function data=GetSampleData(obj)
-            disp('test');
         end
 
         function setAdress(obj,t)
@@ -36,15 +31,6 @@ classdef Adress < handle
             obj.ArrType=t.ArrType;
         end
         
-        function t=GetRow(obj)
-            
-            if isempty(obj.Label)
-                obj.Label=string(sprintf('Adress n'));
-            end
-            t=table(string(obj.Label),string(obj.ArrType),obj.OrigName,obj.Type(end),obj.Size,...
-                            'VariableNames',{'Label','Source','Name','Type','Size'});
-        end
-
         function arr=GetVar(obj,data)
         
             A=data(obj.CurrArr).data;

@@ -43,18 +43,12 @@ classdef Plotter < Node
         end
 
         function DrawTest(obj)
-            var1=obj.Parent.Experiments.VarExp.Forge.Variables(1, 5);
-            var2=obj.Parent.Experiments.VarExp.Forge.Variables(1, 4);
-            fig=figure;
-            hold on;
-            ax=gca;
-            T=obj.Parent.Experiments.SpecGroup.Specimens(obj.Parent.Experiments.SpecGroup.Sel,:);
-
-            for i=1:size(T,1)
-                data=T.Data{i};
-                x=GetVariable(var1,data);
-                y=GetVariable(var2,data);
-                plot(ax,x,y);
+            var1=obj.Parent.Experiments.VarExp.Forge.Variables(1, 1);
+            var2=obj.Parent.Experiments.VarExp.Forge.Variables(1, 2);
+            
+            for i=1:size(obj.Parent.Experiments.SpecGroup.Specimens,1)
+                data=obj.Parent.Experiments.SpecGroup.Specimens(i
+                x=GetVariable(var1,data)
             end
             
             

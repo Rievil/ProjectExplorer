@@ -9,6 +9,7 @@ classdef OpPicker < Item
         VarSmith;
         UITree;
         CurrOperator;
+        UITextArea;
     end
     
     events
@@ -68,17 +69,19 @@ classdef OpPicker < Item
             Last=obj.VarSmith.LastOperator;
             
             obj2=OpPicker.GetType(obj.CurrOperator);
+            obj2.VarSmith=obj.VarSmith;
             SetParent(obj2,Last);
             obj.Type=obj2;
         end
         
         function CloseWindow(obj)
             close(obj.Fig)
+            obj.Type=[];
         end
         
         function close(obj)
             if obj.SelBool==0
-                obj.Type='';
+                obj.Type=[];
             end
         end
         
@@ -86,7 +89,8 @@ classdef OpPicker < Item
 %             if obj.SelBool==0
 %                 obj.Type='';
 %             end
-            disp('test');
+%             disp('test');
+            obj.Type=[];
             delete(obj.Fig);
         end
     end
@@ -113,6 +117,15 @@ classdef OpPicker < Item
             but1=uibutton(g,'Text','Select operator','ButtonPushedFcn',@obj.MSelectOperator);
             but1.Layout.Row=2;
             but1.Layout.Column=2;
+            
+            g2=uigridlayout(p);
+
+            g2.ColumnWidth = {'1x'};
+            g2.RowHeight = {'1x'};
+            
+            obj.UITextArea=uitextarea(g2,'Editable','off');
+            obj.UITextArea.Layout.Row=1;
+            obj.UITextArea.Layout.Column=1;
         end
         
         function stash=Pack(obj)
@@ -128,14 +141,21 @@ classdef OpPicker < Item
         function MOperatorSelected(obj,src,~)
             obj.CurrOperator=src.SelectedNodes.NodeData;
             if obj.CurrOperator~=0
-                PickOperator(obj);
+                obj2=PickOperator(obj);
+                obj.UITextArea.Value=obj2.Description;
 %                 disp('operator node');
             end
         end
         
         function MSelectOperator(obj,src,~)
             if obj.CurrOperator~=0
-                ChAddOperator(obj.Type);
+                
+%             Last=obj.VarSmith.LastOperator;
+%             
+% %             obj2=OpPicker.GetType(obj.CurrOperator);
+%                 SetParent(obj.Type,Last);
+                obj.Type.ChAddOperator(obj.Type);
+%                 ChAddOperator(obj.Type);
             end
             close(obj.Fig);
         end
@@ -147,6 +167,8 @@ classdef OpPicker < Item
             switch name
                 case 'OPInter'
                     obj2=OPInter;
+                case 'OPVarTake'
+                    obj2=OPVarTake;
                 otherwise
             end
         end

@@ -4,18 +4,21 @@ classdef Operator < NumOper & Item
     
     properties
 
-        Adress table;
+        
         Name char; %class name
         Title char; %civil name
-%         Type;
-%         Operations;
+        Description cell;
+        
         Input;
         Output;
         
         Children;
         ChildrenBool=0;
         First=0;
+        VarSmith;
     end
+
+
     
     methods (Abstract)
         RunTool(obj);
@@ -25,10 +28,9 @@ classdef Operator < NumOper & Item
         function obj = Operator(~)
             obj@NumOper;
             obj@Item;
-%             obj.Parent=parent;
-            
-
         end
+        
+
         
         function SetParent(obj,parent)
             obj.Parent=parent;
@@ -37,19 +39,34 @@ classdef Operator < NumOper & Item
             end
         end
         
-        function Run(obj)
-            RunTool(obj);
+        function RunCh(obj,data)
+            RunTool(obj,data);
             if obj.ChildrenBool==1
-                Run(obj.Children);
+                RunCh(obj.Children,obj.Output);
             end
         end
         
-        function ChAddOperator(obj)
+        function ChAddOperator(obj,obj2)
             if obj.First==1
-                AddOperator(obj.Parent,obj);
+                AddOperator(obj.Parent,obj2);
             else
-                ChAddOperator(obj.Parent);
+                ChAddOperator(obj.Parent,obj2);
             end
+        end
+        
+        function OpDrawGui(obj)
+%             function 
+            ClearGUI(obj);
+            DrawGui(obj);
+        end
+        
+        function obj2=GetInspector(obj)
+            obj2=OperLib.FindProp(obj.VarSmith,'Inspector');
+            obj2.CurrDialog=obj;
+        end
+        
+        function obj2=GetVarExp(obj)
+            obj2=OperLib.FindProp(obj.VarSmith,'VarExp');
         end
         
         function AddChildren(obj,children)

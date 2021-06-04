@@ -26,7 +26,7 @@ classdef Item < handle
         
         function ClearGUI(obj)
             if obj.FigBool==1
-                if isvalid(obj.Fig)
+                if ~isempty(obj.Fig)
                     a=obj.Fig.Children;
                     a.delete;
                 end

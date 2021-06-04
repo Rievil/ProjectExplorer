@@ -9,7 +9,7 @@ classdef ProjectObj < Node
         
         CreationDate datetime;
         LastChange datetime;
-
+        Plotter;
         ExpMainNode;
         Experiments;        
         ExpCount=0;
@@ -32,7 +32,7 @@ classdef ProjectObj < Node
             obj.Parent=parent;
             obj.Name=Name;
             SetStatus(obj,1);
-            
+            obj.Plotter=Plotter(obj);
 %             obj.ID=OperLib.FindProp(obj,'ProjectID');
         end
         
@@ -175,6 +175,8 @@ classdef ProjectObj < Node
 
             obj.TreeNode=treenode;
             AddMainExpNode(obj);
+            FillNode(obj.Plotter);
+            
         end
         
         %saving
@@ -188,6 +190,9 @@ classdef ProjectObj < Node
             stash.LastChange=obj.LastChange;
             
             stash.ExpMainNode=[];
+            if isvalid(obj.Plotter)
+                stash.Plotter=Pack(obj.Plotter);
+            end
 %             stash.Experiments=struct;
             n=0;
             for E=obj.Experiments
@@ -220,6 +225,11 @@ classdef ProjectObj < Node
                     obj2=AddExperiment(obj);
                     Populate(obj2,Ex);
                 end
+            end
+            
+                        
+            if isfield(stash,'Plotter')
+                Populate(obj.Plotter,stash.Plotter);
             end
         end
         

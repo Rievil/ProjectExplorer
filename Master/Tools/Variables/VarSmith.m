@@ -6,7 +6,7 @@ classdef VarSmith < Item
     properties
         Operators;
 
-        CurrOperator;
+        CurrOperator=0;
         ID;
         Name (1,1) string;
         Description cell;
@@ -40,7 +40,7 @@ classdef VarSmith < Item
         function obj2=get.LastOperator(obj)
             count=obj.Count;
             if count>0
-                obj2=obj.Operators(count);
+                obj2=obj.Operators{count};
             else
                 obj2=obj;
             end
@@ -50,7 +50,10 @@ classdef VarSmith < Item
             num=numel(obj.Operators);
         end
         
-        
+        function result=GetVariable(obj,data)
+            obj.Operators{1}.RunCh(data);
+            result=obj.Operators{obj.Count}.Output{:};
+        end
         
         function OpenPicker(obj)
             Picker=obj.Parent.OperatorPicker;
@@ -61,20 +64,56 @@ classdef VarSmith < Item
         
         function AddOperator(obj,operator)
             SetGui(operator,obj.UIOpPanel);
-            obj.Operators=[obj.Operators, operator];
+            
+            id=obj.Count+1;
+            if id>1
+                obj.Operators{id-1}.Children=operator;
+                obj.Operators{id-1}.ChildrenBool=1;
+            end
+
+            obj.Operators{id}=operator;
             FillList(obj);
+%             SetOperator(obj,obj.Count)
         end
           
         function list=get.OperList(obj)
             list=strings(obj.Count,1);
             for i=1:obj.Count
-                list(i,1)=obj.Operators(i).Title;
+                list(i,1)=obj.Operators{i}.Title;
             end
         end
         
         function FillList(obj)
             obj.UIList.Items=obj.OperList;
             obj.UIList.ItemsData=1:1:obj.Count;
+%             if obj.CurrOperator=0;
+%                 obj.CurrOperator=1;
+%             end
+        end
+        
+        function RemoveOperator(obj)
+            if obj.CurrOperator>0 && obj.CurrOperator<=obj.Count
+                if obj.CurrOperator==obj.Count
+                delete(obj.Operators{obj.CurrOperator});
+                obj.Operators(obj.CurrOperator)=[];
+                
+                else
+                    dif=obj.Count-obj.CurrOperator;
+                    order=flip(obj.Count-dif:1:obj.Count);%linspace(obj.Count,obj.Count-dif,obj.Count-dif);
+                    for i=order
+                        delete(obj.Operators{i});
+                        obj.Operators(i)=[];
+                    end
+                end
+                obj.CurrOperator=0;
+                FillList(obj);
+            end
+        end
+        
+        function SetOperator(obj,ID)
+           obj.CurrOperator=ID; 
+           obj.Operators{obj.CurrOperator}.SetGui(obj.UIOpPanel);
+           obj.Operators{obj.CurrOperator}.OpDrawGui;
         end
     end
     
@@ -86,21 +125,28 @@ classdef VarSmith < Item
                 g.ColumnWidth = {80,80,'3x'};
                 g.RowHeight = {25,'1x'};
                 
-                lbox = uilistbox(g);
+                lbox = uilistbox(g,'ValueChangedFcn',@obj.MSetOperator);
                 lbox.Layout.Row=2;
                 lbox.Layout.Column=[1 2];
                 
                 obj.UIList=lbox;
+                
+                p=uipanel(g,'Title','Operator settings');
+                p.Layout.Row=[1 2];
+                p.Layout.Column=3;
+                obj.UIOpPanel=p;
+                
                 if obj.Count>0
                     FillList(obj);
                     if obj.CurrOperator>0
-                        SetGui(obj.Operators(obj.CurrOperator),obj.Fig);
-                        DrawGui(obj.Operators(obj.CurrOperator));
+                        SetGui(obj.Operators{obj.CurrOperator},obj.UIOpPanel);
+                        DrawGui(obj.Operators{obj.CurrOperator});
 %                         nametext.Value=obj.Operators(obj.CurrOperator).Name;
-                        lbox.Value=obj.CurrVariable;
-                        obj.UIVarDesc.Value=obj.Operators(obj.CurrOperator).Description;
+                        lbox.Value=obj.CurrOperator;
+%                         obj.UIVarDesc.Value=obj.Operators(obj.CurrOperator).Description;
                     else
-                        DrawGui(obj.Operators(1));
+                        SetGui(obj.Operators{1},obj.UIOpPanel);
+                        DrawGui(obj.Operators{1});
 %                         nametext.Value=obj.Operators(1).Name;
                     end
                 else
@@ -112,14 +158,12 @@ classdef VarSmith < Item
                 but2.Layout.Row=1;
                 but2.Layout.Column=1;
                 
-                but3=uibutton(g,'Text','Remove operator');
+                but3=uibutton(g,'Text','Remove operator','ButtonPushedFcn',@obj.MRemoveOperator);
                 but3.Layout.Row=1;
                 but3.Layout.Column=2;
                 
                 
-                p=uipanel(g,'Title','Operator settings');
-                p.Layout.Row=[1 2];
-                p.Layout.Column=3;
+               
         end
         
         function stash=Pack(obj) 
@@ -129,11 +173,12 @@ classdef VarSmith < Item
             stash.Count=obj.Count;
             stash.Description=obj.Description;
             stash.Operators={};
+            stash.CurrOperator=obj.CurrOperator;
             
-            n=0;
-            for OP=obj.Operators
-                n=n+1;
-                TMP=OpPack(OP);
+
+            for n=1:obj.Count
+                
+                TMP=OpPack(obj.Operators{n});
                 stash.Operators{n}=TMP;
             end
         end
@@ -142,12 +187,16 @@ classdef VarSmith < Item
             obj.ID=stash.ID;
             obj.Name=stash.Name;
             obj.Description=stash.Description;
+            if isfield(stash,'CurrOperator')
+                obj.CurrOperator=stash.CurrOperator;
+            end
             
             n=0;
             for i=1:stash.Count
                 n=n+1;
                 obj2=OpPicker.GetType(stash.Operators{i}.Name);
                 Last=obj.LastOperator;
+                obj2.VarSmith=obj;
                 SetParent(obj2,Last);
                 OpPopulate(obj2,stash.Operators{i});
                 AddOperator(obj,obj2);
@@ -156,8 +205,18 @@ classdef VarSmith < Item
     end
     
     methods %callbacks
+        
+        function MSetOperator(obj,src,~)
+            ID=src.Value;
+            obj.SetOperator(ID);
+        end
+        
         function MOpenPicker(obj,src,~)
             OpenPicker(obj);
+        end
+        
+        function MRemoveOperator(obj,src,~)
+            RemoveOperator(obj);
         end
     end
         

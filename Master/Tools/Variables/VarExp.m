@@ -52,7 +52,7 @@ classdef VarExp < Node
     end
     
     methods %GUI
-        function CheckVar(obj,evnt,src)
+        function CheckVar(obj)
             SG=OperLib.FindProp(obj,'SpecGroup');
             tst=SG.Specimens.Data{1};
             obj.Inspector.Reset;

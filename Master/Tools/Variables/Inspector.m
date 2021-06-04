@@ -29,6 +29,10 @@ classdef Inspector < handle
         GUIParent;
         Nodes;
         ObjParent;
+        CurrVariableID;
+        UITableSelector;
+        OutAdress;
+        CurrDialog;
     end
     
     properties
@@ -118,12 +122,27 @@ classdef Inspector < handle
             end
         end
         
+        function T=GetAdress(obj,id)
+            count=numel(obj.T(id).Type);
+            type=obj.T(id).Type(count);
+            path=string(['[',replace(char(join(flip(obj.T(id).Path))),' ','],['),']']);
+            name=obj.T(id).Name;
+            size=obj.T(id).Size;
+            
+            T=table(id,name,type,path,size,'VariableNames',...
+                {'ID','Name','Type','Path','Size'});
+        end
         
         function DrawVar(obj,evnt,src)
             uit=src.Source.UserData;
             if numel(evnt.SelectedNodes.NodeData)~=0
             [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData{1});
-                
+            obj.CurrVariableID=evnt.SelectedNodes.NodeData{1};
+            
+            
+%             T3=obj.T{obj.CurrVariableID,:};
+            obj.UITableSelector.Data=GetAdress(obj,obj.CurrVariableID);
+            
                 if numel(src.PreviousSelectedNodes)==0
                     SelectedVarIcon=[obj.IconPath 'VarIconSelected.gif'];
                 else
@@ -176,9 +195,9 @@ classdef Inspector < handle
             obj.Count=0;
             obj.ArrCount=[];
             obj.Row=1;
-            tree=obj.GUI(4);
-            a=tree.Children;
-            a.delete;
+%             tree=obj.GUI(4);
+%             a=tree.Children;
+%             a.delete;
         end
         
         function Show(obj)
@@ -202,37 +221,66 @@ classdef Inspector < handle
             
             
             g=uigridlayout(fig);
-            g.RowHeight = {'1x','2x'};
+            g.RowHeight = {25,'1x','2x'};
             g.ColumnWidth = {300,600,'1x'};
             
-
-            
-            
             uit=uitable(g);
-            uit.Layout.Row=1;
+            uit.Layout.Row=[1 2];
             uit.Layout.Column=[2 3];
             
 
             
             t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit,'FontSize',10);
-            t.Layout.Row=[1 2];
+            t.Layout.Row=[1 3];
             t.Layout.Column=1;
 
             
             obj.Fig=1;
 
             p = uipanel(g,'Title','Variable forge','FontSize',12);
-            p.Layout.Row=2;
+            p.Layout.Row=3;
             p.Layout.Column=[2 3];
 
-%             g2=uigridlayout(p);
-%             g2.RowHeight = {25,25,'1x'};
-%             g2.ColumnWidth = {50,'3x','1x'};
-% 
-%             lbl = uilabel(g2,'Text','Size:');
-%             lbl.Layout.Row=1;
-%             lbl.Layout.Column=[1 2];
+            g2=uigridlayout(p);
+            g2.RowHeight = {70,25,25,25,'1x'};
+            g2.ColumnWidth = {100,'1x'};
+            
+            uit2=uitable(g2);
+            obj.UITableSelector=uit2;
+            uit2.Layout.Row=1;
+            uit2.Layout.Column=[1 2];
+            
+            cbox=uicheckbox(g2,'Text','Multiple varaibles?');
+            cbox.Layout.Row=2;
+            cbox.Layout.Column=[1 2];
+            
+            but1=uibutton(g2,'Text','Select variables','ButtonPushedFcn',@obj.MSelectVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
+            but1.Layout.Row=3;
+            but1.Layout.Column=1;
+            
+            but2=uibutton(g2,'Text','Cancel selection');%,'ButtonPushedFcn',@obj.MCheckVar);
+            but2.Layout.Row=4;
+            but2.Layout.Column=1;
+            
             obj.GUI=[fig,g,uit,t,p];
+        end
+        
+        function MSelectVariable(obj,src,~)
+            adress=Adress(obj.CurrDialog,obj.T(obj.CurrVariableID));
+            AddAdress(obj.CurrDialog,adress);
+
+%             BakeAdress(obj);
+            close(obj.GUI(1));
+        end
+        
+        function BakeAdress(obj)
+%             obj.OutAdress=struct2table(obj.T(obj.CurrVariableID),'AsArray',true);
+        end
+        
+        function close(obj)
+%             if obj.SelBool==0
+%                 obj.Type=[];
+%             end
         end
         
         function FirstRun(obj)
@@ -298,11 +346,10 @@ classdef Inspector < handle
                             A=A.(path{i});
                         else
                             A=A.(path{i});
-                            
+
                         end
                     otherwise
                 end
-%                 typeOUT=class(A)
             end
         end
         
@@ -312,7 +359,7 @@ classdef Inspector < handle
             Num=zeros(0,0);
             Size=[0,0];
             obj.Row=1;
-            obj.T=struct("CurrArr",[],"ID",[],"ParID",[],"Depth",[],"Type",Type,"Path",Path,"Num",Num,"Size",Size,"Name",'');
+            obj.T=struct("CurrArr",[],"ArrType",[],"ID",[],"ParID",[],"Depth",[],"Type",Type,"Path",Path,"Num",Num,"Size",Size,"Name",'');
         end
         
         function LoopStruct(obj)
@@ -323,7 +370,6 @@ classdef Inspector < handle
             for i=1:obj.Sz(2)
                 if obj.Sz(2)>1
                     AddSepNode(obj);
-%                     AddPath(obj,"sepnode",[],[],[]);
                 end
                 
                 for j=1:numel(obj.Fields)
@@ -344,9 +390,7 @@ classdef Inspector < handle
                         case 'table'
                             ChildInspector(pArr,obj);
                         otherwise
-                            
-%                             obj.Row=obj.Row+1;
-%                             AddPath(obj,pArr);                            
+                           
                     end
                 end
             end
@@ -428,6 +472,7 @@ classdef Inspector < handle
 %           
             obj.T(obj.Row).CurrArr=obj.CurrArrIdx;
             obj.T(obj.Row).ID=obj.Row;
+            obj.T(obj.Row).ArrType=obj.CurrArrName;
 %             sz=size(obj.T(obj.Row).Type,1);
             obj.T(obj.Row).Type=type;
             obj.Depth=numel(obj.T(obj.Row).Type)+1;

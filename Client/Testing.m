@@ -5,8 +5,10 @@ b=ExplorerAppStartMain;
 % clear all;
 %%
 stash=Pack(b.Core.ProjectOverview);
-%%
-result=Pack(b);
+%% Plotter test
+plotter=b.Core.ProjectOverview.Projects.Plotter;
+
+plotter.DrawTest;
 %%
 results = GetCurrentData(pr);
 %%

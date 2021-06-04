@@ -60,7 +60,6 @@ classdef OPInter < Operator
             obj.arrMX=obj.Parent.Output{obj.MainX};
             obj.arrSX=seconds(obj.Parent.Output{obj.SupX});
             obj.arrSY=obj.Parent.Output{obj.SupY};
-            obj.Test=false;
         end
 
         function DrawSample(obj)
@@ -78,26 +77,14 @@ classdef OPInter < Operator
             try
                 MY=obj.MainY;
                 cla(obj.UIAxes);
-
                 plot(obj.UIAxes,obj.arrSX,obj.arrSY,'-k','DisplayName',obj.Parent.Adress{obj.SupX}.Label);
-
                 scatter(obj.UIAxes,obj.arrMX,MY,'o','filled','DisplayName',obj.Parent.Adress{obj.MainX}.Label);
                 legend(obj.UIAxes,'Location','northwest');
-                
-                xname=sprintf('%s: %s',obj.Parent.Adress{obj.MainX}.ArrType,...
-                                obj.Parent.Adress{obj.MainX}.OrigName);
-
-                yname=sprintf('%s: %s',obj.Parent.Adress{obj.SupY}.ArrType,...
-                                obj.Parent.Adress{obj.SupY}.OrigName);
-
-                xlabel(obj.UIAxes,xname);
-                ylabel(obj.UIAxes,yname);
-
                 obj.Test=true;
             catch ME
                 obj.Test=false;
-                Fig=OperLib.FindProp(obj.VarSmith,'UIFig');
-                uiconfirm(Fig,char(ME.message),'Error','Icon','error')
+                Fig=OperLib.FindProp(obj.VarSmith,
+                uiconfirm(fig,message,title)
             end
         end
 
@@ -131,7 +118,7 @@ classdef OPInter < Operator
             
             varList=obj.Parent.VarList;
 
-            lbl1= uilabel(g,'Text','Main variable XQ:');
+            lbl1= uilabel(g,'Text','Main axis x:');
             lbl1.Layout.Row=2;
             lbl1.Layout.Column=1;
             
@@ -145,7 +132,7 @@ classdef OPInter < Operator
             drmx.Layout.Row=2;
             drmx.Layout.Column=2;
 
-            lbl2= uilabel(g,'Text','Variable X:');
+            lbl2= uilabel(g,'Text','Support axis x:');
             lbl2.Layout.Row=3;
             lbl2.Layout.Column=1;
 
@@ -160,7 +147,7 @@ classdef OPInter < Operator
             drsx.Layout.Row=3;
             drsx.Layout.Column=2;
 
-            lbl3= uilabel(g,'Text','Variable V:');
+            lbl3= uilabel(g,'Text','Support axis y:');
             lbl3.Layout.Row=4;
             lbl3.Layout.Column=1;
 
@@ -177,16 +164,12 @@ classdef OPInter < Operator
             ax=uiaxes(g);
             hold(ax,'on');
             ax.Layout.Row=5;
-            ax.Layout.Column=[1 4];
+            ax.Layout.Column=[1 3];
             obj.UIAxes=ax;
 
             but1=uibutton(g,'Text','Check process','ButtonPushedFcn',@obj.MChekInter);
             but1.Layout.Row=3;
             but1.Layout.Column=4;
-            
-            if obj.Test==true
-                DrawPlot(obj);
-            end
         end
         
         
