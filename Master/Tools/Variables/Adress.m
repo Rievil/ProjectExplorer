@@ -65,6 +65,33 @@ classdef Adress < handle
             end
             arr=A;
         end
+        
+        function stash=Pack(obj)
+            stash=struct;
+            stash.Name=obj.Name;
+            stash.OrigName=obj.OrigName;
+            stash.FinalType=objFinalType;
+            stash.Type=obj.Type;
+            stash.Path=obj.Path;
+            stash.Num=obj.Num;
+            stash.Size=obj.Size;
+            stash.CurrArr=obj.CurrArr;
+            stash.ArrType=obj.ArrType;
+            stash.Label=obj.Label;
+        end
+        
+        function Populate(obj,stash)
+            obj.Name=stash.Name;
+            obj.OrigName=stash.OrigName;
+            obj.FinalType=stash.FinalType;
+            obj.Type=stash.Type;
+            obj.Path=stash.Path;
+            obj.Num=stash.Num;
+            obj.Size=stash.Size;
+            obj.CurrArr=stash.CurrArr;
+            obj.ArrType=stash.ArrType;
+            obj.Label=stash.Label;
+        end
     end
     
 end

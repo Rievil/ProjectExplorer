@@ -120,11 +120,15 @@ classdef OPVarTake < Operator
         
         function stash=Pack(obj)
             stash=struct;
-
+            for i=1:obj.Count
+                stash.Adress(i)=pack(obj.Adress(i));
+            end
         end
         
         function Populate(obj,stash)
-            
+            for i=1:size(stash.Adress,2)
+                
+            end
         end
     end
     

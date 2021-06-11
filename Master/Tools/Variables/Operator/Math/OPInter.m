@@ -130,7 +130,10 @@ classdef OPInter < Operator
             drtype.Layout.Column=2;
             
             varList=obj.Parent.VarList;
-
+            if isempty(varList)
+                varList="";
+            end
+            
             lbl1= uilabel(g,'Text','Main variable XQ:');
             lbl1.Layout.Row=2;
             lbl1.Layout.Column=1;
@@ -140,6 +143,7 @@ classdef OPInter < Operator
             else
                 n=1;
             end
+            
             drmx = uidropdown(g,'Items',varList,'ItemsData',1:1:numel(varList),'Value',n,...
                     'ValueChangedFcn',@obj.MSetMainX);
             drmx.Layout.Row=2;
@@ -201,6 +205,7 @@ classdef OPInter < Operator
             stash.SupX=obj.SupY;
             stash.Type=obj.Type;
             stash.SelType=obj.SelType;
+            
         end
         
         function Populate(obj,stash)
