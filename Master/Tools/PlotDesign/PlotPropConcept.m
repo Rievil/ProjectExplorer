@@ -1,5 +1,5 @@
-classdef FigureConcept < Item
-    %FIGURECONCEPT Summary of this class goes here
+classdef PlotPropConcept < Item
+    %PLOTPROPCONCEPT Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
@@ -7,13 +7,14 @@ classdef FigureConcept < Item
     end
     
     methods
-        function obj = FigureConcept(parent)
+        function obj = PlotPropConcept(parent)
             obj.Parent=parent;
 
         end
 
     end
     
+            
     methods %abstract
         function DrawGui(obj)
             ClearGUI(obj);

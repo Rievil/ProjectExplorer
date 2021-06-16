@@ -54,7 +54,7 @@ classdef OPVarTake < Operator
         function DrawGui(obj)
             g=uigridlayout(obj.Fig);
 
-            g.ColumnWidth = {250,'1x',100,100};
+            g.ColumnWidth = {150,'1x',100,100};
             g.RowHeight = {25,'2x','1x',25};
             
             lbl = uilabel(g,'Text','Select variables from measurements:');
@@ -121,13 +121,17 @@ classdef OPVarTake < Operator
         function stash=Pack(obj)
             stash=struct;
             for i=1:obj.Count
-                stash.Adress(i)=pack(obj.Adress(i));
+                stash.Adress(i)=Pack(obj.Adress{i});
             end
         end
         
         function Populate(obj,stash)
-            for i=1:size(stash.Adress,2)
-                
+            if isfield(stash,'Adress')
+                for i=1:size(stash.Adress,2)
+                    adress=Adress(obj);
+                    Populate(adress,stash.Adress(i));
+                    obj.Adress{i}=adress;
+                end
             end
         end
     end

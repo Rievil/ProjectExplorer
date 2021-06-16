@@ -17,9 +17,9 @@ classdef Adress < handle
     end
     
     methods
-        function obj = Adress(parent,t)
+        function obj = Adress(parent)
             obj.Parent=parent;
-            setAdress(obj,t);
+            
         end
         
         function data=GetSampleData(obj)
@@ -70,7 +70,7 @@ classdef Adress < handle
             stash=struct;
             stash.Name=obj.Name;
             stash.OrigName=obj.OrigName;
-            stash.FinalType=objFinalType;
+            stash.FinalType=obj.FinalType;
             stash.Type=obj.Type;
             stash.Path=obj.Path;
             stash.Num=obj.Num;

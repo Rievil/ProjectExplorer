@@ -73,6 +73,10 @@ classdef VarSmith < Item
 
             obj.Operators{id}=operator;
             FillList(obj);
+            if obj.FigBool==true
+                DrawGui(obj.Operators{id});
+                obj.UIList.Value=id;
+            end
 %             SetOperator(obj,obj.Count)
         end
           
@@ -177,7 +181,6 @@ classdef VarSmith < Item
             
 
             for n=1:obj.Count
-                
                 TMP=OpPack(obj.Operators{n});
                 stash.Operators{n}=TMP;
             end

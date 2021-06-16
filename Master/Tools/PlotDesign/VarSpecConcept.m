@@ -1,5 +1,5 @@
-classdef FigureConcept < Item
-    %FIGURECONCEPT Summary of this class goes here
+classdef VarSpecConcept < Item
+    %VARSPECCONCEPT Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
@@ -7,13 +7,15 @@ classdef FigureConcept < Item
     end
     
     methods
-        function obj = FigureConcept(parent)
+        function obj = VarSpecConcept(parent)
             obj.Parent=parent;
+            %VARSPECCONCEPT Construct an instance of this class
 
         end
 
     end
     
+            
     methods %abstract
         function DrawGui(obj)
             ClearGUI(obj);

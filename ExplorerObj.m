@@ -33,6 +33,10 @@ classdef ExplorerObj < handle
     
     methods
         function obj = ExplorerObj(type)
+            arguments 
+                type (1,1) logical;
+            end
+            
             obj.Regime=type;
             
             
@@ -52,6 +56,10 @@ classdef ExplorerObj < handle
                 
 
                 AssociateApp(obj.Core);
+                if obj.DbConn.Status==true
+                    CreateOverview(obj.Core);
+                end
+            else
                 if obj.DbConn.Status==true
                     CreateOverview(obj.Core);
                 end

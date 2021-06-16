@@ -5,9 +5,13 @@ classdef Plotter < Node
     properties
         PlotObj;
         TreeNode;
-        
-%         VarExp;
-%         SpecGroup;
+        UIList;
+        UITabGroup;
+        UIAxisPreviewTab;
+        UIVarSpecSelectionTab;
+        UIPlotPropertiesTab;
+        UIExportTab;
+        UIOperationsTab;
     end
     
     methods
@@ -43,8 +47,8 @@ classdef Plotter < Node
         end
 
         function DrawTest(obj)
-            var1=obj.Parent.Experiments.VarExp.Forge.Variables(1, 5);
-            var2=obj.Parent.Experiments.VarExp.Forge.Variables(1, 4);
+            var1=obj.Parent.Experiments.VarExp.Forge.Variables(1, 1);
+            var2=obj.Parent.Experiments.VarExp.Forge.Variables(1, 2);
             fig=figure;
             hold on;
             ax=gca;
@@ -56,7 +60,6 @@ classdef Plotter < Node
                 y=GetVariable(var2,data);
                 plot(ax,x,y);
             end
-            
             
         end
 
@@ -71,41 +74,54 @@ classdef Plotter < Node
         function InitializeOption(obj)
             SetParent(obj,'project');
             Clear(obj);
-%             g=uigridlayout(obj.GuiParent);
-%             g.RowHeight = {22,'1x'};
-%             g.ColumnWidth = {'1x',50};
-% %             
-% 
-%             
-%             la=uilabel(g,'Text','Variables used in experiment:');
-%             la.Layout.Row=1;
-%             la.Layout.Column=1;
-%             
-%             but1=uibutton(g,'Text','Check variables',...
-%                 'ButtonPushedFcn',@obj.CheckVar);
-%                         
-%             but1.Layout.Row=1;
-%             but1.Layout.Column=2;
-%             
-%             p = uipanel(g,'Title','Options','FontSize',12);
-%             p.Layout.Row=2;
-%             p.Layout.Column=[1 2];
-%             
-%             g2=uigridlayout(p);
-%             g2.RowHeight = {'1x'};
-%             g2.ColumnWidth = {'1x','1x'};
-%             
-% 
-%             
-%             uit=uitable(g2);
-%             uit.Layout.Row=1;
-%             uit.Layout.Column=1;
-%             uit.Data=GetEmptyVar(obj);
             
+            
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,'1x'};
+            g.ColumnWidth = {150,'1x'};
+            
+            
+            label = uilabel(g,'Text','Figure concepts');
+            label.Layout.Row=1;
+            label.Layout.Column=1;
+            
+            label2 = uilabel(g,'Text','Figure concept properties');
+            label2.Layout.Row=1;
+            label2.Layout.Column=2;
+            
+            lbox=uilistbox(g,'ValueChangedFcn',@obj.MSetFigConcept);
+            lbox.Layout.Row=2;
+            lbox.Layout.Column=1;
+            obj.UIList=lbox;
+            
+            tabgroup=uitabgroup(g,'AutoResizeChildren',true);
+            tabgroup.Layout.Row=2;
+            tabgroup.Layout.Column=2;
+            
+            tab1 = uitab(tabgroup,'Title','Axis preview');
+            tab2 = uitab(tabgroup,'Title','Variable and specimens selection');
+            tab3 = uitab(tabgroup,'Title','Plot properties');
+            tab4 = uitab(tabgroup,'Title','Export properties');
+            tab5 = uitab(tabgroup,'Title','Custom operations');
+            
+            
+            obj.UIAxisPreviewTab=tab1;
+            obj.UIVarSpecSelectionTab=tab2;
+            obj.UIPlotPropertiesTab=tab3;
+            obj.UIExportTab=tab4;
+            obj.UIOperationsTab=tab5;
+            
+            obj.UITabGroup=tabgroup;
 
         end
         
         
+    end
+    
+    methods %callbacks
+        function MSetFigConcept(obj,src,~)
+           disp('MSetFigConcept'); 
+        end
     end
 end
 

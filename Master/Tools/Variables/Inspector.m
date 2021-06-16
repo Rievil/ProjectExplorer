@@ -266,9 +266,11 @@ classdef Inspector < handle
         end
         
         function MSelectVariable(obj,src,~)
-            adress=Adress(obj.CurrDialog,obj.T(obj.CurrVariableID));
+            adress=Adress(obj.CurrDialog);
+            setAdress(adress,obj.T(obj.CurrVariableID));
+            
             AddAdress(obj.CurrDialog,adress);
-
+            
 %             BakeAdress(obj);
             close(obj.GUI(1));
         end

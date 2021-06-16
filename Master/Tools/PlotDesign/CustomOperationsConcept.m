@@ -1,5 +1,5 @@
-classdef FigureConcept < Item
-    %FIGURECONCEPT Summary of this class goes here
+classdef CustomOperationsConcept < Item
+    %CUSTOMOPERATIONS Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
@@ -7,10 +7,10 @@ classdef FigureConcept < Item
     end
     
     methods
-        function obj = FigureConcept(parent)
+        function obj = CustomOperationsConcept(parent)
             obj.Parent=parent;
-
         end
+        
 
     end
     

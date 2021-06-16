@@ -287,16 +287,21 @@ classdef OperLib < handle
         function val=FindProp(obj2,name)
             val=[];
 %             obj2=obj2.Parent;
-            list=properties(obj2);
+            name=string(name);
+            list=string(properties(obj2));
             while numel(list)>0
-                idx=contains(list,name);
+                
+                
+                
+                idx=find(list==name);
+                
                 if sum(idx)>0
                     prop=list(idx);
                     val=obj2.(prop{1});
                     break;
                 end
                 obj2=obj2.Parent;
-                list=properties(obj2);
+                list=string(properties(obj2));
             end
             
         end

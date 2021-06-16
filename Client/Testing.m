@@ -3,6 +3,8 @@ clear all;
 %%
 b=ExplorerAppStartMain;
 % clear all;
+%% Without gui
+c=ExplorerObj(0);
 %%
 stash=Pack(b.Core.ProjectOverview);
 %% Plotter test

@@ -25,8 +25,8 @@ classdef OpPicker < Item
         
         function List=CreateList(obj)
             obj.List=struct;
-            obj.List(1).Name='Data trimming';
-            obj.List(1).Functions={'Take variables'};
+            obj.List(1).Name='Variables';
+            obj.List(1).Functions={'Variables'};
             obj.List(1).Class={'OPVarTake'};
             
             obj.List(2).Name='Matematics';

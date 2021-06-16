@@ -112,7 +112,7 @@ classdef OPInter < Operator
         function DrawGui(obj)
             g=uigridlayout(obj.Fig);
             g.RowHeight = {25,25,25,25,'1x'};
-            g.ColumnWidth = {250,250,'1x'};
+            g.ColumnWidth = {100,150,75,'1x'};
             
             lbl= uilabel(g,'Text','Type of interpolation');
             lbl.Layout.Row=1;
@@ -186,10 +186,10 @@ classdef OPInter < Operator
 
             but1=uibutton(g,'Text','Check process','ButtonPushedFcn',@obj.MChekInter);
             but1.Layout.Row=3;
-            but1.Layout.Column=4;
+            but1.Layout.Column=3;
             
             if obj.Test==true
-                DrawPlot(obj);
+                DrawSample(obj);
             end
         end
         
@@ -205,7 +205,7 @@ classdef OPInter < Operator
             stash.SupX=obj.SupY;
             stash.Type=obj.Type;
             stash.SelType=obj.SelType;
-            
+            stash.Test=obj.Test;
         end
         
         function Populate(obj,stash)
@@ -213,6 +213,7 @@ classdef OPInter < Operator
             obj.SupY=stash.SupX;
             obj.Type=stash.Type;
             obj.SelType=stash.SelType;
+            obj.Test=stash.Test;
         end
     end
     methods %callbackes

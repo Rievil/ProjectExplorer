@@ -33,6 +33,7 @@ classdef ProjectObj < Node
             obj.Name=Name;
             SetStatus(obj,1);
             obj.Plotter=Plotter(obj);
+%             SetGuiParent(obj.Plotter,obj);
 %             obj.ID=OperLib.FindProp(obj,'ProjectID');
         end
         
