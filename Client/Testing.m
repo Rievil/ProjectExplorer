@@ -8,7 +8,7 @@ c=ExplorerObj(0);
 %%
 stash=Pack(b.Core.ProjectOverview);
 %% Plotter test
-plotter=b.Core.ProjectOverview.Projects.Plotter;
+plotter=b.Core.ProjectOverview.Projects(1).Plotter;
 
 plotter.DrawTest;
 %%
@@ -193,3 +193,18 @@ ylabel('Counts');
 
 legend;
 %% Image in ui table
+fig=figure;
+hold on;
+grid off;
+
+ax=gca;
+x=0:0.1:pi()*2;
+y=sin(x);
+plot(x,y,'k','LineWidth',8);
+xlim([0 x(end)]);
+xlabel('x axis');
+ylabel('y axis');
+
+set(ax,'TickDir','out','FontSize',29,'LineWidth',8,'FontName','Arial');
+set(fig,'Renderer','painters');
+print(fig,'C:\Users\Richard\OneDrive - Vysoké učení technické v Brně\Dokumenty\Github\ProjectExplorer\Master\GUI\Icons\FigureConcept','-dsvg');

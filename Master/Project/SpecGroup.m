@@ -10,7 +10,7 @@ classdef SpecGroup < Node
         CurrSelID;
         Count=0;
         Sel;
-        
+        UISelName;
     end
     
     properties (Dependent)
@@ -46,6 +46,7 @@ classdef SpecGroup < Node
             obj.CurrSelID=src.Value;
             obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
             obj.Children(3,1).Data.N=obj.Sel;
+            obj.UISelName.Value=obj.Selector.Name(obj.CurrSelID);
 %             disp('test');
         end
         
@@ -73,6 +74,12 @@ classdef SpecGroup < Node
         
         function MenuNewSelector(obj,src,evnt)
             NewSelector(obj);
+        end
+        
+        function MChangeSelName(obj,src,~)
+            
+            obj.Selector.Name(obj.CurrSelID)=src.Value;
+            obj.Children(6).Items=obj.Selector.Name;
         end
         
         function MenuDeleteSelector(obj,src,event)
@@ -215,15 +222,34 @@ classdef SpecGroup < Node
             panel.Layout.Column=[2 4];
             
             g2=uigridlayout(panel);
-            g2.RowHeight={'1x','1x'};
-            g2.ColumnWidth={150,'1x'};
+            g2.RowHeight={25,'1x','1x'};
+            g2.ColumnWidth={90,100,'1x'};
+            
+            lbl = uilabel(g2,'Text','Selector name:');
+            lbl.Layout.Row=1;
+            lbl.Layout.Column=1;
+            
+            edt = uieditfield(g2,'ValueChangedFcn',@obj.MChangeSelName);
+            edt.Layout.Row=1;
+            edt.Layout.Column=2;
+            
+            obj.UISelName=edt;
+            
+            
+            
             
             lbox = uilistbox(g2,'ValueChangedFcn',@obj.MenuChangeSelector);
-            lbox.Layout.Row=1;
-            lbox.Layout.Column=1;
+            lbox.Layout.Row=2;
+            lbox.Layout.Column=[1 2];
+            
+            
             
              obj.Children=[g;la;uit;panel;g2;lbox];
              
+            if obj.Count>0
+                obj.UISelName.Value=obj.Selector.Name(obj.CurrSelID);
+            end
+            
             if numel(obj.Selector)==0
                 NewSelector(obj);
             end
