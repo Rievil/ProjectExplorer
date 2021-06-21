@@ -26,6 +26,14 @@ classdef FigureConcept < Item
             delete(obj);
         end
         
+        function obj2=MakeSpecificPlot(obj,name)
+            switch name
+                case 'PlotPlot'
+                    obj2=PlotPlot(obj);
+                otherwise
+            end
+        end
+        
          function FillNode(obj)
             parentnode=obj.Parent.TreeNode;
             UITab=OperLib.FindProp(obj,'UIFig');
@@ -55,11 +63,23 @@ classdef FigureConcept < Item
         end
         
         function stash=Pack(obj) 
-            
+            stash=struct;
+            stash.ID=obj.ID;
+            stash.Name=obj.Name;
+            if isvalid(obj.PlotType)
+                stash.PlotType=CoPack(obj.PlotType);
+            end
         end
         
         function Populate(obj,stash) 
-            
+
+            obj.ID=stash.ID;
+            obj.Name=stash.Name;
+            if isvalid(stash.PlotType)
+                obj2=obj.MakeSpecificPlot(stash.PlotType.Name);
+                obj2.CoPopulate(stash.PlotType);
+                obj2.PlotType=obj2;
+            end
         end
     end
     

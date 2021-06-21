@@ -9,7 +9,7 @@ classdef PlotPlot < PlotObj
     methods
         function obj = PlotPlot(parent)
             obj@PlotObj(parent);
-            
+            obj.Name='PlotPlot';
 
         end
         
@@ -17,10 +17,11 @@ classdef PlotPlot < PlotObj
     
     methods %abstract
         function CoPack(obj)
-            
+
         end
         
         function CoPopulate(obj,stash)
+
             
         end
     end
