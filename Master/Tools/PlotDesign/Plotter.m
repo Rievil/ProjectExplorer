@@ -10,13 +10,13 @@ classdef Plotter < Node
         
         UITree;
         
-        UITabGroup;
+        UIPanel;
         
-        UIAxisPreviewTab;
-        UIVarSpecSelectionTab;
-        UIPlotPropertiesTab;
-        UIExportTab;
-        UIOperationsTab;
+%         UIAxisPreviewTab;
+%         UIVarSpecSelectionTab;
+%         UIPlotPropertiesTab;
+%         UIExportTab;
+%         UIOperationsTab;
     end
     
     properties (Dependent)
@@ -134,24 +134,29 @@ classdef Plotter < Node
             end
 %             end
             
-            tabgroup=uitabgroup(g,'AutoResizeChildren',true);
-            tabgroup.Layout.Row=2;
-            tabgroup.Layout.Column=2;
+%             tabgroup=uitabgroup(g,'AutoResizeChildren',true);
+%             tabgroup.Layout.Row=2;
+%             tabgroup.Layout.Column=2;
             
-            tab1 = uitab(tabgroup,'Title','Axis preview');
-            tab2 = uitab(tabgroup,'Title','Variable and specimens selection');
-            tab3 = uitab(tabgroup,'Title','Plot properties');
-            tab4 = uitab(tabgroup,'Title','Export properties');
-            tab5 = uitab(tabgroup,'Title','Custom operations');
+            panel = uipanel(g,'Title','Axis preview');
+            panel.Layout.Row=2;
+            panel.Layout.Column=2;
+            
+            obj.UIPanel=panel;
+            
+%             tab2 = uitab(tabgroup,'Title','Variable and specimens selection');
+%             tab3 = uitab(tabgroup,'Title','Plot properties');
+%             tab4 = uitab(tabgroup,'Title','Export properties');
+%             tab5 = uitab(tabgroup,'Title','Custom operations');
             
             
-            obj.UIAxisPreviewTab=tab1;
-            obj.UIVarSpecSelectionTab=tab2;
-            obj.UIPlotPropertiesTab=tab3;
-            obj.UIExportTab=tab4;
-            obj.UIOperationsTab=tab5;
+%             obj.UIAxisPreviewTab=tab1;
+%             obj.UIVarSpecSelectionTab=tab2;
+%             obj.UIPlotPropertiesTab=tab3;
+%             obj.UIExportTab=tab4;
+%             obj.UIOperationsTab=tab5;
             
-            obj.UITabGroup=tabgroup;
+%             obj.UITabGroup=tabgroup;
             
             cm = uicontextmenu(UITab,'UserData',obj);
             
@@ -171,6 +176,17 @@ classdef Plotter < Node
         end
         
         function MFigureNodeSelected(obj,src,~)
+            node=src.SelectedNodes;
+            obj2=node.NodeData{1};
+            objName=node.NodeData{2};
+            switch lower(objName)
+                case 'figureconcept'
+                    SetGui(obj2,obj.UIPanel);
+                    DrawGui(obj2);
+                case 'plotgroup'
+                    
+                otherwise
+            end
             disp('MFigureNodeSelected');
         end
           

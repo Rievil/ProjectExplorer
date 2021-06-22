@@ -7,13 +7,24 @@ classdef FigureConcept < Item
     properties
         ID;
         Name;
-        PlotType;
+%         PlotTypeName;
+%         PlotType;
+        PlotPreview;
         TreeNode;
+        UITabGroup;
+        
+    end
+    
+    properties
+        PlotTypeChange;
     end
     
     methods
         function obj = FigureConcept(parent)
             obj.Parent=parent;
+            obj.PlotPreview=PlotPreview(obj);
+            
+            obj.PlotTypeChange=addlistener(obj.PlotPreview,'PlotChange',@obj.MPlotChange);
         end
         
         function SetName(obj,name)
@@ -51,7 +62,9 @@ classdef FigureConcept < Item
                 'MenuSelectedFcn',@obj.MNewPlot);
             
             obj.TreeNode.ContextMenu=cm;
-        end
+         end
+        
+
 
     end
     
@@ -59,6 +72,22 @@ classdef FigureConcept < Item
         function DrawGui(obj)
             ClearGUI(obj);
             g=uigridlayout(obj.Fig(1));
+            
+            g.RowHeight = {'1x'};
+            g.ColumnWidth = {'1x'};
+            
+            tabgroup=uitabgroup(g,'AutoResizeChildren',true);
+            tabgroup.Layout.Row=1;
+            tabgroup.Layout.Column=1;
+            
+            tab1 = uitab(tabgroup,'Title','Plot preview');
+            tab2 = uitab(tabgroup,'Title','Axis options');
+            tab3 = uitab(tabgroup,'Title','Style');
+            
+            SetGui(obj.PlotPreview,tab1);
+            DrawGui(obj.PlotPreview);
+            
+            obj.UITabGroup=tabgroup;
 
         end
         
@@ -91,6 +120,11 @@ classdef FigureConcept < Item
         
         function MNewPlot(obj,src,~)
             disp('MNewPlot');
+        end
+        
+        function MPlotChange(obj,src,evnt)
+            disp('MPlotChange');
+            
         end
     end
     

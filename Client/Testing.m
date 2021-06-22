@@ -14,6 +14,8 @@ plotter.DrawTest;
 %%
 results = GetCurrentData(pr);
 %%
+d = categorical(listfonts);
+%%
 T=pr.PR.Projects.TotalTable.Zedo(1,1).Data.Records(1).ConDetector;
 x=T{:,4};
 y=T{:,9};

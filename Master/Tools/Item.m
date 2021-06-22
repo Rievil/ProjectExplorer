@@ -31,8 +31,6 @@ classdef Item < handle
                     a.delete;
                 end
             end
-%             obj.FigBool=0;
-%             obj.Fig=[];
         end
         
         function SetParent(obj,parent)
