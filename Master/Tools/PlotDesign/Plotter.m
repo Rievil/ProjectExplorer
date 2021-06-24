@@ -80,7 +80,7 @@ classdef Plotter < Node
         end
 
         function DrawTest(obj)
-            var1=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 3);
+            var1=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 5);
             var2=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 4);
             fig=figure;
             hold on;

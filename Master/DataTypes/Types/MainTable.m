@@ -7,6 +7,7 @@ classdef MainTable < DataFrame
     properties
        SpecimensCount;
        KeyNames;
+%        TypeSettings;
     end
     
     methods %main methods
@@ -132,7 +133,7 @@ classdef MainTable < DataFrame
         %set property
         function SetVal(obj,src,event)
 %             obj.TypeSettings{1}=event.Source.Data;
-            obj.TypeSettingstings=event.Source.Data;
+            obj.TypeSettings=event.Source.Data;
 %             source.Children{3,1}.UserData=0;
         end       
         
@@ -153,7 +154,7 @@ classdef MainTable < DataFrame
                 end
             end
             source.Children(3,1).UserData=0;
-            obj.TypeSettingstings=source.Children(3,1).Data;
+            obj.TypeSettings=source.Children(3,1).Data;
         end
         
         function TypeRemoveVar(obj,source,event)

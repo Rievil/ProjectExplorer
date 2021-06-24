@@ -39,6 +39,16 @@ classdef Operator < NumOper & Item
             end
         end
         
+        function list=GetVarList(obj)
+            obj2=obj;
+            name=class(obj2);
+            while ~strcmp(name,'OPVarTake')
+                obj2=obj2.Parent;
+                name=class(obj2);
+            end
+            list=obj2.VarList;%
+        end
+        
         function RunCh(obj,data)
             RunTool(obj,data);
             if obj.ChildrenBool==1
