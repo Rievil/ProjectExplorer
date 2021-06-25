@@ -76,7 +76,9 @@ classdef Zedo < AcousticEmission
             obj.Folder=folder;
             alpha=OperLib.GetAlpha;
             warning('off','all');
-
+            parts=split(obj.Folder,'\');
+            SpecName=lower([parts{end},'.']);
+            
             T=OperLib.GetTypeDir(folder);
             T2=T(T.suffix==".txt",:);
             fileName=T2.name;
@@ -97,34 +99,40 @@ classdef Zedo < AcousticEmission
 
             IdxE=find(contains(fileName,'event'));
             if length(IdxE)>0
-                filename=[char(T2.folder(IdxE)) '\' char(T2.file(IdxE))];
-%                 opts=detectImportOptions(filename,'Delimiter','\t');
-                [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
+                AllEvents=struct;
+                for i=IdxE'
+                    filename=[char(T2.folder(i)) '\' char(T2.file(i))];
+    %                 opts=detectImportOptions(filename,'Delimiter','\t');
+                    [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
+
+                    Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine,'Delimiter','\t');
+
+                    time=string(Events{:,7});
+                    Events(:,7)=[];
+                    str=replace(time,'/',' ');
+                    time=datetime(str,'Format','dd.MM.yyyy hh:mm:ss.s');
+                    Events=addvars(Events,time,'Before','Last_Hit_End_Relative_sec_');
+                    Events.Properties.VariableNames{7}='DateTime';
+
+                    Order=split(Events{:,4},',');
+                    Order(:,1)=replace(Order(:,1),',','');
+                    Events(:,4)=[];
+                    Events=addvars(Events,lower(Order),'Before','Hits_IDs');
+                    Events.Properties.VariableNames{4}='Sensors_Order';
+
+                    Order=split(string(Events{:,5}),',');
+                    Order2=double(Order);
+                    Events(:,5)=[];
+                    Events=addvars(Events,Order2,'Before','First_Hit_Start_Relative_sec_');
+                    Events.Properties.VariableNames{5}='Hits_IDs';
+
+                    [speed,Cards]=GetSpeed(obj,filename);
+                    AllEvents(i).Part=Events;
+                end
                 
-                Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine,'Delimiter','\t');
                 
-                time=string(Events{:,7});
-                Events(:,7)=[];
-                str=replace(time,'/',' ');
-                time=datetime(str,'Format','dd.MM.yyyy hh:mm:ss.s');
-                Events=addvars(Events,time,'Before','Last_Hit_End_Relative_sec_');
-                Events.Properties.VariableNames{7}='DateTime';
-                
-                Order=split(Events{:,4},',');
-                Order(:,1)=replace(Order(:,1),',','');
-                Events(:,4)=[];
-                Events=addvars(Events,Order,'Before','Hits_IDs');
-                Events.Properties.VariableNames{4}='Sensors_Order';
-                
-                Order=split(string(Events{:,5}),',');
-                Order2=double(Order);
-                Events(:,5)=[];
-                Events=addvars(Events,Order2,'Before','First_Hit_Start_Relative_sec_');
-                Events.Properties.VariableNames{5}='Hits_IDs';
-                
-                [speed,Cards]=GetSpeed(obj,filename);     
             else
-                Events=[];
+                AllEvents=[];
                 speed=[];
                 Cards=[];
             end
@@ -133,7 +141,7 @@ classdef Zedo < AcousticEmission
             
             for iCard=1:length(UnqCards)
                 clear CardFiles CardNames;
-                Records(iCard).SampleCards=char(UnqCards(iCard));
+                Records(iCard).SampleCards=replace(char(UnqCards(iCard)),SpecName,'');
                 if ~isempty(Cards)
                     Records(iCard).Cards=char(Cards(iCard));
                 else
@@ -236,7 +244,7 @@ classdef Zedo < AcousticEmission
 %                 Records(iCard).ConDetector=T;
             end
             
-            data=struct('Speed',speed,'Events',Events,'Records',Records);
+            data=struct('Speed',speed,'Events',AllEvents,'Records',Records);
             %ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
         end

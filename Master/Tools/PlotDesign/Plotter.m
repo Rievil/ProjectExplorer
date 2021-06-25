@@ -78,7 +78,27 @@ classdef Plotter < Node
         function node=AddNode(obj)
             
         end
-
+        
+        function Tout=GetSampleData(obj,exp,sel)
+            Tout=table;
+            Variables=obj.Parent.Experiments(exp).VarExp.Forge.Variables;
+            SPecGroup=obj.Parent.Experiments(exp).SpecGroup;
+            Sel=SPecGroup.Selector.Specimens{sel};
+            T=obj.Parent.Experiments(exp).SpecGroup.Specimens(Sel,:);
+            for i=1:size(T,1)
+                data=T.Data{i};
+                Trow=T(i,1:3);
+                for j=1:numel(Variables)
+                    Var=Variables(j);
+                    x=Var.GetVariable(data);
+                    Ts=table({x},'VariableNames',{char(Var.Name)});
+                    Trow=[Trow, Ts];
+                end
+                Tout=[Tout; Trow];
+            end
+            
+        end
+        
         function DrawTest(obj)
             var1=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 5);
             var2=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 4);
@@ -90,6 +110,7 @@ classdef Plotter < Node
             for i=1:size(T,1)
                 data=T.Data{i};
                 x=var1.GetVariable(data);
+                
                 y=var2.GetVariable(data);
                 plot(ax,x,y);
             end

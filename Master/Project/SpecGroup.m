@@ -8,13 +8,15 @@ classdef SpecGroup < Node
         SpecDesc table;
         Selector table;
         CurrSelID;
-        Count=0;
         Sel;
         UISelName;
+        UILBox;
     end
     
     properties (Dependent)
         SpecimenList;
+        Count;
+        SelCount;
     end
     
     methods
@@ -22,6 +24,14 @@ classdef SpecGroup < Node
             obj.Parent=parent;
             obj.Specimens=table([],[],[],{},'VariableNames',...
                 {'ID','Key','MeasID','Data'});
+        end
+        
+        function count=get.Count(obj)
+            count=size(obj.Specimens,1);
+        end
+        
+        function selcount=get.SelCount(obj)
+            selcount=size(obj.Selector,1);
         end
         
         function sel=GetEmptySel(obj)
@@ -43,11 +53,31 @@ classdef SpecGroup < Node
         
         function MenuChangeSelector(obj,src,~)
 %             ID=src.Value;
+            CheckSelectors(obj);
             obj.CurrSelID=src.Value;
             obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
             obj.Children(3,1).Data.N=obj.Sel;
             obj.UISelName.Value=obj.Selector.Name(obj.CurrSelID);
 %             disp('test');
+        end
+        
+        function CheckSelectors(obj)
+            test=false;
+            for i=1:size(obj.Selector,1)
+                if obj.Count~=size(obj.Selector.Specimens{i},1)
+                    test=true;
+                    newsel=logical(zeros(obj.Count,1));
+                    obj.Selector.Specimens{i}=newsel;
+                    
+                end
+            end
+            
+            if test==true
+                obj.Sel=newsel;
+            end
+            
+            
+            
         end
         
         function NewSelector(obj)
@@ -120,8 +150,8 @@ classdef SpecGroup < Node
         end
         
         function list=get.SpecimenList(obj)
-            list=obj.Specimens.Key;
-            disp='test';
+            list=obj.Specimen.Key;
+%             disp='test';
         end
         
         function AddSpecimen(obj,spec)
@@ -146,13 +176,13 @@ classdef SpecGroup < Node
                 
             end
 
-            obj.Count=numel(obj.Specimens);
+%             obj.Count=numel(obj.Specimens);
 
         end
         
         function InitSelector(obj)
             if numel(obj.Selector)==0
-                SetSel(obj);
+                NewSelector(obj);
             else
                 
             end
@@ -236,30 +266,23 @@ classdef SpecGroup < Node
             obj.UISelName=edt;
             
             
+            if obj.SelCount>0
+                items=string(obj.Selector.Name);
+            else
+                InitSelector(obj);
+                items=string(obj.Specimens.Name);
+            end
+            arr=1:1:numel(items);
             
-            
-            lbox = uilistbox(g2,'ValueChangedFcn',@obj.MenuChangeSelector);
+            lbox = uilistbox(g2,'Items',items,'ItemsData',arr,'ValueChangedFcn',@obj.MenuChangeSelector);
             lbox.Layout.Row=2;
             lbox.Layout.Column=[1 2];
             
-            
+            obj.UILBox=lbox;
             
              obj.Children=[g;la;uit;panel;g2;lbox];
              
-            if obj.Count>0
-                obj.UISelName.Value=obj.Selector.Name(obj.CurrSelID);
-            end
             
-            if numel(obj.Selector)==0
-                NewSelector(obj);
-            end
-            lbox.Items=obj.Selector.Name;
-            lbox.ItemsData=obj.Selector.ID;
-            lbox.UserData =uit;
-            
-            if obj.CurrSelID>0
-                lbox.Value=obj.CurrSelID;
-            end
             
             
             cm2 = uicontextmenu(UITab,'UserData',lbox);

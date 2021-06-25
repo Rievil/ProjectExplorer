@@ -108,31 +108,40 @@ classdef OPLokalize < Operator
             
             Loc.SensorCount=size(Loc.TS,2);
             
-%             
-%             Time=table([],[],[],[],...
-%                 'VariableNames',{'EventID','Sensor','Begin','End'});
             
+            
+            cardname=string(Loc.SensorOrder(1,:));
+            hitid=Loc.IDSignal(1,:);
+
             for i=1:size(Loc.SensorOrder,1)
                 order=Loc.SensorOrder(i,:);
                 SignalId=Loc.IDSignal(i,:);
-                
+
                 for j=1:numel(order)
-                    TargetCard=order{j};
+                    TargetCard=replace(string(order{j})," ","");
                     cards=string({Loc.TS(:).Label});
                     Idx=find(cards==TargetCard);
-                    
+
                     HitID=SignalId(j);
                     Row=find(Loc.TS(Idx).SensorID==HitID);
-                    
-                    Time(j,1)=Loc.TS(Idx).Begin(Row,1);
-                    Time(j,2)=Loc.TS(Idx).End(Row,1);
-                    
+
+                    time(Idx)=Loc.TS(Idx).Begin(Row,1);
+                    x(Idx)=Loc.TS(Idx).X;
+                    y(Idx)=0;
+                    vzd(Idx)=Loc.Speed*time(Idx);
+
                 end
                 
-                
+                timediff=diff(time)*Loc.Speed;
+                vzdx=diff(x);
+                restlen(i,1)=x(1)+(vzdx-timediff)/2;
+
             end
+
+            obj.Position=restlen;
+ 
         end
-a
+
         
         function T=GetSensorSpecific(obj)
 %             Names=obj.SensorTable.Properties.VariableNames;
@@ -253,6 +262,7 @@ a
         
         
         function arr=RunTool(obj,~)
+            MakeIdxTable(obj);
             GetDeltas(obj);
             obj.Output={obj.Position};
         end
