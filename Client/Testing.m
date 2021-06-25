@@ -56,7 +56,7 @@ for i=1:3
     grid on;
     xall=[];
     
-    for j=1%:size(Tout,1)
+    for j=1:size(Tout,1)
         x1=Tout{j,4}{1};
         % y1=Tout{1,7};
         y1=Tout{j,5}{1};
@@ -74,7 +74,7 @@ for i=1:3
     
     xlabel('Pozice [mm]');
         xlim([130,380/2+130/2]);
-    ylim([0 50]);
+%     ylim([0 50]);
     legend;
     title(sprintf('Vzdalenost %d mm',popis{i}));
 end

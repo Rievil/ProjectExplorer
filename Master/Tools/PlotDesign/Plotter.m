@@ -65,14 +65,12 @@ classdef Plotter < Node
         end
         
         function FillNode(obj)
-%             iconfilename=[OperLib.FindProp(obj,'MasterFolder') 'Master\Gui\Icons\SpecGroup.gif'];
             obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text','Plotter','NodeData',{obj,'plotter'});
         end
         
         function stash=Pack(obj)
             stash=struct;
-%             stash.Inspector=obj.Inspector.T;
-%             obj.Inspector
+
         end
         
         function node=AddNode(obj)
@@ -96,7 +94,6 @@ classdef Plotter < Node
                 end
                 Tout=[Tout; Trow];
             end
-            
         end
         
         function DrawTest(obj)

@@ -212,11 +212,31 @@ classdef SpecGroup < Node
             T=[table(obj.Sel,'VariableNames',{'N'}), obj.Specimens];
         end
         
+        function Idx=HighLightMeas(obj,MeasID)
+            Idx=zeros(size(MeasID,1),0);
+            row=MeasID(1,1);
+            marker=false;
+            n=0;
+            for i=2:size(MeasID,1)
+                
+                if MeasID(i,1)~=row
+                    row=MeasID(i,1);
+                    marker=~marker;    
+                end
+                if marker==true
+                    n=n+1;
+                    Idx=[Idx; i];
+                end
+%                 Idx(i,1)=marker;
+            end
+%             Idx(n:end,1)=[];
+        end
+        
         function InitializeOption(obj)
             SetParent(obj,'project');
             Clear(obj);
             g=uigridlayout(obj.GuiParent);
-            g.RowHeight = {22,'1x',25,25};
+            g.RowHeight = {22,'1x',25,25,25,25};
             g.ColumnWidth = {400,'1x',25,25};
             
             la=uilabel(g,'Text','Specimens in experiemnt:');
@@ -231,21 +251,27 @@ classdef SpecGroup < Node
                 'ColumnWidth',{30,50, 'auto',70,'auto'},'ColumnEditable',arr,'CellEditCallback',@obj.TalbeSetSel,...
                 'ColumnSortable',true,'FontSize',10);
             
+%             TableMarker=obj.HighLightMeas(T.MeasID);
+%             s = uistyle('BackgroundColor',[0.7, 0.7, 0.7]);
+            s2=uistyle('HorizontalAlignment','left');
+            
+%             addStyle(uit,s,'row',TableMarker);
+            addStyle(uit,s2);
+            
             UITab=OperLib.FindProp(obj,'UIFig');
             cm = uicontextmenu(UITab);
             m1 = uimenu(cm,'Text','New selector',...
                 'MenuSelectedFcn',@obj.MenuNewSelector);
-            %,...
-                %'MenuSelectedFcn',@obj.MenuAddMeas);
+        
             uit.ContextMenu =cm;
-            
-                %'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
+
             uit.Layout.Row=2;
             uit.Layout.Column=1;
             
-            s = uistyle; 
-            s.HorizontalAlignment  = 'left'; 
-            addStyle(uit,s); 
+%             s = uistyle; 
+            
+%             s.HorizontalAlignment  = 'left'; 
+%             addStyle(uit,s); 
             
             panel=uipanel(g,'Title','Specimen selector');
             panel.Layout.Row=[1 2];
@@ -259,7 +285,13 @@ classdef SpecGroup < Node
             lbl.Layout.Row=1;
             lbl.Layout.Column=1;
             
-            edt = uieditfield(g2,'ValueChangedFcn',@obj.MChangeSelName);
+            if obj.Count>0
+                selname=obj.Selector.Name(obj.CurrSelID);
+            else
+                selname="";
+            end
+            
+            edt = uieditfield(g2,'Value',selname,'ValueChangedFcn',@obj.MChangeSelName);
             edt.Layout.Row=1;
             edt.Layout.Column=2;
             
@@ -274,7 +306,7 @@ classdef SpecGroup < Node
             end
             arr=1:1:numel(items);
             
-            lbox = uilistbox(g2,'Items',items,'ItemsData',arr,'ValueChangedFcn',@obj.MenuChangeSelector);
+            lbox = uilistbox(g2,'Items',items,'ItemsData',arr,'ValueChangedFcn',@obj.MenuChangeSelector,'Value',obj.CurrSelID);
             lbox.Layout.Row=2;
             lbox.Layout.Column=[1 2];
             
@@ -292,9 +324,20 @@ classdef SpecGroup < Node
                 'MenuSelectedFcn',@obj.MenuDeleteSelector);
             lbox.ContextMenu=cm2;
             
+            lbl = uilabel(g,'Text',sprintf('Specimens count: %d',size(obj.Specimens,1)));
+            lbl.Layout.Row=3;
+            lbl.Layout.Column=1;
+            
+            lbl = uilabel(g,'Text',sprintf('Measurements count: %d',size(unique(obj.Specimens.MeasID),1)));
+            lbl.Layout.Row=4;
+            lbl.Layout.Column=1;
+            
+            
             but1=uibutton(g,'Text','Select descriptive varibles');
-            but1.Layout.Row=4;
+            but1.Layout.Row=6;
             but1.Layout.Column=1;
+            
+            
         end
 
 
@@ -311,7 +354,7 @@ classdef SpecGroup < Node
         
         function stash=Pack(obj)
             stash=struct;
-            stash.Count=obj.Count;
+%             stash.Count=obj.Count;
             stash.Specimens=obj.Specimens;
             stash.Sel=obj.Sel;
             stash.Selector=obj.Selector;
@@ -319,7 +362,7 @@ classdef SpecGroup < Node
         end
         
         function Populate(obj,stash)
-            obj.Count=stash.Count;
+%             obj.Count=stash.Count;
             obj.Specimens=stash.Specimens;
             
             if isfield(stash,'Sel')
