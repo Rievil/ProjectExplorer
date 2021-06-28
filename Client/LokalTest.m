@@ -1,5 +1,11 @@
 lok=Tout.(1){1,1};
 %%
+b=ExplorerAppStartMain;
+%%
+plotter=b.Core.ProjectOverview.Projects(1).Plotter;
+%%
+Tout=plotter.GetSampleData(3,1);
+%%
 
 cardname=string(lok.SensorOrder(1,:));
 hitid=lok.IDSignal(1,:);

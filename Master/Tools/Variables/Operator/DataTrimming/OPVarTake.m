@@ -87,20 +87,6 @@ classdef OPVarTake < Operator
             T=table;
             for i=1:numel(obj.Adress)
                 T=[T; GetRow(obj.Adress{i})];
-%                 if numel(obj.AdressLabel)>0
-%                     if i<=numel(obj.AdressLabel)
-%                         T=[T; table(obj.AdressLabel(i),obj.Adress{i}.OrigName,obj.Adress{i}.Type,obj.Adress{i}.Size,...
-%                             'VariableNames',{'Label','Name','Type','Size'})];
-%                     else
-%                         T=[T; table(string(sprintf('Adress %d',i)),obj.Adress{i}.OrigName,obj.Adress{i}.Type,obj.Adress{i}.Size,...
-%                             'VariableNames',{'Label','Name','Type','Size'})];
-%                     end
-%                 else
-%                     T=[T; table(string(sprintf('Adress %d',i)),obj.Adress{i}.OrigName,obj.Adress{i}.Type,obj.Adress{i}.Size,...
-%                         'VariableNames',{'Label','Name','Type','Size'})];
-%                 end
-
-                
             end
 
             if numel(obj.Adress)>0

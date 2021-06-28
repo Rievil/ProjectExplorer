@@ -132,6 +132,7 @@ classdef OperLib < handle
         end
         
         
+        
         %Map directory for types in reading process
         function FileMap=GetTypeDir(folder)
             map = dir(fullfile(folder)); 

@@ -39,8 +39,9 @@ classdef Adress < handle
         function t=GetRow(obj)
             
             if isempty(obj.Label)
-                obj.Label=string(sprintf('Adress n'));
+                obj.Label=obj.OrigName;
             end
+            
             t=table(string(obj.Label),string(obj.ArrType),obj.OrigName,obj.Type(end),obj.Size,...
                             'VariableNames',{'Label','Source','Name','Type','Size'});
         end

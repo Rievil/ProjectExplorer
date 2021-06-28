@@ -33,6 +33,11 @@ classdef Inspector < handle
         UITableSelector;
         OutAdress;
         CurrDialog;
+        UICbox;
+        SelectMultiple;
+        MultipleVarIDList;
+        MultiAdressTable;
+        MultiAdressList;
     end
     
     properties
@@ -133,16 +138,39 @@ classdef Inspector < handle
                 {'ID','Name','Type','Path','Size'});
         end
         
+        function SelectOne(obj,id)
+            
+        end
+        
+        
+        function AddSelectedAdress(obj)
+            if obj.CurrVariableID>0
+                
+                adress=Adress(obj.CurrDialog);
+                setAdress(adress,obj.T(obj.CurrVariableID));
+                Ta=GetRow(adress);
+                
+                if obj.SelectMultiple==true
+                    obj.MultipleVarIDList=[obj.MultipleVarIDList, obj.CurrVariableID];
+                    id=numel(obj.MultiAdressList)+1;
+                    obj.MultiAdressList{id}=adress;
+                    obj.MultiAdressTable=[obj.MultiAdressTable; Ta];
+                else
+                    obj.MultiAdressList{1}=adress;
+                    obj.MultiAdressTable=Ta;
+                end
+                
+                obj.UITableSelector.Data=obj.MultiAdressTable;
+            end
+        end
+        
         function DrawVar(obj,evnt,src)
             uit=src.Source.UserData;
             if numel(evnt.SelectedNodes.NodeData)~=0
-            [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData{1});
-            obj.CurrVariableID=evnt.SelectedNodes.NodeData{1};
-            
-            
-%             T3=obj.T{obj.CurrVariableID,:};
-            obj.UITableSelector.Data=GetAdress(obj,obj.CurrVariableID);
-            
+                [A,name]=GetVar(obj,evnt.SelectedNodes.NodeData{1});
+
+                obj.CurrVariableID=evnt.SelectedNodes.NodeData{1};
+
                 if numel(src.PreviousSelectedNodes)==0
                     SelectedVarIcon=[obj.IconPath 'VarIconSelected.gif'];
                 else
@@ -151,7 +179,7 @@ classdef Inspector < handle
                         src.PreviousSelectedNodes.Icon=[obj.IconPath src.PreviousSelectedNodes.NodeData{2}];
                     end
                 end
-                
+
                 evnt.SelectedNodes.Icon=SelectedVarIcon;
                 R=A;
                 bool=false;
@@ -206,7 +234,8 @@ classdef Inspector < handle
         
         function DrawGUI(obj)
             if obj.Fig==0
-                fig = uifigure;
+                fig = uifigure('WindowKeyPressFcn',@obj.MCheckKeyPressed);
+                
             else
                 fig=obj.GUIParent;
             end
@@ -221,55 +250,90 @@ classdef Inspector < handle
             
             
             g=uigridlayout(fig);
-            g.RowHeight = {25,'1x','2x'};
-            g.ColumnWidth = {300,600,'1x'};
+            g.RowHeight = {25,'1x','2x',25};
+            g.ColumnWidth = {'1x','1x',80,80};
             
             uit=uitable(g);
-            uit.Layout.Row=[1 2];
-            uit.Layout.Column=[2 3];
+            uit.Layout.Row=2;
+            uit.Layout.Column=[2 5];
             
 
             
             t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit,'FontSize',10);
-            t.Layout.Row=[1 3];
+            t.Layout.Row=[2 3];
             t.Layout.Column=1;
 
             
             obj.Fig=1;
 
-            p = uipanel(g,'Title','Variable forge','FontSize',12);
-            p.Layout.Row=3;
-            p.Layout.Column=[2 3];
-
-            g2=uigridlayout(p);
-            g2.RowHeight = {70,25,25,25,'1x'};
-            g2.ColumnWidth = {100,'1x'};
             
-            uit2=uitable(g2);
+            uit2=uitable(g);
             obj.UITableSelector=uit2;
-            uit2.Layout.Row=1;
-            uit2.Layout.Column=[1 2];
+            uit2.Layout.Row=3;
+            uit2.Layout.Column=[2 5];
             
-            cbox=uicheckbox(g2,'Text','Multiple varaibles?');
-            cbox.Layout.Row=2;
-            cbox.Layout.Column=[1 2];
+            cbox=uicheckbox(g,'Text','Multiple varaibles?','ValueChangedFcn',@obj.MSetMultipleSelection);
+            cbox.Layout.Row=4;
+            cbox.Layout.Column=[2 3];
             
-            but1=uibutton(g2,'Text','Select variables','ButtonPushedFcn',@obj.MSelectVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
-            but1.Layout.Row=3;
-            but1.Layout.Column=1;
+            obj.UICbox=cbox;
+            obj.SelectMultiple=obj.UICbox.Value;
+        
             
-            but2=uibutton(g2,'Text','Cancel selection');%,'ButtonPushedFcn',@obj.MCheckVar);
+            but1=uibutton(g,'Text','Select variables','ButtonPushedFcn',@obj.MSelectVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
+            but1.Layout.Row=4;
+            but1.Layout.Column=4;
+            
+            but2=uibutton(g,'Text','Cancel selection');%,'ButtonPushedFcn',@obj.MCheckVar);
             but2.Layout.Row=4;
-            but2.Layout.Column=1;
+            but2.Layout.Column=5;
             
-            obj.GUI=[fig,g,uit,t,p];
+            but3=uibutton(g,'Text','Add variable','ButtonPushedFcn',@obj.MAddVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
+            but3.Layout.Row=4;
+            but3.Layout.Column=1;
+            
+            
+            obj.GUI=[fig,g,uit,t];
+        end
+        
+        function MCheckKeyPressed(obj,src,evnt)
+            switch evnt.Key
+                case 'space'
+                    disp('Space key');
+                    AddSelectedAdress(obj);
+                otherwise
+                    disp('Different key');
+            end
+                    
+        end
+        
+        function MAddVariable(obj,src,~)
+            AddSelectedAdress(obj);
+        end
+        
+        function MSetMultipleSelection(obj,src,~)
+            obj.SelectMultiple=~obj.SelectMultiple;
         end
         
         function MSelectVariable(obj,src,~)
-            adress=Adress(obj.CurrDialog);
-            setAdress(adress,obj.T(obj.CurrVariableID));
+%             adress=Adress(obj.CurrDialog);
+%             setAdress(adress,obj.T(obj.CurrVariableID));
+%             obj.MultiAdressList=[];
+%             obj.MultiAdressTable=[];
+%             obj.MultipleVarIDList=[];
             
-            AddAdress(obj.CurrDialog,adress);
+            if obj.SelectMultiple==true
+                for ad=obj.MultiAdressList
+                    adre=ad{1};
+                    AddAdress(obj.CurrDialog,adre);
+                end
+            else
+                AddAdress(obj.CurrDialog,obj.MultiAdressList{1});
+            end
+            
+            obj.MultiAdressList=[];
+            obj.MultiAdressTable=[];
+            obj.MultipleVarIDList=[];
             
 %             BakeAdress(obj);
             close(obj.GUI(1));
@@ -308,6 +372,9 @@ classdef Inspector < handle
         end
         
         function Run(obj)
+            obj.MultiAdressList=[];
+            obj.MultiAdressTable=[];
+            obj.MultipleVarIDList=[];
             if obj.Child==0
                 
                 if obj.Fig==0

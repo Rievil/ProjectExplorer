@@ -81,21 +81,23 @@ classdef OPLokalize < Operator
             end
         end
         
+        
+        
             
         function Ts=GetSensorRow(obj)
            varList=categorical(obj.GetVarList);
 %            varList=categorical(obj.Parent.VarList);
            switch obj.LocalType
                case 1
-                    Ts=table(varList(1),varList(1),varList(1),varList(1),varList(1),'VariableNames',...
-                        {'Sensor Label','SensorID','Begin','End','X pozition'});
+                    Ts=table(varList(1),varList(1),varList(1),varList(1),'VariableNames',...
+                        {'Sensor Label','SensorID','BeginTime','X pozition'});
 
                case 2
-                    Ts=table(varList(1),varList(1),varList(1),varList(1),varList(1),varList(1),'VariableNames',...
-                        {'Sensor Label','SensorID','Begin','End','X pozition','Y pozition'});
+                    Ts=table(varList(1),varList(1),varList(1),varList(1),varList(1),'VariableNames',...
+                        {'Sensor Label','SensorID','BeginTime','X pozition','Y pozition'});
                case 3
-                    Ts=table(varList(1),varList(1),varList(1),varList(1),varList(1),varList(1),varList(1),'VariableNames',...
-                        {'Sensor Label','SensorID','Begin','End','X pozition','Y pozition','Z pozition'});
+                    Ts=table(varList(1),varList(1),varList(1),varList(1),varList(1),varList(1),'VariableNames',...
+                        {'Sensor Label','SensorID','BeginTime','X pozition','Y pozition','Z pozition'});
            end
         end
         
@@ -125,7 +127,7 @@ classdef OPLokalize < Operator
                     HitID=SignalId(j);
                     Row=find(Loc.TS(Idx).SensorID==HitID);
 
-                    time(Idx)=Loc.TS(Idx).Begin(Row,1);
+                    time(Idx)=Loc.TS(Idx).BeginTime(Row,1);
                     x(Idx)=Loc.TS(Idx).X;
                     y(Idx)=0;
                     vzd(Idx)=Loc.Speed*time(Idx);
@@ -135,7 +137,6 @@ classdef OPLokalize < Operator
                 timediff=diff(time)*Loc.Speed;
                 vzdx=diff(x);
                 restlen(i,1)=x(1)+(vzdx-timediff)/2;
-
             end
 
             obj.Position=restlen;
@@ -148,11 +149,11 @@ classdef OPLokalize < Operator
             T=struct;
             switch obj.LocalType
                 case 1
-                    Names={'Label','SensorID','Begin','End','X'};
+                    Names={'Label','SensorID','BeginTime','X'};
                 case 2
-                    Names={'Label','SensorID','Begin','End','X','Y'};
+                    Names={'Label','SensorID','BeginTime','X','Y'};
                 case 3
-                    Names={'Label','SensorID','Begin','End','X','Y','Z'};
+                    Names={'Label','SensorID','BeginTime','X','Y','Z'};
             end
             
             for i=1:size(obj.SensorTable,1)
@@ -183,55 +184,55 @@ classdef OPLokalize < Operator
             
             g=uigridlayout(obj.Fig);
             g.RowHeight = {25,25,25,25,25,25,'1x','1x'};
-            g.ColumnWidth = {'1x',30,60,60};
+            g.ColumnWidth = {'1x','1x',80,80};
             
             %Localizaiton type
             
             lbl1= uilabel(g,'Text','Select localization type:');
             lbl1.Layout.Row=1;
-            lbl1.Layout.Column=[1 2];
+            lbl1.Layout.Column=1;
             
             
             drmx = uidropdown(g,'Items',{'1D','2D','3D'},'ItemsData',1:1:3,'Value',obj.LocalType,...
                 'ValueChangedFcn',@obj.MSetLocalType);
             drmx.Layout.Row=1;
-            drmx.Layout.Column=[3 4];
+            drmx.Layout.Column=[2 3];
             
             %Sound velocity
             
             lbl1= uilabel(g,'Text','Sound velocity:');
             lbl1.Layout.Row=2;
-            lbl1.Layout.Column=[1 2];
+            lbl1.Layout.Column=1;
             
             drspeed = uidropdown(g,'Items',varList,'ItemsData',1:1:numel(varList),'Value',obj.SpeedIdx,...
                 'ValueChangedFcn',@obj.MSetSpeedIdx);
             drspeed.Layout.Row=2;
-            drspeed.Layout.Column=[3 4];
+            drspeed.Layout.Column=[2 3];
             
             %Sensor order
             lbl1= uilabel(g,'Text','Sensor order:');
             lbl1.Layout.Row=3;
-            lbl1.Layout.Column=[1 2];
+            lbl1.Layout.Column=1;
             
             drspeed = uidropdown(g,'Items',varList,'ItemsData',1:1:numel(varList),'Value',obj.SensorOrderIdx,...
                 'ValueChangedFcn',@obj.MSetSensorOrder);
             drspeed.Layout.Row=3;
-            drspeed.Layout.Column=[3 4];
+            drspeed.Layout.Column=[2 3];
             
             %Sensor signal IDs
             lbl1= uilabel(g,'Text','Signal IDs:');
             lbl1.Layout.Row=4;
-            lbl1.Layout.Column=[1 2];
+            lbl1.Layout.Column=1;
             
             drspeed = uidropdown(g,'Items',varList,'ItemsData',1:1:numel(varList),'Value',obj.IDSignalIdx,...
                 'ValueChangedFcn',@obj.MSetSignalID);
             drspeed.Layout.Row=4;
-            drspeed.Layout.Column=[3 4];
+            drspeed.Layout.Column=[2 3];
             
             %Sensors properties
             lbl1= uilabel(g,'Text','Sensor properties:');
             lbl1.Layout.Row=6;
-            lbl1.Layout.Column=[1 2];
+            lbl1.Layout.Column=1;
             
             
             if isempty(obj.SensorTable)
@@ -245,7 +246,7 @@ classdef OPLokalize < Operator
             
             sentab = uitable(g,'Data',obj.SensorTable,'ColumnEditable',arr,...
                 'CellEditCallback',@obj.MChangeSensorTable);
-            sentab.Layout.Row=7;
+            sentab.Layout.Row=[7 8];
             sentab.Layout.Column=[1 4];
             
             obj.UISensorTable=sentab;

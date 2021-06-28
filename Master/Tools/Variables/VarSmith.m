@@ -111,6 +111,10 @@ classdef VarSmith < Item
                 end
                 obj.CurrOperator=0;
                 FillList(obj);
+%                 obj.UIOpPanel.clear;
+                a=obj.UIOpPanel.Children;
+                a.delete;
+%                 ClearGUI(obj);
             end
         end
         
