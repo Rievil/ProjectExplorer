@@ -70,7 +70,26 @@ classdef Plotter < Node
         
         function stash=Pack(obj)
             stash=struct;
+            
+            if ~isempty(obj.PlotGroups)
+                for i=1:numel(obj.PlotGroups)
+                    TMP=Pack(obj.PlotGroups{i});
+                    stash.PlotGroups{i}=TMP;
+                end
+            end
+        end
+        
 
+        
+        function Populate(obj,stash)
+%             obj.Inspector.T=stash.Inspector;
+            if isfield(stash,'PlotGroups')
+                for i=1:size(stash.PlotGroups,2)
+                    obj2=PlotGroup(obj);
+                    obj2.Populate(stash.PlotGroups{i});
+                    obj.PlotGroups{i}=obj2;
+                end
+            end
         end
         
         function node=AddNode(obj)
@@ -114,9 +133,7 @@ classdef Plotter < Node
             
         end
 
-        function Populate(obj,stash)
-%             obj.Inspector.T=stash.Inspector;
-        end
+
     end
     
     methods %GUI

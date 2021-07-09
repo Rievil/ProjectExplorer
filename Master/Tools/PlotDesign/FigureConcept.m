@@ -95,20 +95,20 @@ classdef FigureConcept < Item
             stash=struct;
             stash.ID=obj.ID;
             stash.Name=obj.Name;
-            if isvalid(obj.PlotType)
-                stash.PlotType=CoPack(obj.PlotType);
-            end
+%             if isvalid(obj.PlotType)
+%                 stash.PlotType=CoPack(obj.PlotType);
+%             end
         end
         
         function Populate(obj,stash) 
 
             obj.ID=stash.ID;
             obj.Name=stash.Name;
-            if isvalid(stash.PlotType)
-                obj2=obj.MakeSpecificPlot(stash.PlotType.Name);
-                obj2.CoPopulate(stash.PlotType);
-                obj2.PlotType=obj2;
-            end
+%             if isvalid(stash.PlotType)
+%                 obj2=obj.MakeSpecificPlot(stash.PlotType.Name);
+%                 obj2.CoPopulate(stash.PlotType);
+%                 obj2.PlotType=obj2;
+%             end
         end
     end
     

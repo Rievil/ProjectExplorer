@@ -46,7 +46,7 @@ for i=1:3
 end
 
 %% Události - histogram pozice
-fig=figure('position',[20 200 1600 600]);
+fig=figure('position',[20 200 900 400]);
 popis={200,240,360};
 n=0;
 
@@ -77,13 +77,13 @@ for i=1:3
     grid on;
 
     [count0,cent0] = hist(xall0);
-    plot(cent0,count0,'-o','DisplayName',sprintf('Zeslinei %d dB',zesileni(1)),'Color',col(1,:),'MarkerFaceColor',col(1,:));
+    plot(cent0,count0,'-o','DisplayName',sprintf('Amp. %d dB',zesileni(1)),'Color',col(1,:),'MarkerFaceColor',col(1,:));
     
     [count1,cent1] = hist(xall1);
-    plot(cent1,count1,'-o','DisplayName',sprintf('Zeslinei %d dB',zesileni(2)),'Color',col(2,:),'MarkerFaceColor',col(2,:));
+    plot(cent1,count1,'-o','DisplayName',sprintf('Amp. %d dB',zesileni(2)),'Color',col(2,:),'MarkerFaceColor',col(2,:));
     
     [count2,cent2] = hist(xall2);
-    plot(cent2,count2,'-o','DisplayName',sprintf('Zeslinei %d dB',zesileni(3)),'Color',col(3,:),'MarkerFaceColor',col(3,:));
+    plot(cent2,count2,'-o','DisplayName',sprintf('Amp. %d dB',zesileni(3)),'Color',col(3,:),'MarkerFaceColor',col(3,:));
 %     histogram(xall2);
 %     xlim([a,380/2+360/2]);
     
@@ -94,9 +94,10 @@ for i=1:3
     
     xlim([a,380/2+360/2]);
     ylim([0 350]);
-    legend;
+    
     title(sprintf('Vzdalenost %d mm',popis{i}));
 end
+legend;
 
 %% Lis
 Tout=plotter.GetSampleData(3,1);

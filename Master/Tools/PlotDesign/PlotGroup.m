@@ -10,6 +10,7 @@ classdef PlotGroup < Item
         FigureConcepts;
         TreeNode;
         Name;
+        Description;
     end
     
     properties (Dependent)
@@ -82,15 +83,31 @@ classdef PlotGroup < Item
         function DrawGui(obj)
             ClearGUI(obj);
             g=uigridlayout(obj.Fig(1));
-
+            
         end
         
         function stash=Pack(obj) 
-            
+            stash=struct;
+            stash.ID=obj.ID;
+            stash.Name=obj.Name;
+            if ~isempty(obj.FigureConcepts)
+                for i=1:size(obj.FigureConcepts,2)
+                    TMP=Pack(obj.FigureConcepts{i});
+                    stash.FigureConcepts{i}=TMP;
+                end
+            end
         end
         
         function Populate(obj,stash) 
-            
+            obj.ID=stash.ID;
+            obj.Name=stash.Name;
+            if isfield(stash,'FigureConcepts')
+                for i=1:size(stash.FigureConcepts,2)
+                    obj2=FigureConcept(obj);
+                    obj2.Populate(stash.FigureConcepts{i});
+                    obj.FigureConcepts{i}=obj2;
+                end
+            end
         end
     end
     

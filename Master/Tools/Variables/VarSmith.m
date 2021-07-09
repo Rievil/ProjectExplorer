@@ -52,7 +52,7 @@ classdef VarSmith < Item
         
         function result=GetVariable(obj,data)
             obj.Operators{1}.RunCh(data);
-            result=obj.Operators{obj.Count}.Output{:};
+            result=cell2mat(obj.Operators{obj.Count}.Output);
         end
         
         function OpenPicker(obj)

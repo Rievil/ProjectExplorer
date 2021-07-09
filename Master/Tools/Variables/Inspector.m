@@ -38,6 +38,7 @@ classdef Inspector < handle
         MultipleVarIDList;
         MultiAdressTable;
         MultiAdressList;
+        UIVarTableRowSelected=0;
     end
     
     properties
@@ -228,13 +229,54 @@ classdef Inspector < handle
 %             a.delete;
         end
         
+        function RemoveUIVariable(obj)
+            count=numel(obj.MultiAdressList);
+            if count >0
+                if obj.UIVarTableRowSelected>0
+                    delete( obj.MultiAdressList{obj.UIVarTableRowSelected});
+                    obj.MultiAdressList(obj.UIVarTableRowSelected)=[];
+                    obj.MultiAdressTable(obj.UIVarTableRowSelected,:)=[];
+                    
+                    obj.UIVarTableRowSelected=obj.UIVarTableRowSelected-1;
+                else
+                    delete(obj.MultiAdressList{count});
+                    obj.MultiAdressList(count)=[];
+                    obj.MultiAdressTable(count,:)=[];
+                end
+                obj.UITableSelector.Data=obj.MultiAdressTable;
+            end
+        end
+        
+        function SelectAndMoveVars(obj)
+            if obj.SelectMultiple==true
+                for ad=obj.MultiAdressList
+                    adre=ad{1};
+                    AddAdress(obj.CurrDialog,adre);
+                end
+            else
+                AddAdress(obj.CurrDialog,obj.MultiAdressList{1});
+            end
+            
+            obj.MultiAdressList=[];
+            obj.MultiAdressTable=[];
+            obj.MultipleVarIDList=[];
+        end
+          
+        function CloseFig(obj)
+            close(obj.GUI(1));
+        end
+           
         function Show(obj)
-
+            
         end
         
         function DrawGUI(obj)
             if obj.Fig==0
-                fig = uifigure('WindowKeyPressFcn',@obj.MCheckKeyPressed);
+                Pix_SS = get(0,'screensize');
+                A=1000;
+                B=500;
+                dim=[Pix_SS(3)/2-A/2,Pix_SS(4)/2-B/2,A,B];
+                fig = uifigure('WindowKeyPressFcn',@obj.MCheckKeyPressed,'Position',dim);
                 
             else
                 fig=obj.GUIParent;
@@ -257,7 +299,13 @@ classdef Inspector < handle
             uit.Layout.Row=2;
             uit.Layout.Column=[2 5];
             
-
+            lab1=uilabel(g,'Text','Raw variables in measurement:');
+            lab1.Layout.Row=1;
+            lab1.Layout.Column=1;
+            
+            lab1=uilabel(g,'Text','Preview of selected variable:');
+            lab1.Layout.Row=1;
+            lab1.Layout.Column=[2 3];
             
             t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit,'FontSize',10);
             t.Layout.Row=[2 3];
@@ -267,14 +315,14 @@ classdef Inspector < handle
             obj.Fig=1;
 
             
-            uit2=uitable(g);
+            uit2=uitable(g,'CellSelectionCallback',@obj.MVarTableSelect);
             obj.UITableSelector=uit2;
             uit2.Layout.Row=3;
             uit2.Layout.Column=[2 5];
             
             cbox=uicheckbox(g,'Text','Multiple varaibles?','ValueChangedFcn',@obj.MSetMultipleSelection);
             cbox.Layout.Row=4;
-            cbox.Layout.Column=[2 3];
+            cbox.Layout.Column=3;
             
             obj.UICbox=cbox;
             obj.SelectMultiple=obj.UICbox.Value;
@@ -284,13 +332,17 @@ classdef Inspector < handle
             but1.Layout.Row=4;
             but1.Layout.Column=4;
             
-            but2=uibutton(g,'Text','Cancel selection');%,'ButtonPushedFcn',@obj.MCheckVar);
+            but2=uibutton(g,'Text','Cancel selection','ButtonPushedFcn',@obj.MCloseFig);%,'ButtonPushedFcn',@obj.MCheckVar);
             but2.Layout.Row=4;
             but2.Layout.Column=5;
             
             but3=uibutton(g,'Text','Add variable','ButtonPushedFcn',@obj.MAddVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
             but3.Layout.Row=4;
             but3.Layout.Column=1;
+            
+            but4=uibutton(g,'Text','Remove variable','ButtonPushedFcn',@obj.MRemoveVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
+            but4.Layout.Row=4;
+            but4.Layout.Column=2;
             
             
             obj.GUI=[fig,g,uit,t];
@@ -299,12 +351,22 @@ classdef Inspector < handle
         function MCheckKeyPressed(obj,src,evnt)
             switch evnt.Key
                 case 'space'
-                    disp('Space key');
                     AddSelectedAdress(obj);
+                case 'delete'
+                    RemoveUIVariable(obj);
+                case 'return'
+                    SelectAndMoveVars(obj);
+                    CloseFig(obj);
+                case 'escape'
+                    CloseFig(obj);
                 otherwise
                     disp('Different key');
             end
                     
+        end
+        
+        function MCloseFig(obj,~,~)
+            CloseFig(obj);
         end
         
         function MAddVariable(obj,src,~)
@@ -315,35 +377,24 @@ classdef Inspector < handle
             obj.SelectMultiple=~obj.SelectMultiple;
         end
         
+        function MRemoveVariable(obj,src,~)
+            RemoveUIVariable(obj);
+        end
+        
+        function MVarTableSelect(obj,src,evnt)
+            obj.UIVarTableRowSelected=evnt.Indices(1);
+        end
+        
         function MSelectVariable(obj,src,~)
-%             adress=Adress(obj.CurrDialog);
-%             setAdress(adress,obj.T(obj.CurrVariableID));
-%             obj.MultiAdressList=[];
-%             obj.MultiAdressTable=[];
-%             obj.MultipleVarIDList=[];
-            
-            if obj.SelectMultiple==true
-                for ad=obj.MultiAdressList
-                    adre=ad{1};
-                    AddAdress(obj.CurrDialog,adre);
-                end
-            else
-                AddAdress(obj.CurrDialog,obj.MultiAdressList{1});
-            end
-            
-            obj.MultiAdressList=[];
-            obj.MultiAdressTable=[];
-            obj.MultipleVarIDList=[];
-            
-%             BakeAdress(obj);
-            close(obj.GUI(1));
+            SelectAndMoveVars(obj);
+            CloseFig(obj);
         end
         
         function BakeAdress(obj)
-%             obj.OutAdress=struct2table(obj.T(obj.CurrVariableID),'AsArray',true);
+
         end
         
-        function close(obj)
+        function close(obj) %overloaded operator
 %             if obj.SelBool==0
 %                 obj.Type=[];
 %             end
