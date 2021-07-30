@@ -102,7 +102,7 @@ classdef OPVarTake < Operator
             labels=strings(numel(obj.Adress),1);
             for i=1:numel(obj.Adress)
                 obj.Output{i}=GetVar(obj.Adress{i},data);
-                labels(i,1)=replace(obj.Adress{i}.Label,["\","/"," ","-"],"");
+                labels(i,1)=replace(obj.Adress{i}.Label,["\","/"," ","-'],'');
             end
             obj.Labels=labels;
         end

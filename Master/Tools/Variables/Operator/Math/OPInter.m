@@ -197,6 +197,7 @@ classdef OPInter < Operator
         function arr=RunTool(obj,~)
             GetArr(obj);
             obj.Output={obj.MainY};
+            obj.Labels="Inter1D";
         end
         
         function stash=Pack(obj)

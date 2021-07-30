@@ -16,6 +16,7 @@ classdef Operator < NumOper & Item
         ChildrenBool=0;
         First=0;
         VarSmith;
+        Labels;
     end
 
 

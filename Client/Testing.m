@@ -23,9 +23,9 @@ for i=1:3
     xall=[];
     
     for j=1:size(Tout,1)
-        x1=Tout{j,4}{1};
+        x1=Tout.ZedoTime_Zedocas{j};
         % y1=Tout{1,7};
-        y1=Tout{j,5}{1};
+        y1=Tout.Energy_Energie{j};
 
 %         histogram(x1,10,'DisplayName',Tout.Key(j));
     %     scatter(x1,y1);
@@ -64,13 +64,9 @@ for i=1:3
     xall2=[];
 
     for j=1:size(Tout,1)
-        x1=Tout{j,10}{1};
-
-        y1=Tout{j,5}{1};
-
-        xall0=[xall0; Tout{j,10}{1}];
-        xall1=[xall0; Tout{j,11}{1}];
-        xall2=[xall0; Tout{j,12}{1}];
+        xall0=[xall0; Tout.LokalHitD0_x{j}];
+        xall1=[xall0; Tout.LokalHitD1_x{j}];
+        xall2=[xall0; Tout.LokalHitD2_x{j}];
     end
     subplot(1,3,i);
     hold on;
@@ -106,13 +102,13 @@ fig=figure;
 hold on;
 
 for i=1:size(Tout,1)
-    x1=Tout{i,6}{1};
+    x1=Tout.PressTime_Caslisu{i};
     % y1=Tout{1,7};
-    y1=Tout{i,8}{1};
+    y1=Tout.PressForce_Liscas{i};
     
-    x2=Tout.CumZedoTime{i};
+    x2=Tout.CumZedoTime_Zedocumtime{i};
     x2=x2-x2(1);
-    y2=cumsum(Tout.CemZedoHit{i});
+    y2=cumsum(Tout.CemZedoHit_Zedocumcount{i});
     if i==1
         plot(x1,y1,'-k','DisplayName',sprintf('Lis: %s',Tout.Key(i)));
         yyaxis right;

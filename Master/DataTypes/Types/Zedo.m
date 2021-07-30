@@ -167,8 +167,9 @@ classdef Zedo < AcousticEmission
                                 Records(iCard).Parameters(:,2)=[];
                                 
                                 str=replace(time,'/',' ');
-                                time=datetime(str,'Format','dd.MM.yyyy hh:mm:ss.s');
-                                Records(iCard).Parameters = addvars(Records(iCard).Parameters,time,'Before','RMS_V_');
+                                time=str;%datetime(str,'InputFormat','dd.MM.yyyy hh:mm:ss.s');
+                                names=Records(iCard).Parameters.Properties.VariableNames;
+                                Records(iCard).Parameters = addvars(Records(iCard).Parameters,time,'Before',names{2});
                                 Records(iCard).Parameters.Properties.VariableNames{2}='DateTime';
                                 
 %                                 Records(iCard).Parameters.DateTime=time;

@@ -108,24 +108,6 @@ classdef SpecGroup < Node
             NewSelector(obj);
         end
         
-        function MenuSelectAll(obj,src,evnt)
-            obj.Sel(:)=true;
-            obj.Selector.Specimens{obj.CurrSelID}=obj.Sel;
-            obj.Children(3).Data.N=obj.Sel;
-        end
-        
-        function MenuDeselectAll(obj,src,evnt)
-            obj.Sel(:)=false;
-            obj.Selector.Specimens{obj.CurrSelID}=obj.Sel;
-            obj.Children(3).Data.N=obj.Sel;
-        end
-        
-        function MenuSelectInverse(obj,src,evnt)
-            obj.Sel(:)=~obj.Sel(:);
-            obj.Selector.Specimens{obj.CurrSelID}=obj.Sel;
-            obj.Children(3).Data.N=obj.Sel;
-        end
-        
         function MChangeSelName(obj,src,~)
             
             obj.Selector.Name(obj.CurrSelID)=src.Value;

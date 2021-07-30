@@ -103,15 +103,26 @@ classdef Plotter < Node
             Sel=SPecGroup.Selector.Specimens{sel};
             T=obj.Parent.Experiments(exp).SpecGroup.Specimens(Sel,:);
             for i=1:size(T,1)
-                data=T.Data{i};
-                Trow=T(i,1:3);
-                for j=1:numel(Variables)
-                    Var=Variables(j);
-                    x=Var.GetVariable(data);
-                    Ts=table({x},'VariableNames',{char(Var.Name)});
-                    Trow=[Trow, Ts];
+                try
+                    data=T.Data{i};
+                    Trow=T(i,1:3);
+                    for j=1:numel(Variables)
+                        Var=Variables(j);
+                        x=Var.GetVariable(data);
+
+                        finnames=strings(size(x,2),1);
+                        for k=1:numel(finnames)
+                            finnames(k,1)=string(sprintf('%s_%s',Var.Name,x.Properties.VariableNames{k}));
+                        end
+                        x.Properties.VariableNames=cellstr(finnames);
+
+    %                     Ts=table({x},'VariableNames',{char(Var.Name)});
+                        Trow=[Trow, x];
+                    end
+                    Tout=[Tout; Trow];
+                catch ME
+                    disp(sprintf('Specimen %s has problem, row: %d, reason: %s',T.Key(i),i,string(ME.message)));
                 end
-                Tout=[Tout; Trow];
             end
         end
         

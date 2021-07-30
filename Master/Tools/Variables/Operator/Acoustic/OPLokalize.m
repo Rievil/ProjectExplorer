@@ -266,6 +266,14 @@ classdef OPLokalize < Operator
             MakeIdxTable(obj);
             GetDeltas(obj);
             obj.Output={obj.Position};
+            switch obj.LocalType
+                case 1
+                    obj.Labels=["x"];
+                case 2 
+                    obj.Labels=["x","y"];
+                case 3
+                    obj.Labels=["x","y","z"];
+            end
         end
         
         function stash=Pack(obj)
