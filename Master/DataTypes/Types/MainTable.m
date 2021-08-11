@@ -7,11 +7,16 @@ classdef MainTable < DataFrame
     properties
        SpecimensCount;
        KeyNames;
+%        TypeSettings;
     end
     
     methods %main methods
-        function obj = MainTable(~)
-            obj@DataFrame;
+        function obj = MainTable(parent)
+            obj@DataFrame(parent);
+            
+            obj.ContainerType=OperLib.GetContainerTypes(1);
+            obj.KeyWord="";
+            obj.Sufix=OperLib.GetSuffixTypes(1);
         end
         
 
@@ -29,6 +34,9 @@ classdef MainTable < DataFrame
             Tab=T;
         end
         
+        function [T]=GetVarNames(obj)
+            
+        end
         
         function obj2=Copy(obj)
             obj2=MainTable;
@@ -40,10 +48,11 @@ classdef MainTable < DataFrame
             obj2.GuiParent=obj.GuiParent;
             obj2.Count=obj.Count;
             obj2.Children=obj.Children;
-            obj2.TypeSet=obj.TypeSet;
+            obj2.TypeSettings=obj.TypeSettings;
             obj2.Init=obj.Init;
             obj2.Pos=obj.Pos;
         end
+        
         function Data=PackUp(obj)
             TMP=obj.Data;
             P=TMP.Properties;
@@ -67,44 +76,50 @@ classdef MainTable < DataFrame
     
     %reading methods
     methods 
-                %will read data started from dataloader
-        function Data=Read(obj,filename)
-            obj.Filename=filename;
-            T=readtable(filename,'ReadVariableNames',1,'Sheet','MainTable');
-            Data=table;
-            TypeSet=obj.TypeSet{1,1};
-            SpecNum=size(obj.TypeSet{1},1);
-            Desc=strings([SpecNum 1]);
-            Desc(TypeSet.IsDescriptive,1)="Descriptive";
+        
+        %will read data started from dataloader
+        function result=Read(obj,filename,opts)
+%             obj.Filename=filename;
+            result=struct;
             
-            for i=1:SpecNum
-                type=char(obj.TypeSet{1}.ColType(i));
+            T=readtable(filename,opts);
+            Data=table;
+            TypeSettings=obj.TypeSettings;
+            ColNum=size(TypeSettings,1);
+            
+            Desc=strings(ColNum,1);
+            Desc(TypeSettings.IsDescriptive,1)="Descriptive";
+            
+            for i=1:ColNum
+                type=char(obj.TypeSettings.ColType(i));
                 
-                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSet{1}.ColNumber(i)}));
-                SmallTable.Properties.VariableNames=obj.TypeSet{1}.Label(i);
+                SmallTable=table(OperLib.ConvertTabeType(type,T{:,obj.TypeSettings.ColNumber(i)}));
+                SmallTable.Properties.VariableNames=obj.TypeSettings.Label(i);
                 
                 Data=[Data, SmallTable];
-                if TypeSet.IsDescriptive(i)==1
+                if TypeSettings.IsDescriptive(i)==1
                     
                 end
-                %Arr=OperLib.ConvertType(type,T{:,obj.TypeSet{1}.ColNumber(i)});
-                
             end
             Data.Properties.VariableDescriptions=Desc;
             
+            for i=1:size(Data,1)
+                result.data(i).meas=Data(i,:);
+            end
             
-            KeyRow=obj.TypeSet{1,1}(obj.TypeSet{1,1}.Key>0,:);
-            obj.SpecimensCount=size(Data,1);
-            obj.KeyNames=Data{:,KeyRow.ColNumber};
-            
-            obj.Data=Data;
+            KeyRow=obj.TypeSettings(obj.TypeSettings.Key>0,:);
+
+%             result.data=Data;
+            result.key=Data{:,KeyRow.ColNumber};
+            result.count=size(Data,1);
+            result.type=class(obj);
         end
         
         function Cat=GetCat(obj)
             Cat=table;
             for i=1:size(obj.Data,2)
                 ClassName=lower(class(obj.Data{1,i}));
-                Desc=obj.TypeSet{1, 1}.IsDescriptive;
+                Desc=obj.TypeSettings{1, 1}.IsDescriptive;
                 if Desc(i,1)==true
                     Cat=[Cat, obj.Data(:,i)];
                 end
@@ -116,36 +131,103 @@ classdef MainTable < DataFrame
     %Gui for data type selection 
     methods (Access = public)   
         %set property
-        function SetVal(obj,val,idx)
-            obj.TypeSet{idx}=val;
+        function SetVal(obj,src,event)
+%             obj.TypeSettings{1}=event.Source.Data;
+            obj.TypeSettings=event.Source.Data;
+%             source.Children{3,1}.UserData=0;
         end       
+        
         %adrow in table
-        function TypeAdRow(obj,Value,idx,Target)
-            obj.TypeSet{idx}=Value;
-            dim=size(Target.Data);
-            if dim(1)~=Value
-                if Value>dim(1)
-                    Target.Data=[Target.Data; OperLib.MTBlueprint];
-                    Target.Data{end,4}=Value;
+        function TypeAdVar(obj,source,event)
+            T=source.Children(3,1).Data;
+            RowCount=size(T,1);
+            CurrRow=source.Children(3,1).UserData;
+            if RowCount>0
+                T2=OperLib.MTBlueprint;
+                T2.ColNumber=RowCount+1;
+                if CurrRow>0 && CurrRow<RowCount
+                    A=T(1:CurrRow,:);
+                    B=T(CurrRow+1:end,:);
+                    source.Children(3,1).Data=[A; T2; B];
                 else
-                    Target.Data(end,:)=[];
+                    source.Children(3,1).Data=[source.Children(3,1).Data; T2]; 
                 end
-                obj.TypeSet{Target.UserData{2}}=Target.Data;
             end
+            source.Children(3,1).UserData=0;
+            obj.TypeSettings=source.Children(3,1).Data;
         end
-        %will initalize gui for first time
-        function InitializeOption(obj)
-            Clear(obj);
-
-            Target=DrawUITable(obj,OperLib.MTBlueprint,@SetVal);
-            DrawSpinner(obj,[1 20],Target,@TypeAdRow);
-            DrawLabel(obj,['Select composition of main table: by spinner select number of columns \n',...
+        
+        function TypeRemoveVar(obj,source,event)
+            CurrRow=source.Children(3,1).UserData;
+            if CurrRow>0
+                source.Children(3,1).Data(CurrRow,:)=[];
+            else
+                source.Children(3,1).Data(end,:)=[];
+            end
+            source.Children(3,1).UserData=0;
+        end
+        
+        function SetTabPos(obj,source,event)
+            Row=event.Indices(1);
+            event.Source.UserData=Row;
+        end
+        
+        
+        function CreateTypeComponents(obj)
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,250,50};
+            g.ColumnWidth = {'1x','2x',44,44};
+            
+            la=uilabel(g,'Text','Columns selection:');
+            la.Layout.Row=1;
+            la.Layout.Column=[1 4];
+            
+            T=OperLib.MTBlueprint;
+            uit = uitable(g,'Data',T,'ColumnEditable',true,...
+                'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
+                'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
+            
+            if strcmp(class(obj.TypeSettings),'table')
+                uit.Data=obj.TypeSettings;
+            else
+                obj.TypeSettings=T;
+            end
+            
+            uit.Layout.Row = 2;
+            uit.Layout.Column = [1 4];
+            
+            MF=OperLib.FindProp(obj.Parent,'MasterFolder');
+            
+            IconFolder=[MF 'Master\GUI\Icons\'];
+            IconFilePlus=[IconFolder 'plus_sign.gif'];
+            IconFileMinus=[IconFolder 'cancel_sign.gif'];
+            
+            but1=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
+            
+            but1.Layout.Row=1;
+            but1.Layout.Column=3;
+            but1.Icon=IconFilePlus;
+            
+            but2=uibutton(g,'Text','',...
+                'ButtonPushedFcn',@(src,event)obj.TypeRemoveVar(obj,event));
+            but2.Layout.Row=1;
+            but2.Layout.Column=4;
+            but2.Icon=IconFileMinus;
+            
+            txt=sprintf(['Select composition of main table: by spinner select number of columns \n',...
                            'and choose the type of each column, column position in source file.\n',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+                           'IMPORTANT: there can be only one KeyColumn']);
+                       
+            la2=uilabel(g,'Text',txt);
+            
+           la2.Layout.Row=3;
+           la2.Layout.Column=[1 4];
+           obj.Children=[g;la;uit;but1;but2;la2];
         end
     end
+
     
-    %Gui for plotter
     methods 
         function han=PlotType(obj,ax)
 
@@ -160,4 +242,3 @@ classdef MainTable < DataFrame
         end
     end
 end
-

@@ -1,4 +1,4 @@
-classdef Zedo < DataFrame
+classdef Zedo < AcousticEmission
     %MainTable is a PILOT type for all other possible measurments, ts
     %doesnt has to be present, but is higly recomended for the clarity and
     %clear structure of loaded data. PILOT type means, that it will guid
@@ -6,6 +6,7 @@ classdef Zedo < DataFrame
     %by which all other types will be sorted out. This design 
     properties
        HasEvents logical;
+       SensorCoordinates;
     end
     
     properties (Access = private)
@@ -13,14 +14,24 @@ classdef Zedo < DataFrame
     end
     
     methods %main methods with abstract interpretations
-        function obj = Zedo(~)
-            obj@DataFrame;
+        function obj = Zedo(parent)
+            obj@AcousticEmission(parent);
+            
+            obj.ContainerType=OperLib.GetContainerTypes(2);
+            obj.KeyWord="";
+            obj.Sufix="";
+            obj.SensorCoordinates=table([],[],[],[],[],[],'VariableNames',{'ID','x','y','z','OrientHor','OrientVert'});
         end
         
         function Tab=TabRows(obj,InT)
             Tab=obj.Data;
         end
-
+        
+                
+        function [T]=GetVarNames(obj)
+            
+        end
+        
         function obj2=Copy(obj)
             obj2=Zedo;  
             obj2.Data=obj.Data;
@@ -41,28 +52,41 @@ classdef Zedo < DataFrame
     
     methods %reading
        %will read data started from dataloader
-        function Data=Read(obj,folder)
+       function result=Read(obj,folder,~)
+           result=struct;
+           measfolder=dir(folder);
+           measfolder([1,2])=[];
+           
+           result.key=string({measfolder(:).name})';
+           result.count=numel(result.key);
+           result.type=class(obj);
+
+
+           for i=1:result.count
+               folder=[measfolder(i).folder '\' measfolder(i).name];
+               Data=ReadFolder(obj,folder);
+               result.data(i).meas=Data;
+           end
+       end
+       
+       
+        function data=ReadFolder(obj,folder)
+%             data=GetEmptyArr(obj);
+            
             obj.Folder=folder;
-            alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            alpha=OperLib.GetAlpha;
             warning('off','all');
-            path=folder;
+            parts=split(obj.Folder,'\');
+            SpecName=lower([parts{end},'.']);
             
-            MeaPath=folder;
-            filesORG=dir([path '\*.txt']);
-            tmp=strrep({filesORG.folder},MeaPath,'');
-            folderTMP=string(tmp);%cell2struct(tmp,'folder');
-            for i=1:length(folderTMP)
-                filesORG(i).folder=char(folderTMP(i));
-            end
-            
-            files=filesORG;
-            fileNameTMP=[files(:).name];
-            fileName=string(split(fileNameTMP,'.txt'));
+            T=OperLib.GetTypeDir(folder);
+            T2=T(T.suffix==".txt",:);
+            fileName=T2.name;
             
             Records=struct;
             %zjistím jaké jsou pøítomné karty
             FileTypePattern={'-hit-','-ae-'};
-            paterrns={'parameters','detector-'};
+            paterrns={'-parameters','detector-'};
             SignalPatterns={'signal','hitdet'};
             
             for i=1:length(FileTypePattern)
@@ -72,94 +96,180 @@ classdef Zedo < DataFrame
                 UnqCards=unique(TMP);
                 break;
             end
-            
+
             IdxE=find(contains(fileName,'event'));
             if length(IdxE)>0
-                filename=[files(IdxE).folder '\' files(IdxE).name];
-                [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
+                AllEvents=struct;
+                for i=IdxE'
+                    filename=[char(T2.folder(i)) '\' char(T2.file(i))];
+    %                 opts=detectImportOptions(filename,'Delimiter','\t');
+                    [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
+
+                    Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine,'Delimiter','\t');
+
+                    time=string(Events{:,7});
+                    Events(:,7)=[];
+                    str=replace(time,'/',' ');
+                    time=datetime(str,'Format','dd.MM.yyyy hh:mm:ss.s');
+                    Events=addvars(Events,time,'Before','Last_Hit_End_Relative_sec_');
+                    Events.Properties.VariableNames{7}='DateTime';
+
+                    Order=split(Events{:,4},',');
+                    Order(:,1)=replace(Order(:,1),',','');
+                    Events(:,4)=[];
+                    Events=addvars(Events,lower(Order),'Before','Hits_IDs');
+                    Events.Properties.VariableNames{4}='Sensors_Order';
+
+                    Order=split(string(Events{:,5}),',');
+                    Order2=double(Order);
+                    Events(:,5)=[];
+                    Events=addvars(Events,Order2,'Before','First_Hit_Start_Relative_sec_');
+                    Events.Properties.VariableNames{5}='Hits_IDs';
+
+                    [speed,Cards]=GetSpeed(obj,filename);
+                    AllEvents(i).Part=Events;
+                end
                 
-                Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine);
-                Events=AdjustEvents(obj,Events);
-                [speed,Cards]=GetSpeed(obj,filename);     
+                
             else
-                Events=[];
+                AllEvents=[];
                 speed=[];
                 Cards=[];
             end
             
+            
+            
             for iCard=1:length(UnqCards)
                 clear CardFiles CardNames;
-                Records(iCard).SampleCards=char(UnqCards(iCard));
+                Records(iCard).SampleCards=replace(char(UnqCards(iCard)),SpecName,'');
                 if ~isempty(Cards)
                     Records(iCard).Cards=char(Cards(iCard));
                 else
                     Records(iCard).Cards=['Card ' alpha(iCard)];%char(UnqCards(iCard));
                 end
-                Records(iCard).Channel=categorical(cellstr(string(alpha(iCard))));                
+                Records(iCard).Channel=char(string(alpha(iCard)));
                 IdxCard=find(contains(fileName,Records(iCard).SampleCards));
                 BoolSignals=find(contains(fileName,SignalPatterns{1}),1)>0;
                 
                 CardNames=fileName(IdxCard);   
-                CardFiles=files(IdxCard);
+                CardFiles=T2(IdxCard,:);
                 AEFiles=struct;
                 
                 for i=1:length(paterrns)
                 Idx=find(contains(CardNames,paterrns{i}));
                     if ~isempty(Idx)
                         switch i
-                            case 1 %parameters
+                            case 1 %Parameters
+                                Records(iCard).Parameters=readtable([char(CardFiles.folder(Idx)) '\' char(CardFiles.file(Idx))],'ReadVariableNames',true);                                
                                 
-                                Records(iCard).Param.Name=paterrns{i};
-                                Records(iCard).Param.Data=readtable([CardFiles(Idx).folder '\' CardFiles(Idx).name],'ReadVariableNames',true);                                
+                                
+                                time=string(Records(iCard).Parameters{:,2});
+                                Records(iCard).Parameters(:,2)=[];
+                                
+                                str=replace(time,'/',' ');
+                                time=str;%datetime(str,'InputFormat','dd.MM.yyyy hh:mm:ss.s');
+                                names=Records(iCard).Parameters.Properties.VariableNames;
+                                Records(iCard).Parameters = addvars(Records(iCard).Parameters,time,'Before',names{2});
+                                Records(iCard).Parameters.Properties.VariableNames{2}='DateTime';
+                                
+%                                 Records(iCard).Parameters.DateTime=time;
+                                %remove this file from list, so it wont be
+                                %loaded again
                                 CardNames(Idx)=[];    
-                                CardFiles(Idx)=[]; 
+                                CardFiles(Idx,:)=[]; 
+                                
                             case 2 %detector
                                 DetectorsNames=CardNames(Idx);
-                                DetectorsFiles=CardFiles(Idx);
-                                %ted ještì pro každý hitdetector musím
-                                %nahrát signál
+                                DetectorsFiles=CardFiles(Idx,:);
                                 DecNum=extractAfter(DetectorsNames,paterrns{2});
 
+                                %decide if each detector has its own
+                                %signals, or one signal for all detectors
+                                IdxSignal=find(contains(CardFiles.name,SignalPatterns{1}));
+                                CardSignals=CardFiles(IdxSignal,:);
+                                
+                                sigperdec=find(contains(CardSignals.name,SignalPatterns{2}));
+                                Records(iCard).Signals=table;
+                                Records(iCard).Features=table;
+                                if numel(sigperdec)==0
+                                    %there is only one set of signals, per
+                                    %whole channel
+                                    Records(iCard).SignalPerEachDetector=false;
+                                    
+                                    ID=split(CardSignals.name,SignalPatterns{1});
+                                    ID(:,1)=[];
+                                    ID=abs(double(ID));
+                                    
+                                    CardSignals=[table(ID,'VariableNames',{'ID'}), CardSignals];
+                                    Records(iCard).Signals=CardSignals;
+                                else
+                                    Records(iCard).SignalPerEachDetector=true;
+                                end
+
+                                Records(iCard).ConDetector=table;
                                 for s=1:length(DecNum) %n hitdetector
-                                    clear NHitDet;
+
                                     DetectorName=[SignalPatterns{2} num2str(DecNum(s))];
-                                    %AEFiles(2).Detec(s).Name=DetectorName;                                        
+                                    
                                     Records(iCard).Detector(s).Name=DetectorName;
-                                    Records(iCard).Detector(s).Data=readtable([DetectorsFiles(s).folder '\' DetectorsFiles(s).name],'ReadVariableNames',true,'HeaderLines', 2);
+                                    Records(iCard).Detector(s).Data=readtable([char(DetectorsFiles.folder(s)) '\' char(DetectorsFiles.file(s))],...
+                                        'ReadVariableNames',true,'HeaderLines', 2);
+                                    Records(iCard).Detector(s).Signals=table;
+                                    Records(iCard).Detector(s).Features=table;
                                     
-                                    NHitDet(1:size(Records(iCard).Detector(s).Data,1),1)=s;
-                                    Records(iCard).Detector(s).Data=[Records(iCard).Detector(s).Data table(NHitDet)];
-                                    
-                                    %if BoolSignals==true %signal
-                                        IdxSignal=find(contains(CardNames,DetectorName));
-                                        if ~isempty(IdxSignal)
-                                            %daná karta mìla záznamy
-                                            Records(iCard).Detector(s).Signals=AddID(obj,CardFiles(IdxSignal),CardNames(IdxSignal));
-                                            Records(iCard).Detector(s).HaveSignals=true;
-                                        else
-                                            Records(iCard).Detector(s).HaveSignals=false;
-                                            %obj.Options.Signals=0;
-                                            warning('on','all');
-                                            %warning(['Card "' Records(iCard).SampleCards '" Didn''t recorded any signals']);
-                                            warning('off','all');
-                                            %daná karta nemìøila
-                                            %Records(iCard).Detector(s).Signals=[];
+                                    if BoolSignals==true
+                                        if Records(iCard).SignalPerEachDetector==true
+                                            Idx=find(contains(CardFiles.name,DetectorName));
+                                            DetSignals=CardFiles(Idx,:);
+                                            ID=split(DetSignals.name,[DetectorName '-id']);
+                                            ID(:,1)=[];
+                                            ID=abs(double(ID));
+                                            Records(iCard).Detector(s).Signals=[table(ID,'VariableNames',{'ID'}),DetSignals];
                                         end
-                                    %end
+                                    end
+                                    
+                                    rows=size(Records(iCard).Detector(s).Data,1);
+                                    hitdet=linspace(1,rows,rows)';
+                                    CT=[table(hitdet,'VariableNames',{'HitDetID'}), Records(iCard).Detector(s).Data];
+                                    Records(iCard).ConDetector=[Records(iCard).ConDetector; CT];
+                                    
+
                                 end
                             otherwise
                         end
                     end
                 end
                 
-                TMPS={Records(iCard).Detector.Data};
-                T=ConnTables(obj,TMPS);
-                Records(iCard).ConDetector=T;
+%                 TMPS={Records(iCard).Detector.Data};
+%                 T=ConnTables(obj,TMPS);
+%                 Records(iCard).ConDetector=T;
             end
-            Zedo=struct('Speed',speed,'Events',Events,'Records',Records);
-            obj.Data=Zedo;
+            
+            data=struct('Speed',speed,'Events',AllEvents,'Records',Records);
             %ZedoKey=struct('Speed',speed,'Events',Events,'Records',Records);
             warning('on','all');
+        end
+        
+        function data=GetEmptyArr(obj)
+            data=struct("speed",[],"events",[]);
+            
+%             cardcount=GetTypeProp(obj,name);
+            cardcount=obj.TypeSettings.Value{2};
+            senpercard=obj.TypeSettings.Value{3};
+            
+            records=struct;
+            n=0;
+            for i=1:cardcount
+                for j=1:senpercard
+                    n=n+1;
+                    chann=GetChannel(obj);
+                    
+                    chann.CardID=i;
+                    chann.ChannelID=j;
+                    
+                    data.records(n)=chann;
+                end
+            end
         end
         
         function Events=AdjustEvents(obj,Events)
@@ -172,12 +282,16 @@ classdef Zedo < DataFrame
         %------------------------------------------------------------------
         %Nacti zaznam ze zeda
         %------------------------------------------------------------------        
-        function [IDFiles]=AddID(obj,IDFiles,Names)
+        function [IDFiles]=ExtractID(obj,IDFiles,Names)
             %HitsTMP=files(Index);
-            IDTMP = double(split(Names,'id'));
+            IDTMP = double(split(Names,'signal'));
             IDTMP(:,1)=[];
-            ID=num2cell(IDTMP);
-            [IDFiles.ID]=ID{:}; %postup rpo pøidání promìnné array do struktury
+            ID=abs(IDTMP);
+%             ID=num2cell(ID);
+            for i=1:size(IDFiles,1)
+                IDFiles(i).ID=ID(i,1);
+            end
+%             [IDFiles.ID]=ID; %postup rpo pøidání promìnné array do struktury
         end
         
         function [speed,Cards]=GetSpeed(obj,filename)
@@ -309,88 +423,99 @@ classdef Zedo < DataFrame
 
     %Gui for data type selection 
     methods (Access = public)   
-        %set property
-        function SetVal(obj,val,idx)
-            obj.TypeSet{idx}=val;
-        end       
         
-        %add card to zedo
-        %Key(obj,han.Value,obj.Count,Target);
-        function AddCard(obj,n,~,Parent)
-            %(obj,Parent,Type,Key)
-            DrawUITreeNode(obj,Parent,['Card ' char(num2str(n))],@UpdateCardInfo);
-            
+
+        
+        function T=GetZBl(obj)
+            loctype=LocType(obj);
+            Name={'AE device','Number of cards','Channels per card','Localization','Local type'}';
+            Value={'Zedo',...
+                1,2,...
+                false,...
+                loctype(1)}';
+            T=table(Name,Value);
         end
         
-        %add channel
-        function AddChannel(obj,Parent,n)
-            DrawUITreeNode(obj,Parent,['Channel ' char(double2str(n))],@UpdateCardInfo);
-        end
         
-        %function edit card
-        function UpdateCardInfo(obj,value,node)
-            
-        end
-        
-        %adrow in table
-        function TypeAdRow(obj,Value,idx,Target)
-            obj.TypeSet{idx}=Value;
-            dim=size(Target.Data);
-            if dim(1)~=Value
-                if Value>dim(1)
-                    Target.Data=[Target.Data; OperLib.MTBlueprint];
-                    Target.Data{end,4}=Value;
-                else
-                    Target.Data(end,:)=[];
+
+        function SetVal(obj,event)
+            sensorCount=event.Source.Data.Value{2}*event.Source.Data.Value{3};
+            loctype=LocType(obj);
+            test=false;
+            while test==false
+                switch char(event.Source.Data.Value{5})
+                    case '~'
+                        test=1;
+                    case '1D'
+                        if sensorCount<2
+                            event.Source.Data.Value{5}=loctype(1);
+                        else
+                            test=1;
+                        end
+                    case '2D'
+                        if sensorCount<3
+                            event.Source.Data.Value{5}=loctype(2);
+                        else 
+                            test=1;
+                        end
+                    case '3D'
+                        if sensorCount<5
+                            event.Source.Data.Value{5}=loctype(3);
+                        else 
+                            test=1;
+                        end
                 end
-                obj.TypeSet{Target.UserData{2}}=Target.Data;
             end
+            obj.TypeSettings=event.Source.Data;
         end
+        
+
+
         %will initalize gui for first time
-        function InitializeOption(obj)
+        function CreateTypeComponents(obj)
+            g=uigridlayout(obj.GuiParent);
+            g.RowHeight = {22,250,50};
+            g.ColumnWidth = {'1x','2x',44,44};
             
-            Clear(obj);
+   
+            la=uilabel(g,'Text','Columns selection:');
             
-%             Target=DrawUITree(obj,@SetVal);
-%             DrawSpinner(obj,[1 20],Target,@AddCard);
-%             DrawUIEditField(obj,"Channel 1",@UpdateCardInfo);
-%             
-            DrawLabel(obj,['SimpleZedo format at the moment \n',...
-                           'Select composition of main table: by spinner select number of columns \n',...
-                           'and choose the type of each column, column position in source file.',...
-                           'IMPORTANT: there can be only one KeyColumn'],[300 60]);
+            la.Layout.Row=1;
+            la.Layout.Column=[1 4];
+            
+            T=GetZBl(obj);
+            uit = uitable(g,'Data',T,'ColumnEditable',[false,true],...
+                'ColumnWidth','auto','CellEditCallback',@(src,event)SetVal(obj,event));
+            
+            if strcmp(class(obj.TypeSettings),'table')
+                uit.Data=obj.TypeSettings;
+            end
+            
+            uit.Layout.Row = 2;
+            uit.Layout.Column = [1 4];
+            
+           
+            
+            MF=OperLib.FindProp(obj.Parent,'MasterFolder');
+            
+            IconFolder=[MF 'Master\GUI\Icons\'];
+            IconFilePlus=[IconFolder 'plus_sign.gif'];
+            IconFileMinus=[IconFolder 'cancel_sign.gif'];
+
+            
+            obj.Children=[g;la;uit];
         end
+        
     end
     
     %Gui for plotter
     methods 
         function han=PlotType(obj,ax)
-            yyaxis(ax,'right');
-            hold(ax,'on');
-            x=obj.Data.Records.ConDetector{:,4};
-            y=cumsum(obj.Data.Records.ConDetector{:,17});
-            plot(ax,x,y);
-            ylabel(ax,'Cummulative hits \it AE_{hits} \rm [hit]');
-            
+
         end
         
-        function Out=GetParams(obj,Name)
-            R=obj.Data.Records;
-            Out=table;
-            
-            for card=1:size(R,2)
-                
-                Names=strings([size(R(card).ConDetector,1),1]);
-                Card=strings([size(R(card).ConDetector,1),1]);
-                Names(:,1)=Name;
-                Card(:,1)=R(card).Cards;
-                Out=[Out; table(Names,Card), R(card).ConDetector];                
-                %Out{end,:}=[];
-            end
-        end
-        
-        function Out=GetEvents(obj,Name)
-            Out=obj.Data.Events;
+        function Out=GetParameterss(obj,Name)
+            Out=obj.Data;
         end
         
         function Out=GetVariables(obj)

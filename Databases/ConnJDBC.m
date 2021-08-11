@@ -40,11 +40,10 @@ fetchdata = select(conn,selectquery);
 elapsedtime=toc
 %%
 %Inner join
-selectquery=['SELECT ep.ID, ep.Name, pl.ProjectName, ep.Description ',...
+selectquery=['SELECT ep.ID, pl.ID, pl.ProjectName, ep.Name, ep.Description ',...
             'FROM Experiments ep '...
             'INNER JOIN ProjectList pl ',...
-            'ON ep.ProjectID = pl.ID ',...
-            'WHERE ep.ID<3'];
+            'ON ep.ProjectID = pl.ID '];
         
 fetchdata = select(conn,selectquery);
 
@@ -81,3 +80,7 @@ sqlquery = 'UPDATE ProjectList SET ID = 1 WHERE ID = 20';
 execute(conn,sqlquery);
 %%
 close(conn);
+%%
+tst=DbConn(25);
+%%
+mr = matlabroot;

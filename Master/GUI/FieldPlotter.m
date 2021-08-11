@@ -838,7 +838,7 @@ classdef FieldPlotter < handle
         
         function IniciateControls(obj)
             obj.Panel=obj.Parent.Panel;
-            data=table
+            data=table;
             obj.UITable = uitable(obj.Panel,'Data',t);
         end
     end
