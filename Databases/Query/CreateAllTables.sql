@@ -46,6 +46,7 @@ CREATE TABLE [dbo].[UsersPC](
 	[PCName] [char] NULL,
 	[MasterFolder] [char] NULL,
 	[SandboxFolder] [char] NULL,
+	[KeyFilename] [ntext] NULL,
 	CONSTRAINT [UserID] FOREIGN KEY([UserID]) REFERENCES [dbo].[Users] ([ID]) ON DELETE CASCADE)
 GO
 

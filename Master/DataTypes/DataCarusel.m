@@ -4,25 +4,23 @@ classdef DataCarusel < handle
         Columns (:,1) double; %columns with unq data sets to be retrived
         RealComb table;
         RealCombCount (1,1) double;
-        NumRealComb table;
         CurrComb (1,:) double;
+    end
+    
+    properties (Hidden)
+        NumRealComb table;
         RawComb struct; %raw formated combinations
         ColumnNames string; %name of columns
-        
         CombCount double;
         ColCount;
         ColSum;
         Comb table;
-    end
-    
-    properties (Hidden)
-
-        
+        FTable table;
+        FIndex (:,1);
     end
     
     properties (SetAccess = private)
-        FTable table;
-        FIndex (:,1);
+
     end
     
     methods (Access = public)
@@ -49,6 +47,32 @@ classdef DataCarusel < handle
             UnqComb(obj);
             GetRealComb(obj);
         end
+        
+        
+        function [FTable,B]=GetCombinations(obj,CRows)
+            arguments
+                obj;
+                CRows (1,:) double;
+            end
+            obj.CurrComb=CRows;
+
+            
+            FTable=table;
+            for ColNum=obj.CurrComb
+                nFTable=obj.InTab;
+                for i=1:obj.ColCount
+                    nFTable=nFTable(nFTable{:,obj.Columns(i)}==obj.RealComb{ColNum,i},:);
+                end
+                FTable=[FTable; nFTable];
+            end
+            obj.FTable=FTable;               
+            [A,B]=intersect(obj.InTab{:,1},obj.FTable{:,1});
+            %TMpIDx=find(obj.InTab{:,1}==A);
+            obj.FIndex=B;
+        end        
+    end
+    
+    methods (Access=private)
         
         %get the combinations with id num
         function UnqComb(obj)
@@ -104,27 +128,5 @@ classdef DataCarusel < handle
             obj.RealComb.Properties.VariableNames=VarNames;
             obj.RealCombCount=size(obj.RealComb,1);
         end      
-        
-        function [FTable,B]=GetCombinations(obj,CRows)
-            arguments
-                obj;
-                CRows (1,:) double;
-            end
-            obj.CurrComb=CRows;
-
-            
-            FTable=table;
-            for ColNum=obj.CurrComb
-                nFTable=obj.InTab;
-                for i=1:obj.ColCount
-                    nFTable=nFTable(nFTable{:,obj.Columns(i)}==obj.RealComb{ColNum,i},:);
-                end
-                FTable=[FTable; nFTable];
-            end
-            obj.FTable=FTable;               
-            [A,B]=intersect(obj.InTab{:,1},obj.FTable{:,1});
-            %TMpIDx=find(obj.InTab{:,1}==A);
-            obj.FIndex=B;
-        end        
     end
 end

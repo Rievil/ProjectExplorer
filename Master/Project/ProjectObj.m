@@ -1,54 +1,92 @@
-classdef ProjectObj < handle
+classdef ProjectObj < Node
     properties (SetAccess=public)
         ID;
         Name char; %name of project
         ProjectFolder char; %created path in sandbox folder, all MData will be stored there
+        Description;
+        
         Status;
+        
         CreationDate datetime;
         LastChange datetime;
-        Meas struct; %list of measuremnts objects in the specific object
-        %each object is stored as a separate file in project folder, for
-        %clarity this is must - user might want to manualy load data
-        %container of specific measuremnt to access the data, in a long
-        %term and debuging this is importnat
-        MeasCount=0;
-        MTreeNodes;     
+        Plotter;
+        ExpMainNode;
+        Experiments;        
+        ExpCount=0;
+
+        TreeNode;    
+        
         SelectorSets struct;
-        CurrentSelector;
-        MasterDataTypesTable; 
-        DataTypesTable;
-        TotalTable;
-        EvListener;
-        Parent;
-        %master data table, which all measruemnts will or will not clone for
-        %their ussage
-    end
     
-%     events
-%         ReloadData
-%     end
+        CurrentSelector;
+        EvListener;
+    end
+
     
     %Main methods, consturction, destruction etc.
     methods (Access=public) 
         %creation of project objects
-        function obj=ProjectObj(Name,SandBox,App)
-            obj.Name=Name;
-            obj.ProjectFolder=[Name '\'];
-            obj.Meas=struct('Data',[],'ID',[],'Row',[]);
+        function obj=ProjectObj(Name,parent)
+%             obj@Node;
             
-            if ~exist([SandBox obj.Name '\'],'dir')
+            obj.Parent=parent;
+            obj.Name=Name;
+            SetStatus(obj,1);
+            obj.Plotter=Plotter(obj);
+%             SetGuiParent(obj.Plotter,obj);
+%             obj.ID=OperLib.FindProp(obj,'ProjectID');
+        end
+        
+        function SetFolder(obj)
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            
+            folder=[SandBox 'P_' char(num2str(obj.ID)) '\'];
+            if ~exist(folder,'dir')
                 %folder doesnt exist we can create folder for project
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
-                mkdir([SandBox Name '\']);
+                mkdir([SandBox 'P_' char(num2str(obj.ID)) '\']);
+                obj.ProjectFolder=['P_',char(num2str(obj.ID)) '\'];
                 SetStatus(obj,1);
+                
             else
                 %folder does exist, promt the user to set different name
                 SetStatus(obj,4);
+                error('Folder already exists! use different name!');
             end
-            InitSelectorSets(obj,App);
-            
         end
         
+        function NewExperiment(obj) %volání aplikací
+            obj2=AddExperiment(obj);
+            FillNode(obj2);
+            ExpID=OperLib.FindProp(obj,'ExperimentID');
+            obj2.ID=ExpID;
+            
+            obj2.TypeFig=AppTypeSelector(obj2);
+        end
+
+        function obj2=AddExperiment(obj)
+            obj2=Experiment(obj);   
+            obj.Experiments=[obj.Experiments, obj2];
+            obj.ExpCount=numel(obj.Experiments);
+        end
+        
+        function DeleteExperiment(obj,name)
+            i=0;
+            for E=obj.Experiments
+                i=i+1;
+                if strcmp(E.Name,name)
+                    Remove(obj.Experiments(i));
+                    obj.Experiments(i)=[];
+                    break;
+                end
+            end
+            obj.ExpCount=numel(obj.Experiments);
+        end
+        
+        function AddMainExpNode(obj)
+            obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'},...
+                'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\Experiment.gif']);
+        end
         
         %creation of meas
         function CreateMeas(obj,app,SandBox,TreeNode)
@@ -123,6 +161,86 @@ classdef ProjectObj < handle
  
     end
     
+    %Abstract methods
+    methods 
+        %showing editable window in project explorer
+        function FillUITab(obj,Tab)
+
+        end
+        
+        %filling the node
+        function FillNode(obj)
+            treenode=uitreenode(obj.Parent.TreeNode,...
+            'Text',obj.Name,...
+            'NodeData',{obj,'project'}); 
+
+            obj.TreeNode=treenode;
+            AddMainExpNode(obj);
+            FillNode(obj.Plotter);
+            
+        end
+        
+        %saving
+        function stash=Pack(obj)
+            stash=struct;
+            stash.Name=obj.Name;
+            stash.ID=obj.ID;
+            stash.ProjectFolder=obj.ProjectFolder;
+            stash.Status=obj.Status;
+            stash.CreationDate=obj.CreationDate;
+            stash.LastChange=obj.LastChange;
+            
+            stash.ExpMainNode=[];
+            if isvalid(obj.Plotter)
+                stash.Plotter=Pack(obj.Plotter);
+            end
+%             stash.Experiments=struct;
+            n=0;
+            for E=obj.Experiments
+                n=n+1;
+                stash.Experiments(n)=Pack(E);            
+            end
+            if n==0
+                stash.Experiments=struct;
+            end
+            stash.ExpCount=n;
+                
+        end
+        
+        %fill the object
+        function Populate(obj,stash)
+            obj.Name=stash.Name;
+            obj.ID=stash.ID;
+            obj.ProjectFolder=stash.ProjectFolder;
+            obj.Status=stash.Status;
+            obj.CreationDate=stash.CreationDate;
+            obj.LastChange=stash.LastChange;
+            obj.ExpCount=stash.ExpCount;
+            FillNode(obj);
+            
+            
+            if obj.ExpCount>0
+                n=0;
+                for Ex=stash.Experiments
+                    n=n+1;
+                    obj2=AddExperiment(obj);
+                    Populate(obj2,Ex);
+                end
+            end
+            
+                        
+            if isfield(stash,'Plotter')
+                Populate(obj.Plotter,stash.Plotter);
+            end
+        end
+        
+        function AddNode(obj)
+            AddExperiment(obj);
+        end
+        
+        function InitializeOption(obj)
+        end
+    end
     %Data selectors
     methods 
         %work with selectors
@@ -195,20 +313,7 @@ classdef ProjectObj < handle
     methods
                 
         function FillPTree(obj,TreeNode)
-            if numel(obj.MTreeNodes)>0
-                Nodes=TreeNode.Children;
-                Nodes.delete;
-            end
-            
-            if obj.MeasCount>0
-                for i=1:size(obj.Meas,2)
-    %                 tmp=char(datestr(obj.Meas{i}.Date));
-    %                 tmp2=obj.Meas{i}.Name;
-                        obj.MTreeNodes{i}=uitreenode(TreeNode,...
-                                'Text',[char(num2str(i)) ' - ' obj.Meas(i).Data.Name],...
-                                'NodeData',{i,obj.Meas(i).Data,TreeNode}); 
-                end
-            end
+
         end
     end
     
@@ -361,17 +466,39 @@ classdef ProjectObj < handle
               
         %delete measurment
         function DeleteM(obj,i,Meas,Node)
-%             Node.delete;
-%             filename=obj.Meas{i}.FName;
-%             delete(filename);  
-%             obj.Meas{i}=[];    
             Node.delete;
             delete(Meas);
             obj.Meas(i)=[];
         end
+        
+        function Remove(obj)
+            if ~isempty(obj.ProjectFolder)
+                folder=[obj.Parent.SandBoxFolder, obj.ProjectFolder];
+                rmdir(folder,'s');
+            end
+            delete(obj.TreeNode);
+        end
+        
         %class destructor of object
         function delete(obj)
-            obj.TotalTable=[];
+            delete(obj.TreeNode);
+        end
+        
+    end
+    
+    methods %db
+        function AddProject(obj)
+            Connect(obj);
+            data=table(string(obj.Name),"",'VariableNames',{'ProjectName','Description'});
+            DBWrite(obj,'ProjectList',data);
+            [bool,user]=DBCheckForAlias(obj,alias);
+            
+            Disconnect(obj);
+        end
+        
+        function project=GetProjects(obj)
+            
         end
     end
+        
 end

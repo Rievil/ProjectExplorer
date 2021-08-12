@@ -1,4 +1,4 @@
-classdef AEClassifier < AE
+classdef AEClassifier < handle
     %Public var
     properties (SetAccess = public)
         %Measuremnts;  %Main project structure

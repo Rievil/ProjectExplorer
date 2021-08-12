@@ -61,4 +61,17 @@ sqlwrite(conn,'Meas',datain)
 selectquery = 'SELECT * FROM Meas';
 Meas = select(conn,selectquery);
 %%
+close(conn);
+
+%%
+[file,path]=uigetfile('.txt','Select KeyFilename');
+filename=[path, file];
+
+%%
+fileID = fopen(filename);
+A = fscanf(fileID,'%s');
+fclose(fileID);
+
+value = jsondecode(A);
+%%
 
