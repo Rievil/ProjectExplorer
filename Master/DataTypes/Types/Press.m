@@ -122,7 +122,7 @@ classdef Press < DataFrame
         end
         
         function T=GetTension(obj,MT)
-            TenTMP=3/2*(MT.Data.VzdPodpor*0.001)/((MT.Data.B*0.001)*(MT.Data.T*0.001)^2);
+            TenTMP=3/2*(0.240*0.001)/((MT.Data.B*0.001)*(MT.Data.T*0.001)^2);
             Strength=obj.Data.Force.*TenTMP*1e-6;
             T=obj.Data;
             
