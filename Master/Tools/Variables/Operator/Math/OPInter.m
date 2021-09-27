@@ -101,10 +101,28 @@ classdef OPInter < Operator
             end
         end
 
-        function arr=get.MainY(obj)            
+        function arr=get.MainY(obj)  
+            obj.arrSX=obj.SetType(obj.arrSX);
+            obj.arrSY=obj.SetType(obj.arrSY);
+            obj.arrMX=obj.SetType(obj.arrMX);
+            
+            
             arr = interp1(obj.arrSX,obj.arrSY,obj.arrMX,char(obj.Type(obj.SelType)));
         end
         
+        function result=SetType(obj,inArr)
+            type=lower(class(obj.arrSX));
+            switch type
+                case 'double'
+                    result=inArr;
+                case 'duration'
+                    result=seconds(inArr);
+                case 'seconds'
+                    result=seconds(inArr);
+                case 'datetime'
+                    result=datenum(inArr);
+            end
+        end
 
     end
     

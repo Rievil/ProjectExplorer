@@ -11,6 +11,8 @@ stash=Pack(b.Core.ProjectOverview);
 plotter=b.Core.ProjectOverview.Projects(1).Plotter;
 
 % plotter.DrawTest;
+%%
+
 %% Události - histogram energie
 fig=figure('position',[20 200 1600 600]);
 popis={200,240,360};

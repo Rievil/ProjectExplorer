@@ -29,6 +29,7 @@ classdef Item < handle
                 if ~isempty(obj.Fig)
                     a=obj.Fig.Children;
                     a.delete;
+                    obj.FigBool=0;
                 end
             end
         end
