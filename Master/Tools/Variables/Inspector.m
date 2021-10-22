@@ -293,11 +293,11 @@ classdef Inspector < handle
             
             g=uigridlayout(fig);
             g.RowHeight = {25,'1x','2x',25};
-            g.ColumnWidth = {'1x','1x',80,80};
+            g.ColumnWidth = {'1x','1x','1x',100,100};
             
             uit=uitable(g);
             uit.Layout.Row=2;
-            uit.Layout.Column=[2 5];
+            uit.Layout.Column=[3 5];
             
             lab1=uilabel(g,'Text','Raw variables in measurement:');
             lab1.Layout.Row=1;
@@ -305,11 +305,11 @@ classdef Inspector < handle
             
             lab1=uilabel(g,'Text','Preview of selected variable:');
             lab1.Layout.Row=1;
-            lab1.Layout.Column=[2 3];
+            lab1.Layout.Column=[3 5];
             
             t = uitree(g,'SelectionChangedFcn',@obj.DrawVar,'UserData',uit,'FontSize',10);
             t.Layout.Row=[2 3];
-            t.Layout.Column=1;
+            t.Layout.Column=[1 2];
 
             
             obj.Fig=1;
@@ -318,7 +318,7 @@ classdef Inspector < handle
             uit2=uitable(g,'CellSelectionCallback',@obj.MVarTableSelect);
             obj.UITableSelector=uit2;
             uit2.Layout.Row=3;
-            uit2.Layout.Column=[2 5];
+            uit2.Layout.Column=[3 5];
             
             cbox=uicheckbox(g,'Text','Multiple varaibles?','ValueChangedFcn',@obj.MSetMultipleSelection);
             cbox.Layout.Row=4;
@@ -328,7 +328,7 @@ classdef Inspector < handle
             obj.SelectMultiple=obj.UICbox.Value;
         
             
-            but1=uibutton(g,'Text','Select variables','ButtonPushedFcn',@obj.MSelectVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
+            but1=uibutton(g,'Text','Save variables','ButtonPushedFcn',@obj.MSelectVariable);%,'ButtonPushedFcn',@obj.MCheckVar);
             but1.Layout.Row=4;
             but1.Layout.Column=4;
             

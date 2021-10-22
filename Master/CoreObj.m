@@ -45,6 +45,10 @@ classdef CoreObj < handle
         function Save(obj)
             tic;
             disp('Saving work ....');
+            
+            d = uiprogressdlg(obj.UIFig,'Title','Saving projects',...
+            'Indeterminate','on');
+        
             warning ('off','all');
             stash=Pack(obj.ProjectOverview);
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');
@@ -53,6 +57,14 @@ classdef CoreObj < handle
             warning ('on','all');
             msg=sprintf('Work saved succesfully; it took=%0.3fs',toc);
             disp(msg);
+            
+            d.Title=msg;
+            d.Indeterminate ='off';
+            d.ShowPercentage ='off';
+            d.Value =1;
+            d.Icon='success';
+            pause(1);
+            d.close;
         end
         
         function Load(obj)
