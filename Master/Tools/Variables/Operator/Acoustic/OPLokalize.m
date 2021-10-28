@@ -120,8 +120,8 @@ classdef OPLokalize < Operator
                 SignalId=Loc.IDSignal(i,:);
 
                 for j=1:numel(order)
-                    TargetCard=replace(string(order{j})," ","");
-                    cards=string({Loc.TS(:).Label});
+                    TargetCard=lower(replace(string(order{j})," ",""));
+                    cards=lower(string({Loc.TS(:).Label}));
                     Idx=find(cards==TargetCard);
 
                     HitID=SignalId(j);

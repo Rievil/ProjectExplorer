@@ -127,7 +127,11 @@ classdef Zedo < AcousticEmission
                     Events.Properties.VariableNames{5}='Hits_IDs';
 
                     [speed,Cards]=GetSpeed(obj,filename);
-                    AllEvents(i).Part=Events;
+                    if numel(IdxE)==1
+                        AllEvents=Events;
+                    else
+                        AllEvents(i).Part=Events;
+                    end
                 end
                 
                 

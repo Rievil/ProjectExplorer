@@ -146,7 +146,10 @@ classdef DataFrame < OperLib & GUILib
             name=T.name;
             Idx=find(contains(lower(T.name),lower(obj.KeyWord)));
             
-            if Idx>0
+            if isempty(Idx)
+                fprintf("Can't find '%s' in name of file '%s'",lower(obj.KeyWord),...
+                    lower(T.name));
+            elseif Idx>0
                 %i got exactly one type
                 filename=[char(T.folder(Idx))  '\' (char(T.file(Idx)))];
                 opts=MakeReadOpt(obj,filename,T.suffix);

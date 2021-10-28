@@ -100,7 +100,7 @@ classdef OperLib < handle
                     if isa(InArr,'double')
                         Arr=InArr;
                     else
-                        Arr=string2double(InArr);
+                        Arr=str2double(InArr);
                     end
                 case "category"
                     Arr=categorical(InArr,'Ordinal',true);

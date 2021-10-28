@@ -118,10 +118,33 @@ classdef Plotter < Node
 
     %                     Ts=table({x},'VariableNames',{char(Var.Name)});
                         Trow=[Trow, x];
+                        
+
                     end
-                    Tout=[Tout; Trow];
+                    
+                    for g=1:size(Trow,2)
+                        tmp=Trow{:,g};
+                        switch class(tmp)
+                            case 'categorical'
+                                tmp=string(tmp);
+%                                 T = addvars(T,LastName,'Before','Age');
+%                                 Trow(:,g)=[];
+%                                 Trow=addvars(Trow,tmp,'After',Trow.Properties.VariableNames{g-1});
+                                Trow=[Trow(:,1:g-1),table(string(tmp),'VariableNames',{Trow.Properties.VariableNames{g}}),Trow(:,g+1:end)];
+                        end
+                    end
+                    
+                    if size(Tout,2)>0
+                        if size(Trow,2)==size(Tout,2)
+                            Tout=[Tout; Trow];
+                        end
+                    else
+%                         if size(Trow,2)==size(Tout,2)
+                        Tout=[Tout; Trow];
+%                         end
+                    end
                 catch ME
-                    disp(sprintf('Specimen %s has problem, row: %d, reason: %s',T.Key(i),i,string(ME.message)));
+                    fprintf("Specimen ID:%d '%s' has problem, row: %d, reason: %s\n",T.ID(i),T.Key(i),i,string(ME.message));
                 end
             end
         end
