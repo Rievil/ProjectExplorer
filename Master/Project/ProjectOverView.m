@@ -18,6 +18,8 @@ classdef ProjectOverView < Node
         SpecimenID=0;
     end
     
+
+    
     methods %dependant
         function ID=get.ProjectID(obj)
             ID=obj.ProjectID+1;
@@ -67,13 +69,14 @@ classdef ProjectOverView < Node
             %nový objekt byl v poøádku vytvoøen
             obj2=ProjectObj(Name,obj);
             obj2.ID=OperLib.FindProp(obj,'ProjectID');
-
+            
             status=obj2.Status.Value;
 
             switch status
                 case 1
                     FillNode(obj2);
                     obj.Projects=[obj.Projects, obj2];
+                    
                 case 4
                     delete(obj2);
             end                
@@ -89,7 +92,6 @@ classdef ProjectOverView < Node
                     obj.Projects(i)=[];
                     break;
                 end
-            
             end
             obj.ProjectCount=numel(obj.Projects);
         end
@@ -110,6 +112,7 @@ classdef ProjectOverView < Node
         function stash=Pack(obj)
             stash=struct;
             list=string(properties(obj))';
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
             for prop=list
                 switch prop
                     case "ProjectCount"
@@ -134,6 +137,11 @@ classdef ProjectOverView < Node
                 end
             end
         end
+        
+        function SaveProject(obj,proj)
+            
+        end
+        
         
         function Populate(obj,stash)
             obj.ProjectCount=stash.ProjectCount;
@@ -171,6 +179,10 @@ classdef ProjectOverView < Node
         function save(obj)
             val=obj;
             save('test.mat','val');
+        end
+        
+        function MRemoveSpecificProject(obj,src,evnt)
+            disp('test');
         end
     end
     

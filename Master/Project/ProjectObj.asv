@@ -22,6 +22,11 @@ classdef ProjectObj < Node
         EvListener;
     end
     
+    events
+        Proje
+    end
+
+    
     %Main methods, consturction, destruction etc.
     methods (Access=public) 
         %creation of project objects
@@ -407,6 +412,46 @@ classdef ProjectObj < Node
             close(f3);
         end
 
+        function SaveMeas(obj,SandBox)
+            %sobj = saveobj@MeasObj(obj);
+            f1=waitbar(0,'Saving meas: ...');
+            try
+                MSize=size(obj.Meas,2);
+                for i=1:MSize
+                    
+                    warning ('off','all');
+                    meas=obj.Meas(i);
+                    meas.Data.Parent=[];
+                    save([SandBox obj.ProjectFolder 'Meas_' char(num2str(meas.ID)) '.mat'],'meas');
+                    waitbar(i/MSize,f1,['Saving meas: ''' char(meas.Data.Name) '''']);
+                    warning ('on','all');
+                end
+            catch ME
+                close(f1);
+            end
+            close(f1);
+        end
+        
+        
+        function LoadMeas(obj,SandBox)
+            obj.Meas=[];
+            Files = dir([SandBox obj.ProjectFolder '*.mat']);
+            if size(Files,1)>0
+                for i=1:size(Files,1)
+                    load([Files(i).folder '\' Files(i).name],'meas');
+                    
+                    row=meas.Row;
+                    obj.Meas(row).Data=meas.Data;
+                    obj.Meas(row).ID=meas.ID;
+                    obj.Meas(row).Row=meas.Row;
+                    
+                    obj.Meas(row).Data.SandBox=SandBox;
+                    obj.Meas(row).Data.FName=[Files(i).folder '\' Files(i).name];
+                    obj.Meas(row).Data.Parent=obj;
+                end
+                InitSelectorSets(obj);
+            end
+        end
         
         
         %pull data from meas
