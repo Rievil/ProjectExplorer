@@ -2,9 +2,9 @@ classdef ProjectObj < Node
     properties (SetAccess=public)
         ID;
         Name char; %name of project
-        ProjectFolder char; %created path in sandbox folder, all MData will be stored there
+        ProjectFolder string; %created path in sandbox folder, all MData will be stored there
         Description;
-        
+        State=1;
         Status;
         
         CreationDate datetime;
@@ -14,13 +14,46 @@ classdef ProjectObj < Node
         Experiments;        
         ExpCount=0;
 
-        TreeNode;    
+            
         
         SelectorSets struct;
     
         CurrentSelector;
         EvListener;
+        Version=1;
     end
+    
+    properties (SetAccess = private)
+        ProjectID=0;
+        ExperimentID=0;
+        MeasID=0;
+        SpecimenID=0;
+    end
+    
+
+    
+    methods %dependant
+        function ID=get.ProjectID(obj)
+            ID=obj.ProjectID+1;
+            obj.ProjectID=ID;
+        end
+        
+        function ID=get.ExperimentID(obj)
+            ID=obj.ExperimentID+1;
+            obj.ExperimentID=ID;
+        end
+        
+        function ID=get.MeasID(obj)
+            ID=obj.MeasID+1;
+            obj.MeasID=ID;
+        end
+        
+        function ID=get.SpecimenID(obj)
+            ID=obj.SpecimenID+1;
+            obj.SpecimenID=ID;
+        end
+    end
+    
     
     %Main methods, consturction, destruction etc.
     methods (Access=public) 
@@ -36,21 +69,14 @@ classdef ProjectObj < Node
 %             obj.ID=OperLib.FindProp(obj,'ProjectID');
         end
         
-        function SetFolder(obj)
+        function CheckFolder(obj)
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            
-            folder=[SandBox 'P_' char(num2str(obj.ID)) '\'];
-            if ~exist(folder,'dir')
-                %folder doesnt exist we can create folder for project
+            folder=sprintf("%sP_%d_%s\\",SandBox,obj.ID,obj.Name);
+            if ~exist(folder)
                 obj.CreationDate=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');
-                mkdir([SandBox 'P_' char(num2str(obj.ID)) '\']);
-                obj.ProjectFolder=['P_',char(num2str(obj.ID)) '\'];
-                SetStatus(obj,1);
-                
-            else
-                %folder does exist, promt the user to set different name
-                SetStatus(obj,4);
-                error('Folder already exists! use different name!');
+                mkdir(folder);
+                prfolder=sprintf("P_%d_%s",obj.ID,obj.Name);
+                obj.ProjectFolder=prfolder;
             end
         end
         
@@ -59,7 +85,6 @@ classdef ProjectObj < Node
             FillNode(obj2);
             ExpID=OperLib.FindProp(obj,'ExperimentID');
             obj2.ID=ExpID;
-            
             obj2.TypeFig=AppTypeSelector(obj2);
         end
 
@@ -83,8 +108,9 @@ classdef ProjectObj < Node
         end
         
         function AddMainExpNode(obj)
+            iconFolder=[OperLib.FindProp(obj,'MasterFolder'), 'Master\Gui\Icons\'];
             obj.ExpMainNode=uitreenode(obj.TreeNode,'Text','Experiments','NodeData',{obj,'expmain'},...
-                'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\Experiment.gif']);
+                'Icon',[iconFolder 'Experiment.gif']);
         end
         
         %set of project status; project have statuses to understand in what
@@ -121,7 +147,7 @@ classdef ProjectObj < Node
             obj.DataTypesTable=TypeTable;
         end
         
- 
+        
     end
     
     %Abstract methods
@@ -131,22 +157,50 @@ classdef ProjectObj < Node
 
         end
         
-        %filling the node
-        function FillNode(obj)
+        function icon=Geticon(obj)
+            iconFolder=[OperLib.FindProp(obj,'MasterFolder'), 'Master\Gui\Icons\'];
+            switch obj.State
+                case 1
+                    icon=[iconFolder 'project_active.gif'];
+                case 0
+                    icon=[iconFolder 'project_deactive.gif'];
+            end
+        end
+        
+        function FillGhostNode(obj)
+            
+            
             treenode=uitreenode(obj.Parent.TreeNode,...
             'Text',obj.Name,...
-            'NodeData',{obj,'project'}); 
-
+            'NodeData',{obj,'project'},'Icon',Geticon(obj)); 
             obj.TreeNode=treenode;
+            UIFig=OperLib.FindProp(obj,'UIFig');
+            cm = uicontextmenu(UIFig);
+            m1 = uimenu(cm,'Text','Delete project','MenuSelectedFcn',@obj.MRemoveProject);%,...
+            m2 = uimenu(cm,'Text','Deactivate project','MenuSelectedFcn',@obj.MDeactivate);
+            m3 = uimenu(cm,'Text','Activate project','MenuSelectedFcn',@obj.MActivate);
+            obj.TreeNode.ContextMenu=cm;
+            
+        end
+        
+        function ClearIns(obj)
+        end
+        
+        %filling the node
+        function FillNode(obj)
+%             if obj.State==0
+            if isempty(obj.TreeNode)
+                 FillGhostNode(obj);
+            else
+                if ~isvalid(obj.TreeNode)
+                    FillGhostNode(obj);
+                end
+            end
+%             end
             AddMainExpNode(obj);
             FillNode(obj.Plotter);
             
-            UIFig=OperLib.FindProp(obj,'UIFig');
-            cm = uicontextmenu(UIFig);
-            m1 = uimenu(cm,'Text','Delete project','MenuSelectedFcn',@obj.RemoveNode);%,...
-            m2 = uimenu(cm,'Text','Deactivate project','MenuSelectedFcn',@obj.MenuRead);
-            m3 = uimenu(cm,'Text','Activate project','MenuSelectedFcn',@obj.MenuRead);
-            obj.TreeNode.ContextMenu=cm;
+            
         end
         
         %saving
@@ -156,10 +210,16 @@ classdef ProjectObj < Node
             stash.ID=obj.ID;
             stash.ProjectFolder=obj.ProjectFolder;
             stash.Status=obj.Status;
+            stash.State=obj.State;
             stash.CreationDate=obj.CreationDate;
             stash.LastChange=obj.LastChange;
             
+            stash.ExperimentID=obj.ExperimentID;
+            stash.MeasID=obj.MeasID;
+            stash.SpecimenID=obj.SpecimenID;
+            
             stash.ExpMainNode=[];
+            stash.Version=obj.Version;
             if isvalid(obj.Plotter)
                 stash.Plotter=Pack(obj.Plotter);
             end
@@ -184,10 +244,29 @@ classdef ProjectObj < Node
             obj.Status=stash.Status;
             obj.CreationDate=stash.CreationDate;
             obj.LastChange=stash.LastChange;
-            obj.ExpCount=stash.ExpCount;
+            if isfield(stash,'ExpCount')
+                obj.ExpCount=stash.ExpCount;
+            end
+            
+            if isfield(stash,'State')
+                obj.State=stash.State;
+            end
+            
+            if isfield(stash,'ExperimentID')
+            obj.ExperimentID=stash.ExperimentID;
+            end
+            
+            if isfield(stash,'MeasID')
+            obj.MeasID=stash.MeasID;
+            end
+            
+            if isfield(stash,'SpecimenID')
+            obj.SpecimenID=stash.SpecimenID;
+            end
+            
+
             FillNode(obj);
-            
-            
+
             if obj.ExpCount>0
                 n=0;
                 for Ex=stash.Experiments
@@ -196,10 +275,14 @@ classdef ProjectObj < Node
                     Populate(obj2,Ex);
                 end
             end
-            
-                        
+
+
             if isfield(stash,'Plotter')
                 Populate(obj.Plotter,stash.Plotter);
+            end
+
+            if isfield(stash,'Version')
+                obj.Version=stash.Version;
             end
         end
         
@@ -225,14 +308,37 @@ classdef ProjectObj < Node
     %Save, load, delete, copy methods
     methods 
         
+        function Save(obj)
+            obj.Version=obj.Version+1;
+            obj.CheckFolder;
+            stash=Pack(obj);
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            filename=sprintf("%s%s\\main.mat",SandBox,stash.ProjectFolder);
+%             file=sprintf("%s\\main.mat",stash.ProjectFolder);
+            save(filename,'stash');
+        end
         
+        function Load(obj,filename)
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            file=sprintf("%s%s\\main.mat",SandBox,filename);
+            load(file);
+            Populate(obj,stash);
+        end
               
         function Remove(obj)
-            if ~isempty(obj.ProjectFolder)
-                folder=[obj.Parent.SandBoxFolder, obj.ProjectFolder];
-                rmdir(folder,'s');
+            UITab=OperLib.FindProp(obj,'UIFig');
+            selection = uiconfirm(UITab,sprintf("Do you want to remove whole project '%s'?",obj.Name),'Delete project', ...
+               'Options',{'Yes','No'}, ...
+               'DefaultOption',2,'CancelOption',2);
+            switch selection
+                case 'Yes'
+                    RemoveProjectEntry(obj.Parent,obj);
+                    SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+                    status = rmdir(sprintf("%s%s",SandBox,obj.ProjectFolder));
+                    delete(obj.TreeNode);
+                    delete(obj);
+                case 'No'
             end
-            delete(obj.TreeNode);
         end
         
         %class destructor of object
@@ -240,6 +346,33 @@ classdef ProjectObj < Node
             delete(obj.TreeNode);
         end
         
+
+    end
+    
+    methods %callbacks
+        function MRemoveProject(obj,~,~)
+            Remove(obj);
+        end
+        
+        function MDeactivate(obj,~,~)
+            ChangeState(obj.Parent,obj,0);
+            delete(obj.Plotter);
+%             obj.Plotter=[];
+            delete(obj.ExpMainNode);
+%             obj.ExpMainNode=[];
+            delete(obj.Experiments);
+%             obj.Experiments=[];
+            obj.State=0;
+            obj.TreeNode.Icon=Geticon(obj);
+        end
+        
+        function MActivate(obj,~,~)
+            ChangeState(obj.Parent,obj,1);
+            obj.Plotter=Plotter(obj);
+            Load(obj,obj.ProjectFolder);
+            obj.State=1;
+            obj.TreeNode.Icon=Geticon(obj);
+        end
     end
     
     methods %db

@@ -6,7 +6,7 @@ classdef Plotter < Node
         PlotObj;
         PlotGroups;
         
-        TreeNode;
+%         TreeNode;
         
         UITree;
         
@@ -55,6 +55,10 @@ classdef Plotter < Node
                 obj.PlotGroups{i}.ID=i;
             end
         end
+        
+        function delete(obj)
+            delete(obj.TreeNode);
+        end
     end
     
     methods %abstract
@@ -66,6 +70,9 @@ classdef Plotter < Node
         
         function FillNode(obj)
             obj.TreeNode=uitreenode(obj.Parent.TreeNode,'Text','Plotter','NodeData',{obj,'plotter'});
+        end
+        
+        function ClearIns(obj)
         end
         
         function stash=Pack(obj)

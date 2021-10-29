@@ -4,6 +4,8 @@ classdef Node < OperLib & GUILib
     
     properties
         Parent;
+        TreeNode;
+        
     end
     
     methods (Abstract)
@@ -12,6 +14,7 @@ classdef Node < OperLib & GUILib
         stash=Pack(obj);
         node=AddNode(obj);
         Populate(obj);
+        ClearIns(obj);
     end
     
     methods
@@ -21,6 +24,18 @@ classdef Node < OperLib & GUILib
 
         end
         
+%         function Clear(obj)
+%             delete(obj.TreeNode);
+%             obj.TreeNode=[];
+%             ClearIns(obj);
+%         end
+        
+%         function FillGhostNode(obj,label)
+%             treenode=uitreenode(obj.Parent.TreeNode,...
+%             'Text',obj.Name,...
+%             'NodeData',{obj,label}); 
+%             obj.TreeNode=treenode;
+%         end
         
         
         function sobj = saveobj(obj)

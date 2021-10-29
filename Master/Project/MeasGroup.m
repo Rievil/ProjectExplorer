@@ -5,7 +5,7 @@ classdef MeasGroup < Node
     properties
         Meas=[];
         Count=0;
-        TreeNode;
+%         TreeNode;
     end
     
     events
@@ -74,7 +74,8 @@ classdef MeasGroup < Node
             
         end
         
-        
+        function ClearIns(obj)
+        end
         
         function stash=Pack(obj)
             stash=struct;

@@ -5,7 +5,7 @@ classdef Experiment < Node
     properties
         ID;
         ExpFolder char;
-        TreeNode;
+%         TreeNode;
         Status;
         Name='--#New Experiment#--';
         TypeSettings;
@@ -57,9 +57,9 @@ classdef Experiment < Node
 
         
         function CreateExpFolder(obj)
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');            
-            obj.ExpFolder=[OperLib.FindProp(obj,'ProjectFolder'), 'E_',num2str(obj.ID)];
-            mkdir([SandBox, obj.ExpFolder]);
+%             SandBox=OperLib.FindProp(obj,'SandBoxFolder');            
+%             obj.ExpFolder=[OperLib.FindProp(obj,'ProjectFolder'), 'E_',num2str(obj.ID)];
+%             mkdir([SandBox, obj.ExpFolder]);
         end
         
         function SetTypeSettings(obj,table)
@@ -90,6 +90,9 @@ classdef Experiment < Node
     methods 
         function FillUITab(obj,Tab)
 
+        end
+        
+        function ClearIns(obj)
         end
         
         function stash=Pack(obj)

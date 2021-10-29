@@ -1,44 +1,25 @@
 classdef ProjectOverView < Node
     properties (SetAccess = public)
-        Projects ProjectObj; %list of projects present in sandbox        
-%         SandBoxFolder char;
+        Projects ProjectObj; %list of projects present in sandbox  
+        ProjectList table;
+
         ProjectCount=0;
-        TreeNode;
-        UITree; %handle to ui tree in project explorer
+
+        UITree; 
         UITab;
         
-%         MasterFolder;
         FigProjectDesign;
     end
     
     properties (SetAccess = private)
         ProjectID=0;
-        ExperimentID=0;
-        MeasID=0;
-        SpecimenID=0;
     end
     
-
     
-    methods %dependant
+    methods
         function ID=get.ProjectID(obj)
             ID=obj.ProjectID+1;
             obj.ProjectID=ID;
-        end
-        
-        function ID=get.ExperimentID(obj)
-            ID=obj.ExperimentID+1;
-            obj.ExperimentID=ID;
-        end
-        
-        function ID=get.MeasID(obj)
-            ID=obj.MeasID+1;
-            obj.MeasID=ID;
-        end
-        
-        function ID=get.SpecimenID(obj)
-            ID=obj.SpecimenID+1;
-            obj.SpecimenID=ID;
         end
     end
     
@@ -56,9 +37,12 @@ classdef ProjectOverView < Node
             SandBoxFolder=OperLib.FindProp(obj,'SandBoxFolder');
             
             obj.UITab=OperLib.FindProp(obj,'AppTabGroup');
+            
+            obj.ProjectList=table([],[],[],[],'VariableNames',{'Name','ID','Folder','State'});
 %             FillNode(obj);
         end
         
+
         
         function DesignNewProject(obj)
             obj.FigProjectDesign=EditProject(obj);
@@ -76,7 +60,8 @@ classdef ProjectOverView < Node
                 case 1
                     FillNode(obj2);
                     obj.Projects=[obj.Projects, obj2];
-                    
+                    CheckFolder(obj2);
+                    AddProjectEntry(obj,obj2);
                 case 4
                     delete(obj2);
             end                
@@ -95,6 +80,8 @@ classdef ProjectOverView < Node
             end
             obj.ProjectCount=numel(obj.Projects);
         end
+        
+        
         
         function [ProjectCount]=Count(obj)
             ProjectCount=numel(obj.Projects);
@@ -125,12 +112,18 @@ classdef ProjectOverView < Node
                         stash.(prop)=obj.(prop)-1;
                     case "SpecimenID"
                         stash.(prop)=obj.(prop)-1;
+                    case "ProjectList"
+                        stash.(prop)=obj.(prop);
                     case "Projects"
                         n=0;
+                        
                         for Pr=obj.(prop)
                             n=n+1;
-                            TMP=Pack(Pr);
-                            stash.(prop)(n)=TMP;
+                            switch obj.ProjectList.State(n)
+                                case 1
+                                    Save(Pr);
+                                case 0
+                            end
                         end
                     otherwise
 %                         stash.(prop)=obj.(prop);
@@ -138,32 +131,88 @@ classdef ProjectOverView < Node
             end
         end
         
-        function SaveProject(obj,proj)
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            filename=[SandBox '\' sprintf("%d_%s.mat",proj.ID,proj.Name)];
-            save(filename,'proj');
+        function row=CheckProjectEntry(obj,ID)
+            row=find(obj.ProjectList.ID==ID,1);
         end
         
+        function AddProjectEntry(obj,ob2)
+            idx=obj.ProjectList.ID==ob2.ID;
+            
+            if sum(idx)==0
+                obj.ProjectList=[obj.ProjectList;
+                    table(string(ob2.Name),ob2.ID,ob2.ProjectFolder,1,'VariableNames',{'Name','ID','Folder','State'})];
+            end
+        end
+        
+        function ChangeState(obj,obj2,state)
+            row=CheckProjectEntry(obj,obj2.ID);
+            if ~isempty(row)
+                obj.ProjectList.State(row)=state;
+            end
+        end
+        
+        function RemoveProjectEntry(obj,ob2)
+            row=CheckProjectEntry(obj,ob2.ID);
+            if ~isempty(row)
+                obj.ProjectList(row,:)=[];
+            end
+        end
+        
+        function ClearIns(obj)
+        end
         
         function Populate(obj,stash)
             obj.ProjectCount=stash.ProjectCount;
             obj.ProjectID=stash.ProjectID;
-            obj.ExperimentID=stash.ExperimentID;
-            obj.MeasID=stash.MeasID;
-            obj.SpecimenID=stash.SpecimenID;
+            
+            if isfield(stash,'ProjectList')
+                obj.ProjectList=stash.ProjectList;
+            end
 %             FillNode(obj);
             
             n=0;
-            for St=stash.Projects
+            for i=1:size(obj.ProjectList,1)
                 n=n+1;
-                obj.Projects(n)=ProjectObj('new project',obj);
-                Populate(obj.Projects(n),St);
+                obj2=ProjectObj('new project',obj);
+                switch obj.ProjectList.State(i)
+                    case 1
+                        Load(obj2,obj.ProjectList.Folder(i));
+                    case 0
+                        obj2.Name=obj.ProjectList.Name(i);
+                        obj2.ID=obj.ProjectList.ID(i);
+                        obj2.ProjectFolder=obj.ProjectList.Folder(i);
+                        obj2.State=0;
+                        FillGhostNode(obj2);
+                end
+                obj.Projects(n)=obj2;
+            end
+        end
+        
+        function LoadProject(obj,filename)
+%             obj2=ProjectObj('new project',obj);
+            load(filename);
+            row=CheckProjectEntry(obj,stash.ID);
+            
+            if isempty(row)
+                obj2=ProjectObj('new project',obj);
+                obj.Projects(end+1)=obj2;
+                Populate(obj2,stash);
+                AddProjectEntry(obj,obj2)
+            else
+                
             end
         end
 
         function FillNode(obj)
             obj.TreeNode=uitreenode(obj.UITree,'Text','Project OverView',...
                 'NodeData',{obj,'projectoverview'});
+            
+            
+            UIFig=OperLib.FindProp(obj,'UIFig');
+            cm = uicontextmenu(UIFig);
+            m1 = uimenu(cm,'Text','New project','MenuSelectedFcn',@obj.MNewProject);
+            m2 = uimenu(cm,'Text','Load project','MenuSelectedFcn',@obj.MLoadProject);
+            obj.TreeNode.ContextMenu=cm;
         end
 
         function node=AddNode(obj)
@@ -200,6 +249,25 @@ classdef ProjectOverView < Node
                 obj.ProjectID=lastID.ID;
             end
             Disconnect(obj);
+        end
+    end
+    
+    methods %callbacks
+        function MNewProject(obj,~,~)
+            DesignNewProject(obj);
+        end
+        
+        function MLoadProject(obj,~,~)
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            [file,path] = uigetfile('*.mat','Select project main file',SandBox);
+            switch class(path)
+                case 'double'
+                    disp('nothing selected');
+                case 'char'
+                    filename=sprintf("%s\%s",path,file);
+                    LoadProject(obj,filename);
+            end
+            
         end
     end
 end

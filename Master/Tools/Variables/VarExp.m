@@ -5,7 +5,7 @@ classdef VarExp < Node
     properties
         Inspector;
         Forge;
-        TreeNode;
+%         TreeNode;
     end
     
     methods
@@ -27,6 +27,9 @@ classdef VarExp < Node
             p=OperLib.FindProp(obj,'UITab');
             SetGuiParent(obj,p);
             InitializeOption(obj);
+        end
+        
+        function ClearIns(obj)
         end
         
         function FillNode(obj)

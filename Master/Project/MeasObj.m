@@ -22,7 +22,7 @@ classdef MeasObj < Node
         ClonedTypes=0;
         TotalTable;
         Version;
-        TreeNode;
+%         TreeNode;
         
         
         SpecimenCount;    
@@ -120,6 +120,9 @@ classdef MeasObj < Node
             p=OperLib.FindProp(obj,'UITab');
             SetGuiParent(obj,p);
             InitializeOption(obj);
+        end
+        
+        function ClearIns(obj)
         end
         
         function stash=Pack(obj)

@@ -3,7 +3,7 @@ classdef SpecGroup < Node
     %   Detailed explanation goes here
     
     properties
-        TreeNode;
+%         TreeNode;
         Specimens table;
         SpecDesc table;
         Selector table;
@@ -225,6 +225,9 @@ classdef SpecGroup < Node
                 'Icon',iconfilename);
         end
 
+        function ClearIns(obj)
+        end
+        
         function T=GetSpecTable(obj)
             GetSel(obj);
             T=[table(obj.Sel,'VariableNames',{'N'}), obj.Specimens];
