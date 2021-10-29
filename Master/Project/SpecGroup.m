@@ -166,7 +166,7 @@ classdef SpecGroup < Node
                 varargin(1:2)=[];
                 
             end
-            obj.Count=size(obj.Specimens,1);
+%             obj.Count=size(obj.Specimens,1);
         end
         
         function list=get.SpecimenList(obj)

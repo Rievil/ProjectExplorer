@@ -322,62 +322,7 @@ classdef ProjectObj < Node
         end
     end
     
-    %Overview of all meas, data preparation
-    methods      
-        function Out=MakeOverView(obj)
-            Out=table;
-            for i=1:size(obj.Meas,2)
-                M=obj.Meas(i).Data;
-                MeaName=strings([size(M.Data,1),1]);
-                MeaName(:,1)=string(M.Name);
-                MTab=table;
-                for j=1:size(M.Data,1)
-                    MTab=[MTab; M.Data.MainTable(j).Data];
-                end
-                
-                Out=[Out; table(MeaName), MTab];
-            end
-            [file,path,indx] = uiputfile('OverViewTable.xlsx');
-            filename=[path file];
-            writetable(Out,filename);
-        end
-        
-        function Stack(obj,Sel)
-            FilterStack=table;
-            OutStack=table;
-            for i=1:numel(obj.Meas)
-                M=obj.Meas(i).Data;
-                ID=obj.Meas(i).ID;
-                IDSpec=[];
-                if ~isempty(M)
-                    idx=M.Selector{:,Sel};
-                    
-                    
-                    IDMeas(1:size(M.Data,1),1)=ID;
-                    IDMeas=IDMeas(idx,1);
-                    
-                    IDSpec(:,1)=linspace(1,size(M.Data,1),size(M.Data,1))';
-                    IDSpec=IDSpec(idx,1);
-                    
-                    Filter=M.Data(idx,:);
-                    if size(Filter,1)>0
-                        Filter=[table(IDMeas,IDSpec,'VariableNames',{'IDMeas','IDSpec'}), Filter];
-                        
-                        FilterStack=[FilterStack; Filter];
-                    end
-                end
-            end
-            obj.TotalTable=FilterStack;
-            %obj.TotalTable=OutStack;
-        end
-        
-        function SignSpecimen(obj,meas,spec)
-            if obj.CurrentSelector>0
-                val=obj.Meas(meas).Data.Selector{spec,obj.CurrentSelector};
-                obj.Meas(meas).Data.Selector{spec,obj.CurrentSelector}=~val;
-            end
-        end
-    end
+    
     
     %Save, load, delete, copy methods
     methods 
@@ -429,13 +374,6 @@ classdef ProjectObj < Node
         end
         
               
-        %delete measurment
-        function DeleteM(obj,i,Meas,Node)
-            Node.delete;
-            delete(Meas);
-            obj.Meas(i)=[];
-        end
-        
         function Remove(obj)
             if ~isempty(obj.ProjectFolder)
                 folder=[obj.Parent.SandBoxFolder, obj.ProjectFolder];
