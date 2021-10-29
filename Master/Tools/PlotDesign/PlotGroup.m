@@ -7,7 +7,7 @@ classdef PlotGroup < Item
     
     properties
         ID;
-        FigureConcepts;
+        Children;
         TreeNode;
         Name;
         Description;
@@ -27,7 +27,7 @@ classdef PlotGroup < Item
         end
         
         function count=get.Count(obj)
-            count=numel(obj.FigureConcepts);
+            count=numel(obj.Children);
         end
         
         function FillNode(obj)
@@ -49,7 +49,7 @@ classdef PlotGroup < Item
             obj.TreeNode.ContextMenu=cm;
             
             for i=1:obj.Count
-                obj.FigureConcepts{i}.FillNode;
+                obj.Children{i}.FillNode;
             end
         end
         
@@ -65,15 +65,15 @@ classdef PlotGroup < Item
             obj2.ID=id;
             obj2.SetName(char(sprintf('Figure concept %d',id)));
             
-            obj.FigureConcepts{id}=obj2;
+            obj.Children{id}=obj2;
             FillNode(obj2);
         end
         
         function RemoveConceptFigure(obj,id)
-            obj.FigureConcepts(id)=[];
+            obj.Children(id)=[];
             n=0;
             for i=1:obj.Count
-                obj.FigureConcepts{i}.ID=i;
+                obj.Children{i}.ID=i;
             end
         end
 
@@ -90,10 +90,10 @@ classdef PlotGroup < Item
             stash=struct;
             stash.ID=obj.ID;
             stash.Name=obj.Name;
-            if ~isempty(obj.FigureConcepts)
-                for i=1:size(obj.FigureConcepts,2)
-                    TMP=Pack(obj.FigureConcepts{i});
-                    stash.FigureConcepts{i}=TMP;
+            if ~isempty(obj.Children)
+                for i=1:size(obj.Children,2)
+                    TMP=Pack(obj.Children{i});
+                    stash.Children{i}=TMP;
                 end
             end
         end
@@ -102,10 +102,10 @@ classdef PlotGroup < Item
             obj.ID=stash.ID;
             obj.Name=stash.Name;
             if isfield(stash,'FigureConcepts')
-                for i=1:size(stash.FigureConcepts,2)
+                for i=1:size(stash.Children,2)
                     obj2=FigureConcept(obj);
-                    obj2.Populate(stash.FigureConcepts{i});
-                    obj.FigureConcepts{i}=obj2;
+                    obj2.Populate(stash.Children{i});
+                    obj.Children{i}=obj2;
                 end
             end
         end
@@ -123,7 +123,7 @@ classdef PlotGroup < Item
         
         function delete(obj)
             for i=1:obj.Count
-                delete(obj.FigureConcepts);
+                delete(obj.Children{i});
             end
         end
         
