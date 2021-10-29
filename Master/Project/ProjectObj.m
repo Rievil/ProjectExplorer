@@ -246,73 +246,7 @@ classdef ProjectObj < Node
         function InitializeOption(obj)
         end
     end
-    %Data selectors
-    methods 
-        %work with selectors
-        function InitSelectorSets(obj,App)
-            if isempty(fieldnames(obj.SelectorSets))
-
-                SelectorSets=struct;
-                SelectorSets.Sets=1;
-                SelectorSets.Description='Default_set';   
-                
-                obj.SelectorSets=SelectorSets;
-
-                App.DropDownSelector.Value='Default_set';
-                App.DropDownSelector.Items={'Default_set'};
-                App.DropDownSelector.ItemsData=1;
-                obj.CurrentSelector=1;
-            end
-        end
-        
-        %add selector
-        function AddSelector(obj)
-            if ~isempty(fieldnames(obj.SelectorSets))
-                n=size(obj.SelectorSets,2);
-                obj.SelectorSets(n+1).Sets=n+1;
-                obj.SelectorSets(n+1).Description=sprintf("New set %i",n+1);
-                for i=1:size(obj.Meas,2)
-                    AddSelRows(obj.Meas(i).Data,n+1,obj.SelectorSets(n+1).Description);
-                end
-            else
-                InitSelectorSets(obj);
-            end
-        end
-        
-        %change name of selector group
-        function ChangeSelName(obj,nSet,NewName)
-            obj.SelectorSets(nSet).Description=string(NewName);
-            for i=1:size(obj.Meas,2)
-                if ~isempty(obj.Meas(i).Data)
-                    obj.Meas(i).Data.Selector.Properties.VariableNames{nSet}=char(NewName);
-                end
-            end
-        end
-        
-        function ResetSelectors(obj)
-            
-            if size(obj.Meas,1)>0
-                for i=1:size(obj.Meas,2)
-                    M=obj.Meas(i).Data;
-                    ResetSelectors(M);
-                end
-            end
-        end
-        
-        
-        %delete selecetor group
-        function DeleteSel(obj,nSet)
-            obj.SelectorSets(nSet)=[];
-            for i=1:size(obj.SelectorSets,2)
-                %pøeèísluje do správného poøadí jednotlivé selektory
-                obj.SelectorSets(i).Sets=i;
-            end
-            
-            for i=1:size(obj.Meas,2)
-                DeleteSelCol(obj.Meas(i).Data,nSet)
-            end
-        end
-    end
+   
     
     %Gui methods
     methods
@@ -326,52 +260,7 @@ classdef ProjectObj < Node
     
     %Save, load, delete, copy methods
     methods 
-        function ReLoadData(obj)
-            f3 = waitbar(0,'Please wait...','Name','Feature extraction');
-            f3.Position(2)=f3.Position(2)+60;
-            
-            count=0;
-            for i=1:numel(obj.Meas)
-                M=obj.Meas(i).Data;
-                if ~isempty(M)
-                    count=count+1;
-                end
-            end
-            
-            %obj.notify('ReloadData');
-            j=0;
-            for i=1:numel(obj.Meas)
-                M=obj.Meas(i).Data;
-                if ~isempty(M)
-                    j=j+1;
-                    waitbar(j/count,f3,['Processing meas: ''' M.Name '''']);
-                    ReLoadData(M);
-%                     ResetSelectors(M);
-                end
-            end
-            close(f3);
-        end
-
         
-        
-        %pull data from meas
-        function [StructData]=PullData(obj,Set)
-            StructData=struct;
-            for i=1:numel(obj.Meas)
-                [Data,Cat]=PullData(obj.Meas{i},Set);
-                StructData(i).PulledData=Data;
-                StructData(i).Names=fieldnames(StructData(i).PulledData);
-                StructData(i).Size=size(StructData(i).PulledData);
-                StructData(i).Cat=Cat;
-            end
-        end
-        
-       %will copy options for data loading to its measobj
-        function CloneDataType(obj,TypeTable)
-            for i=1:size(obj.Meas,2)
-                obj.Meas(i).Data.TypeTable=TypeTable;
-            end
-        end
         
               
         function Remove(obj)
