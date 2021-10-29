@@ -112,7 +112,7 @@ classdef ProjectOverView < Node
         function stash=Pack(obj)
             stash=struct;
             list=string(properties(obj))';
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            
             for prop=list
                 switch prop
                     case "ProjectCount"
@@ -139,7 +139,9 @@ classdef ProjectOverView < Node
         end
         
         function SaveProject(obj,proj)
-            
+            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+            filename=[SandBox '\' sprintf("%d_%s.mat",proj.ID,proj.Name)];
+            save(filename,'proj');
         end
         
         

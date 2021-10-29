@@ -87,42 +87,6 @@ classdef ProjectObj < Node
                 'Icon',[obj.Parent.Parent.Parent.MasterFolder '\Master\Gui\Icons\Experiment.gif']);
         end
         
-        %creation of meas
-        function CreateMeas(obj,app,SandBox,TreeNode)
-            obj.MeasCount=obj.MeasCount+1;
-            ID=obj.MeasCount;
-            Row=size(obj.Meas,2)+1;
-            %Nyní se musí spustit data loader s souèasným nastavením
-            %projektu
-            
-            Loader=DataLoader(ID,obj.ProjectFolder,SandBox,Row,obj);
-            try
-            
-                if Loader.BruteFolderSet==true
-                    SetDataTypes(Loader,obj.DataTypesTable);
-                    ReadData(Loader);
-
-                    obj.Meas(Row).Data=Loader;
-                    obj.Meas(Row).ID=ID;
-                    obj.Meas(Row).Row=Row;
-
-                    obj.Meas(Row).Data.TypeTable=obj.DataTypesTable;
-                    CheckSel(obj.Meas(Row).Data,obj.SelectorSets);
-                    FillPTree(obj,TreeNode);    
-                else
-                    delete(Loader);
-                    InfoUser(app,'warning','measurement wasnt created');
-                end
-
-            catch ME
-                obj.Meas(Row)=[];
-                Row=Row-1;
-                obj.MeasCount=obj.MeasCount-1;
-            end         
-        end
-        
-
-        
         %set of project status; project have statuses to understand in what
         %state is work and data stored in it, its also used to recognize if
         %projectexplorer can load the data, or not ->this will be different
