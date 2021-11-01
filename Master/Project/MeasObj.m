@@ -297,7 +297,7 @@ classdef MeasObj < Node
                 else
                     key=result(i).key;
                     if numel(key)==numel(keyold)
-                        [A]=intersect(keyold,key);
+                        [A]=intersect(lower(keyold),lower(key));
                         if numel(A)==numel(key)
                             ch=1;
                             keyold=key;

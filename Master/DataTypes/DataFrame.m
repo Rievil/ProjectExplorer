@@ -129,6 +129,9 @@ classdef DataFrame < OperLib & GUILib
     end   
     
     methods (Access=public)
+        
+
+        
         function result=ReadContainer(obj,map)
             %filter by container
             switch obj.ContainerType

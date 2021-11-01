@@ -7,6 +7,7 @@ classdef MainTable < DataFrame
     properties
        SpecimensCount;
        KeyNames;
+       UITable;
 %        TypeSettings;
     end
     
@@ -138,33 +139,36 @@ classdef MainTable < DataFrame
         end       
         
         %adrow in table
-        function TypeAdVar(obj,source,event)
-            T=source.Children(3,1).Data;
+        function TypeAdVar(obj)
+            T=obj.UITable.Data;
             RowCount=size(T,1);
-            CurrRow=source.Children(3,1).UserData;
+            CurrRow=obj.UITable.UserData;
             if RowCount>0
                 T2=OperLib.MTBlueprint;
                 T2.ColNumber=RowCount+1;
                 if CurrRow>0 && CurrRow<RowCount
                     A=T(1:CurrRow,:);
                     B=T(CurrRow+1:end,:);
-                    source.Children(3,1).Data=[A; T2; B];
+                    obj.UITable.Data=[A; T2; B];
                 else
-                    source.Children(3,1).Data=[source.Children(3,1).Data; T2]; 
+                    obj.UITable.Data=[obj.UITable.Data; T2]; 
                 end
             end
-            source.Children(3,1).UserData=0;
-            obj.TypeSettings=source.Children(3,1).Data;
+            obj.UITable.UserData=0;
+            obj.TypeSettings=obj.UITable.Data;
         end
         
-        function TypeRemoveVar(obj,source,event)
-            CurrRow=source.Children(3,1).UserData;
-            if CurrRow>0
-                source.Children(3,1).Data(CurrRow,:)=[];
-            else
-                source.Children(3,1).Data(end,:)=[];
+        function TypeRemoveVar(obj)
+            CurrRow=obj.UITable.UserData;
+            if size(obj.UITable.Data,1)>1
+                if CurrRow>0
+                    obj.UITable.Data(CurrRow,:)=[];
+                else
+                    obj.UITable.Data(end,:)=[];
+                end
+                obj.UITable.UserData=0;
             end
-            source.Children(3,1).UserData=0;
+            
         end
         
         function SetTabPos(obj,source,event)
@@ -173,25 +177,61 @@ classdef MainTable < DataFrame
         end
         
         
+        function EstimateColumns(obj,filename)
+%             FileMap = OperLib.GetTypeDir(folder);
+            tst=obj.UITable.Data;
+            opts=MakeReadOpt(obj,filename,obj.Sufix);
+            ColNames=categorical(["string","datetime","double","category"],{'string','datetime','double','category'},'ordinal',true);
+            %ColNames=categorical(["string","datetime","double","category"],{'string','datetime','double','category'},'ordinal',true);
+            fT=table;
+            for i=1:numel(opts.VariableNames)
+                 T=OperLib.MTBlueprint;
+                 
+                 switch char(opts.VariableTypes{i})
+                     case 'char'
+                         T.ColType=ColNames(1);
+                     case 'double'
+                         T.ColType=ColNames(3);
+                     otherwise
+                         T.ColType=ColNames(1);
+                 end
+                 
+                 T.Key=false;
+                 T.Label=string(opts.VariableNames{i});
+                 T.ColNumber=i;
+                 fT=[fT; T];
+            end
+            
+            obj.TypeSettings=fT;
+            obj.UITable.Data=fT;
+
+                
+                
+            
+        end
+        
         function CreateTypeComponents(obj)
-            g=uigridlayout(obj.GuiParent);
-            g.RowHeight = {22,250,50};
+            g=uigridlayout(obj.GuiParent,'DeleteFcn',@obj.MCleanObj);
+            g.RowHeight = {22,250,50,50};
             g.ColumnWidth = {'1x','2x',44,44};
             
             la=uilabel(g,'Text','Columns selection:');
             la.Layout.Row=1;
             la.Layout.Column=[1 4];
             
-            T=OperLib.MTBlueprint;
+            
+            if strcmp(class(obj.TypeSettings),'table')
+                T=obj.TypeSettings;
+            else
+                T=OperLib.MTBlueprint;
+            end
+            
             uit = uitable(g,'Data',T,'ColumnEditable',true,...
                 'ColumnWidth','auto','CellEditCallback',@(src,event)obj.SetVal(obj,event),...
                 'CellSelectionCallback',@(src,event)obj.SetTabPos(obj,event),'UserData',0);
+            obj.UITable=uit;
             
-            if strcmp(class(obj.TypeSettings),'table')
-                uit.Data=obj.TypeSettings;
-            else
-                obj.TypeSettings=T;
-            end
+
             
             uit.Layout.Row = 2;
             uit.Layout.Column = [1 4];
@@ -203,14 +243,14 @@ classdef MainTable < DataFrame
             IconFileMinus=[IconFolder 'cancel_sign.gif'];
             
             but1=uibutton(g,'Text','',...
-                'ButtonPushedFcn',@(src,event)obj.TypeAdVar(obj,event));
+                'ButtonPushedFcn',@obj.MTypeAdVar);
             
             but1.Layout.Row=1;
             but1.Layout.Column=3;
             but1.Icon=IconFilePlus;
             
             but2=uibutton(g,'Text','',...
-                'ButtonPushedFcn',@(src,event)obj.TypeRemoveVar(obj,event));
+                'ButtonPushedFcn',@obj.MTypeRemoveVar);
             but2.Layout.Row=1;
             but2.Layout.Column=4;
             but2.Icon=IconFileMinus;
@@ -224,6 +264,15 @@ classdef MainTable < DataFrame
            la2.Layout.Row=3;
            la2.Layout.Column=[1 4];
            obj.Children=[g;la;uit;but1;but2;la2];
+           
+           txt=sprintf('Load example for columns estimation');
+           la3=uilabel(g,'Text',txt);
+           la3.Layout.Row=3;
+           la.Layout.Column=[1 2];
+           
+           but3=uibutton(g,'Text','Load sample','ButtonPushedFcn',@obj.MLoadSample);
+           but3.Layout.Row=4;
+           but3.Layout.Column=[3 4];
         end
     end
 
@@ -239,6 +288,34 @@ classdef MainTable < DataFrame
         
         function Out=GetVariables(obj)
             
+        end
+    end
+    
+    methods %callbacks
+        function MLoadSample(obj,src,~)
+            sbox=OperLib.FindProp(obj,'SandBoxFolder');
+            suff=obj.Sufix;
+            [file,path] = uigetfile(['*',char(suff)],'Select container',sbox);
+            if ~isnumeric(file)
+                if exist([path,file])
+                    EstimateColumns(obj,[path,file]);
+                end
+            else
+                
+            end
+        end
+        
+        function MTypeRemoveVar(obj,~,~)
+            TypeRemoveVar(obj);
+        end
+        
+        function MTypeAdVar(obj,~,~)
+            TypeAdVar(obj);
+        end
+        
+        function MCleanObj(obj,~,~)
+            disp('MainTable closed');
+            obj.UITable=[];
         end
     end
 end
