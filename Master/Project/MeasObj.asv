@@ -10,7 +10,8 @@ classdef MeasObj < Node
 %         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         BruteFolder char; %folder with measured data, from which DataC construct itrs container
         BruteFolderSet=false;
-
+%         Row;
+%         ProjectFolder char;
         ExtractionState; %status of extraction of data from brute folder
         c char;
         Key=0;
@@ -21,7 +22,9 @@ classdef MeasObj < Node
         ClonedTypes=0;
         TotalTable;
         Version;
-
+%         TreeNode;
+        
+        
         SpecimenCount;    
     end
     
@@ -294,7 +297,7 @@ classdef MeasObj < Node
                 else
                     key=result(i).key;
                     if numel(key)==numel(keyold)
-                        [A]=intersect(lower(keyold),lower(key));
+                        [A]=intersect(keyold,key);
                         if numel(A)==numel(key)
                             ch=1;
                             keyold=key;
@@ -577,15 +580,11 @@ classdef MeasObj < Node
             but1.Layout.Row=3;
             but1.Layout.Column=[3 4];
             
-            la4=uilabel(g,'Text','Select read options');
-            la4.Layout.Row=4;
-            la4.Layout.Column=1;
+            bg = uibuttongroup('Parent',g);
+            bg.Layout.Row=4;
+            bg.Layout.Column=3;
             
-            uit = uitable(g);
-            uit.Layout.Row=4;
-            uit.Layout.Column=2;
-
-
+            
         end
     end
 

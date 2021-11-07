@@ -8,7 +8,7 @@ c=ExplorerObj(0);
 %%
 stash=Pack(b.Core.ProjectOverview);
 %% Plotter test
-plotter=b.Core.ProjectOverview.Projects(1).Plotter;
+plotter=b.Core.ProjectOverview.Projects(3).Plotter;
 
 % plotter.DrawTest;
 %%
