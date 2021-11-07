@@ -10,19 +10,18 @@ classdef MeasObj < Node
 %         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
         BruteFolder char; %folder with measured data, from which DataC construct itrs container
         BruteFolderSet=false;
-
+        TypeTable
         ExtractionState; %status of extraction of data from brute folder
-        c char;
         Key=0;
         MainTable;
-        TypeTable table;
-        
         Selector;
         ClonedTypes=0;
         TotalTable;
         Version;
-
+        ExpHandle Experiment;
         SpecimenCount;    
+        UITLoad;
+        LoadOptions table;
     end
     
     
@@ -44,7 +43,7 @@ classdef MeasObj < Node
 
             obj.Metadata=struct;
             obj.Metadata.Date=datetime(now(),'ConvertFrom','datenum','Format','dd.MM.yyyy hh:mm:ss');    
-
+            obj.ExpHandle=obj.Parent.Parent;
             obj.eReload=addlistener(obj.Parent,'eReload',@obj.ReLoadData);
             obj.Version=0;
         end
@@ -130,6 +129,7 @@ classdef MeasObj < Node
             stash.BruteFolder=obj.BruteFolder;
             stash.BruteFolderSet=obj.BruteFolderSet;
             stash.SpecimenCount=obj.SpecimenCount;
+            stash.LoadOptions=obj.LoadOptions;
         end
         
         function Populate(obj,stash)
@@ -139,6 +139,10 @@ classdef MeasObj < Node
             obj.BruteFolder=stash.BruteFolder;
             obj.BruteFolderSet=stash.BruteFolderSet;
             obj.SpecimenCount=stash.SpecimenCount;
+            
+            if isfield(stash,'LoadOptions')
+                obj.LoadOptions=stash.LoadOptions;
+            end
             
             FillNode(obj)
         end
@@ -171,14 +175,7 @@ classdef MeasObj < Node
         end
         
     end
-    
-    %Events, listeners, callbacks
-    methods
-%         function SetListeners(obj)
-%             obj.eReload = addlistener(obj.Parent,'ReloadData',@obj.ReLoadData);
-%         end
-    end
-    
+
     %Selectors
     methods
         %Initiate selector
@@ -225,19 +222,6 @@ classdef MeasObj < Node
 
     
     %Save, load, delete, copy methods
-    methods
-        function saveobj(obj)
-            disp('Tento objekt se ukládá');
-        end
-        
-        function delete(obj)
-            
-        end
-        
-        function save(obj)
-
-        end
-    end
     
     methods %Reading methods
         
@@ -274,13 +258,16 @@ classdef MeasObj < Node
             TypeCount=size(obj.TypeTable,1);
             f=waitbar(0,'Loading all data');
             for i=1:TypeCount
-                obj2=obj.TypeTable.TypesObj{i,1};
-                waitbar(i/(TypeCount+2),f,char(sprintf('Loading: ''%s'' data type',class(obj2)))); 
-                subresult=ReadContainer(obj2,FileMap);
-                if i==1
-                    result=subresult;
-                else
-                    result=[result, subresult];
+                order=int(obj.LoadOptions.Order(i));
+                if obj.LoadOptions.LoadRule(i)
+                    obj2=obj.TypeTable.TypesObj{order,1};
+                    waitbar(i/(TypeCount+2),f,char(sprintf('Loading: ''%s'' data type',class(obj2)))); 
+                    subresult=ReadContainer(obj2,FileMap);
+                    if i==1
+                        result=subresult;
+                    else
+                        result=[result, subresult];
+                    end
                 end
             end
             waitbar((i+1)/(TypeCount+2),f,'Storing variables');
@@ -532,6 +519,47 @@ classdef MeasObj < Node
             event.Source.UserData.Value=obj.BruteFolder;
         end
         
+        function T=MakeOptionTable(obj)
+            TT=obj.ExpHandle.TypeSettings;
+            T=table;
+            typescount=size(TT,1);
+            count=categorical(1:1:typescount,'Ordinal',true);
+            for i=1:typescount
+                T=[T; table(TT.DataType(i),count(i),true,false,...
+                    'VariableNames',{'Name','Order','LoadRule','AllKeysThere'})];
+            end
+        end
+        
+        function ReadOptionChange(obj,T,col)
+            
+            
+            switch col
+                case 2
+                    arr=double(T{:,col});
+                    arr2=double(obj.LoadOptions{:,col});
+                    
+                    oldIdx=double(arr)~=double(arr2);                    
+                    oldPos=arr2(arr(oldIdx));
+                    
+                    newIdx=arr2==arr(oldIdx);
+                    
+                    idx=arr2==arr(newIdx);
+                    
+                    old=obj.LoadOptions{oldIdx,col};
+                    new=T{newIdx,col};
+                    
+                    obj.LoadOptions{newIdx,col}=old;
+                    obj.LoadOptions{oldIdx,col}=new;
+                    
+                    obj.LoadOptions = sortrows(obj.LoadOptions,'Order','Ascend');
+                case 3
+                    obj.LoadOptions(:,col)=T(:,col);
+                case 4
+                    obj.LoadOptions(:,col)=T(:,col);
+            end
+            
+            disp('change');
+        end
         
         function InitializeOption(obj)
             
@@ -581,11 +609,27 @@ classdef MeasObj < Node
             la4.Layout.Row=4;
             la4.Layout.Column=1;
             
-            uit = uitable(g);
+            if size(obj.LoadOptions,1)>0
+                T=obj.LoadOptions;
+            else
+                T=MakeOptionTable(obj);
+                obj.LoadOptions=T;
+            end
+            
+            uit = uitable(g,'Data',T,...
+                'ColumnEditable',[false,true,true,true],...
+                'DisplayDataChangedFcn',@obj.MLoadOptionChange);
             uit.Layout.Row=4;
             uit.Layout.Column=2;
 
 
+        end
+    end
+    
+    methods %callbacks
+        function MLoadOptionChange(obj,src,evnt)
+            ReadOptionChange(obj,src.Data,evnt.InteractionColumn)
+            src.Data=obj.LoadOptions;
         end
     end
 

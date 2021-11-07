@@ -12,6 +12,7 @@ plotter=b.Core.ProjectOverview.Projects(3).Plotter;
 
 % plotter.DrawTest;
 %%
+count=categorical(1:1:5,'Ordinal',true);
 %% Události - histogram energie
 fig=figure('position',[20 200 1600 600]);
 popis={200,240,360};
