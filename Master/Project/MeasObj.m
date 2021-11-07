@@ -5,6 +5,7 @@ classdef MeasObj < Node
         Name char;
         
         Metadata struct;
+        MeasDate datetime;
 %         Date datetime; %oficial name for measurement, copy erliest date from files
 %         LastChange datetime; %when change happen
 %         Data; %data containers per that measurment (ae classifer, ie data, uz data, fc data, fct data)
@@ -130,6 +131,7 @@ classdef MeasObj < Node
             stash.BruteFolderSet=obj.BruteFolderSet;
             stash.SpecimenCount=obj.SpecimenCount;
             stash.LoadOptions=obj.LoadOptions;
+            stash.MeasDate=obj.MeasDate;
         end
         
         function Populate(obj,stash)
@@ -142,6 +144,10 @@ classdef MeasObj < Node
             
             if isfield(stash,'LoadOptions')
                 obj.LoadOptions=stash.LoadOptions;
+            end
+            
+            if isfield(stash,'MeasDate')
+                obj.MeasDate=stash.MeasDate;
             end
             
             FillNode(obj)
@@ -258,70 +264,125 @@ classdef MeasObj < Node
             TypeCount=size(obj.TypeTable,1);
             f=waitbar(0,'Loading all data');
             for i=1:TypeCount
-                order=int(obj.LoadOptions.Order(i));
+                order=double(obj.LoadOptions.Order(i));
                 if obj.LoadOptions.LoadRule(i)
                     obj2=obj.TypeTable.TypesObj{order,1};
                     waitbar(i/(TypeCount+2),f,char(sprintf('Loading: ''%s'' data type',class(obj2)))); 
                     subresult=ReadContainer(obj2,FileMap);
-                    if i==1
+                    
+                    if numel(fieldnames(result))==0
                         result=subresult;
                     else
                         result=[result, subresult];
                     end
-                end
-            end
-            waitbar((i+1)/(TypeCount+2),f,'Storing variables');
-
-            
-            %check for key similarities
-            ch=0;
-            for i=1:size(result,2)
-                if i==1
-                    keyold=result(i).key;
-                else
-                    key=result(i).key;
-                    if numel(key)==numel(keyold)
-                        [A]=intersect(lower(keyold),lower(key));
-                        if numel(A)==numel(key)
-                            ch=1;
-                            keyold=key;
-                        else
-                            break;
-                            ch=0;
-                        end
-                    else
-                        result(i).key=keyold;
+                    
+%                     
+                    if obj.LoadOptions.AllKeysThere(i)==true
+%                         MakeSpecimens(obj,result,result.key);
+%                         MakeMainSpec(obj,subresult);
+%                         break;
                     end
                 end
             end
             
-            if ch==1
-                finalkey=keyold;
-            else
-                %key is corupted
-            end
+            waitbar((i+1)/(TypeCount+2),f,'Storing variables');
             
-            MakeSpecimens(obj,result,finalkey);
+            MakeMainSpec(obj,result);
+%             
+%             
+%             
+%             %check for key similarities
+%             ch=0;
+%             for i=1:size(result,2)
+%                 if i==1
+%                     keyold=result(i).key;
+%                 else
+%                     key=result(i).key;
+%                     if numel(key)==numel(keyold)
+%                         [A]=intersect(lower(keyold),lower(key));
+%                         if numel(A)==numel(key)
+%                             ch=1;
+%                             keyold=key;
+%                         else
+%                             break;
+%                             ch=0;
+%                         end
+%                     else
+%                         result(i).key=keyold;
+%                     end
+%                 end
+%             end
+%             
+%             if ch==1
+%                 finalkey=keyold;
+%             else
+%                 %key is corupted
+%             end
+            
+%             MakeSpecimens(obj,result,finalkey);
             waitbar(1,f,'Finished');
             pause(1);
             close(f);
             
         end
         
+        function MakeMainSpec(obj,result)
+            SpecGroup=OperLib.FindProp(obj,'SpecGroup');
+            try
+            for k=1:size(result,2)
+                for i=1:size(result(k).key,1)
+
+                    spec=Specimen(SpecGroup);
+                    data=struct;
+                    for j=1:size(result,2)
+                        data(j).data=result(j).data(i).meas;
+                        data(j).type=result(j).type;
+                    end
+
+
+                    spec.MeasID=obj.ID;
+                    spec.Data=data;
+
+                    if numel(char(result(k).key(i)))>0
+                        spec.Key=result(k).key(i);    
+                    else
+                        %create new key if source doesnt have it
+                        spec.Key=string(num2str(i));
+                    end
+
+                    if SpecGroup.CheckUnqKey(spec)
+
+                        if SpecGroup.SpecExist(spec.Key)
+                            UpdateSpec(SpecGroup,spec);
+                        else
+                            AddSpecimen(SpecGroup,spec);
+                        end
+                    else
+
+                    end
+                end
+            end
+            catch
+                fprintf('Meas n. %d\n',k);
+            end
+            
+        end
+        
         function MakeSpecimens(obj,result,key)
             SpecGroup=OperLib.FindProp(obj,'SpecGroup');
+            n=0;
             for i=1:numel(key)
                 data=struct;
+                spec=Specimen(SpecGroup);
                 for j=1:size(result,2)
                     Idx=find(result(j).key==key(i));
+                    
                     data(j).data=result(j).data(Idx).meas;
                     data(j).type=result(j).type;
                 end
                 
-%                 SpecimenID=OperLib.FindProp(obj,'SpecimenID');
-                spec=Specimen(SpecGroup);
-                spec.MeasID=obj.ID;
                 spec.Data=data;
+                spec.MeasID=obj.ID;
                 spec.Key=key(i);
                 
                 AddSpecimen(SpecGroup,spec);
@@ -621,8 +682,22 @@ classdef MeasObj < Node
                 'DisplayDataChangedFcn',@obj.MLoadOptionChange);
             uit.Layout.Row=4;
             uit.Layout.Column=2;
-
-
+            
+            if ~isempty(obj.MeasDate)
+                time=obj.MeasDate;
+            else
+                time=datetime(now(),'ConvertFrom','datenum');
+            end
+            
+            la5=uilabel(g,'Text','Select when was measuremnt conducted');
+            la5.Layout.Row=5;
+            la5.Layout.Column=2;
+            
+            dpck=uidatepicker(g,'DisplayFormat','dd-MM-yyyy',...
+                'Value',time,...
+                'ValueChangedFcn',@obj.MMeasDate);
+            dpck.Layout.Row=5;
+            dpck.Layout.Column=1;
         end
     end
     
@@ -630,6 +705,10 @@ classdef MeasObj < Node
         function MLoadOptionChange(obj,src,evnt)
             ReadOptionChange(obj,src.Data,evnt.InteractionColumn)
             src.Data=obj.LoadOptions;
+        end
+        
+        function MMeasDate(obj,src,~)
+            obj.MeasDate=src.Value;
         end
     end
 

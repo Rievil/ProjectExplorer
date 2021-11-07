@@ -111,7 +111,7 @@ classdef Plotter < Node
             T=obj.Parent.Experiments(exp).SpecGroup.Specimens(Sel,:);
             for i=1:size(T,1)
                 try
-                    data=T.Data{i};
+                    data=T.Data{i}.Data;
                     Trow=T(i,1:3);
                     for j=1:numel(Variables)
                         Var=Variables(j);

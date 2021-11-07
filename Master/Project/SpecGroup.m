@@ -22,7 +22,11 @@ classdef SpecGroup < Node
     methods
         function obj = SpecGroup(parent)
             obj.Parent=parent;
-            obj.Specimens=table([],[],[],{},'VariableNames',...
+            obj.Specimens=T;
+        end
+        
+        function T=GetSpecRow(obj)
+            T=table([],[],[],{},'VariableNames',...
                 {'ID','Key','MeasID','Data'});
         end
         
@@ -174,30 +178,43 @@ classdef SpecGroup < Node
 %             disp='test';
         end
         
+        function idx=FindSpec(obj,key)
+            idx=lower(obj.Specimens.Key)==lower(key);
+        end
+        
+        function bool=SpecExist(obj,key)
+            pos=obj.FindSpec(key);
+            if sum(pos)>0
+                bool=true;
+            else
+                bool=false;
+            end
+        end
+        
+        function UpdateSpec(obj,spec)
+            row=obj.FindSpec(spec.Key);
+            
+            spec.ID=obj.Specimens.ID(row);
+            obj.Specimens.MeasID(row)=spec.MeasID;
+            Compare(obj.Specimens.Data{row},spec);
+        end
+        
+        function bool=CheckUnqKey(obj,spec)
+            keys=unique(obj.Specimens.Key);
+            if numel(keys)==numel(obj.Specimens.Key)
+                bool=true;
+            else
+                bool=false;
+            end
+        end
+        
         function AddSpecimen(obj,spec)
             
-            T2=table;
-            if numel(obj.Specimens)>0
-                T2=obj.Specimens(obj.Specimens.MeasID==spec.MeasID,:);
-                T2=T2(T2.Key==spec.Key,:);
-            end
+            spec.ID=OperLib.FindProp(obj,'SpecimenID');
             
-            if numel(T2)==0
-                spec.ID=OperLib.FindProp(obj,'SpecimenID');
-                T=GetT(spec);
-                obj.Specimens=[obj.Specimens; T];
-%                 CreateSelector(obj);
-            elseif size(T2,1)==1
-                idx=find(obj.Specimens.MeasID==spec.MeasID & obj.Specimens.Key==spec.Key);
-                T=GetT(spec);
-                T.ID=obj.Specimens.ID(idx);
-                obj.Specimens(idx,:)=T;
-            elseif size(T2,1)>0
-                
-            end
-
-%             obj.Count=numel(obj.Specimens);
-
+            obj.Specimens=[obj.Specimens; table(spec.ID,spec.Key,spec.MeasID,{spec},'VariableNames',...
+                {'ID','Key','MeasID','Data'})];
+            
         end
         
         function InitSelector(obj)
@@ -396,6 +413,8 @@ classdef SpecGroup < Node
             if isfield(stash,'Sel')
                 obj.Sel=stash.Sel;
             end
+            
+            
             
             
             

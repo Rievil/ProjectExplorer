@@ -56,8 +56,17 @@ classdef VarExp < Node
     
     methods %GUI
         function CheckVar(obj)
+            
             SG=OperLib.FindProp(obj,'SpecGroup');
-            tst=SG.Specimens.Data{1};
+            
+            for i=1:size(SG.Specimens,1)
+                count=size(SG.Specimens.Data{i}.Data,2);
+                if count==size(SG.Parent.TypeSettings,1)
+                    break;
+                end
+            end
+            
+            tst=SG.Specimens.Data{i}.Data;
             obj.Inspector.Reset;
             for i=1:size(tst,2)
                 obj.Inspector.AddArray('data',tst(i).data,'name',tst(i).type);

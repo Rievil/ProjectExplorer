@@ -8,8 +8,9 @@ c=ExplorerObj(0);
 %%
 stash=Pack(b.Core.ProjectOverview);
 %% Plotter test
-plotter=b.Core.ProjectOverview.Projects(3).Plotter;
-
+plotter=b.Core.ProjectOverview.Projects(2).Plotter;
+%%
+ Tout=plotter.GetSampleData(1,1);
 % plotter.DrawTest;
 %%
 count=categorical(1:1:5,'Ordinal',true);
