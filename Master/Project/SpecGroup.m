@@ -22,7 +22,7 @@ classdef SpecGroup < Node
     methods
         function obj = SpecGroup(parent)
             obj.Parent=parent;
-            obj.Specimens=T;
+            obj.Specimens=GetSpecRow(obj);
         end
         
         function T=GetSpecRow(obj)
