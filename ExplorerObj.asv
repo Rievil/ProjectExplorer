@@ -56,44 +56,18 @@ classdef ExplorerObj < handle
             list=obj.Core.ProjectOverview.ProjectList;
         end
         
-        function plt=GetProject(obj,varargin)
-            names=obj.Core.ProjectOverview.ProjectList.Name;
-            nums=1:1:numel(names);
-            row=0;
+        function plt=GetPlotter(obj,varargin)
             if numel(varargin)==1
                 switch class(varargin{1})
                     case 'double'
                         if isnumeric(varargin{1}) && varargin{1}<=obj.Core.ProjectOverview.ProjectCount
-                            row=varargin{1};
-                            
+                            plt=obj.Core.ProjectOverview.Projects(varargin{1}).Plotter;
                         end
                     case 'char'
-                        A=contains(names,varargin{1});
-                        if sum(A)==0
-                            row=0;
-                        elseif sum(A)==1
-                            row=A;
-                        elseif sum(A)>0
-                            row=0;
-                        end
+                        
                     case 'string'
-                        A=contains(names,varargin{1});
-                        if sum(A)==0
-                            row=0;
-                        elseif sum(A)==1
-                            row=A;
-                        elseif sum(A)>0
-                            row=0;
-                        end
                 end
                 
-                if nums(row)>0 && obj.Core.ProjectOverview.ProjectList.State(row)==1
-                    plt=obj.Core.ProjectOverview.Projects(row);
-                    fprintf("--Retrived Project '%s'--\n",names(row));
-                else
-                    plt=[];
-                    fprintf("Project '%s' is deactivated. Activate it before further work\n",names(varargin{1}));
-                end
             else
                 
             end

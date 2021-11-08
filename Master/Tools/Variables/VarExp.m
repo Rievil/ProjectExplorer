@@ -60,13 +60,13 @@ classdef VarExp < Node
             SG=OperLib.FindProp(obj,'SpecGroup');
             
             for i=1:size(SG.Specimens,1)
-                count=size(SG.Specimens.Data{i}.Data,2);
+                count=size(SG.Specimens.Data(i).Data,2);
                 if count==size(SG.Parent.TypeSettings,1)
                     break;
                 end
             end
             
-            tst=SG.Specimens.Data{i}.Data;
+            tst=SG.Specimens.Data(i).Data;
             obj.Inspector.Reset;
             for i=1:size(tst,2)
                 obj.Inspector.AddArray('data',tst(i).data,'name',tst(i).type);

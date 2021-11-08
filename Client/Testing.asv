@@ -8,13 +8,11 @@ list=GetProjectList(b);
 %%
 plt=GetProject(b,'3DPrint');
 %%
-list=GetSelList(plt,1);
-%%
 list=GetVarList(plt,1);
 %%
 list=GetSpecList(plt,1);
 %%
-Tout=plt.GetSampleData('exp',1,'sel',17,'var',["ZedoLokal","ZedoCumHits"]);
+Tout=plt.GetSampleData('exp',1,'sel',["1_W_A","1_W_B"],'var',["ZedoLokal","ZedoCumHits"]);
 %% Without gui
 c=ExplorerObj(0);
 %%

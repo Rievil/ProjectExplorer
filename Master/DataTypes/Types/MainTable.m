@@ -78,6 +78,8 @@ classdef MainTable < DataFrame
     %reading methods
     methods 
         
+        function result=ReadDb(obj)
+        end
         %will read data started from dataloader
         function result=Read(obj,filename,opts)
 %             obj.Filename=filename;

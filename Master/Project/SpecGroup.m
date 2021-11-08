@@ -98,11 +98,11 @@ classdef SpecGroup < Node
             obj.Selector=[obj.Selector; table(NewID,Name,{sel},...
                 'VariableNames',{'ID','Name','Specimens'})];
             
-            if obj.Init
-                lbox=obj.Children(6);
-                lbox.Items=obj.Selector.Name;
-                lbox.ItemsData=obj.Selector.ID;
-            end
+%             if obj.Init
+%                 lbox=obj.Children(6);
+                obj.UILBox.Items=obj.Selector.Name;
+                obj.UILBox.ItemsData=obj.Selector.ID;
+%             end
 
         end
         
@@ -174,12 +174,12 @@ classdef SpecGroup < Node
         end
         
         function list=get.SpecimenList(obj)
-            list=obj.Specimen.Key;
+            list=obj.Specimens.Key;
 %             disp='test';
         end
         
         function idx=FindSpec(obj,key)
-            idx=lower(obj.Specimens.Key)==lower(key);
+            idx=contains(lower(obj.Specimens.Key),lower(key));
         end
         
         function bool=SpecExist(obj,key)
@@ -196,7 +196,7 @@ classdef SpecGroup < Node
             
             spec.ID=obj.Specimens.ID(row);
             obj.Specimens.MeasID(row)=spec.MeasID;
-            Compare(obj.Specimens.Data{row},spec);
+            Compare(obj.Specimens.Data(row),spec);
         end
         
         function bool=CheckUnqKey(obj,spec)
@@ -223,6 +223,10 @@ classdef SpecGroup < Node
             end
         end
         
+        function list=GetSelList(obj)
+            list=obj.Selector.Name;
+        end
+        
         function NewSel(obj)
             arr=logical(zeros(size(obj.Specimens,1),1));
             obj.Sel=arr;
@@ -247,11 +251,6 @@ classdef SpecGroup < Node
         
         function uit=DrawSepcTable(obj,g)
             
-            
-
-            
-%             GetSel(obj);
-%             T=[table(obj.Sel,'VariableNames',{'N'}), obj.Specimens];
             list=string(obj.Parent.TypeSettings.DataType);
             colors=lines(numel(list));
             
@@ -278,9 +277,9 @@ classdef SpecGroup < Node
             
             cwidth = cell(1,2+numel(list));
             cwidth{1}=30;
-            cwidth{2}=80;
+            cwidth{2}=150;
             for i=1:numel(list)
-                cwidth{2+i}='auto';
+                cwidth{2+i}=90;
             end
             
             uit = uitable(g,'Data',T,...
@@ -327,21 +326,14 @@ classdef SpecGroup < Node
             Clear(obj);
             g=uigridlayout(obj.GuiParent);
             g.RowHeight = {22,'1x',25,25,25,25};
-            g.ColumnWidth = {400,'1x',25,25};
+            g.ColumnWidth = {400,'2x',400,25,25};
             
             la=uilabel(g,'Text','Specimens in experiemnt:');
             la.Layout.Row=1;
             la.Layout.Column=[1 4];
-            
-%             [T,style]=GetSpecTable(obj);
-            
-            
-            uit=DrawSepcTable(obj,g);
-            
-            
 
-            
-            
+            uit=DrawSepcTable(obj,g);
+
             UITab=OperLib.FindProp(obj,'UIFig');
             cm = uicontextmenu(UITab);
             m1 = uimenu(cm,'Text','New selector',...
@@ -357,7 +349,7 @@ classdef SpecGroup < Node
             uit.ContextMenu =cm;
 
             uit.Layout.Row=2;
-            uit.Layout.Column=1;
+            uit.Layout.Column=[1 2];
             
 %             s = uistyle; 
             
@@ -366,7 +358,7 @@ classdef SpecGroup < Node
             
             panel=uipanel(g,'Title','Specimen selector');
             panel.Layout.Row=[1 2];
-            panel.Layout.Column=[2 4];
+            panel.Layout.Column=[3 4];
             
             g2=uigridlayout(panel);
             g2.RowHeight={25,'1x','1x'};
@@ -398,7 +390,7 @@ classdef SpecGroup < Node
             arr=1:1:numel(items);
             
             lbox = uilistbox(g2,'Items',items,'ItemsData',arr,'ValueChangedFcn',@obj.MenuChangeSelector,'Value',obj.CurrSelID);
-            lbox.Layout.Row=2;
+            lbox.Layout.Row=[2 3];
             lbox.Layout.Column=[1 2];
             
             obj.UILBox=lbox;

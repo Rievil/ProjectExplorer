@@ -1,4 +1,4 @@
-classdef ProjectObj < Node
+classdef ProjectObj < Node & DataOperation
     properties (SetAccess=public)
         ID;
         Name char; %name of project
@@ -59,7 +59,11 @@ classdef ProjectObj < Node
     methods (Access=public) 
         %creation of project objects
         function obj=ProjectObj(Name,parent)
-%             obj@Node;
+            obj@Node;
+            obj@DataOperation;
+            
+            
+            
             
             obj.Parent=parent;
             obj.Name=Name;

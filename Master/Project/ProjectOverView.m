@@ -135,6 +135,10 @@ classdef ProjectOverView < Node
             row=find(obj.ProjectList.ID==ID,1);
         end
         
+        function list=GetProjectList(obj)
+            list=obj.ProjectList;
+        end
+        
         function AddProjectEntry(obj,ob2)
             idx=obj.ProjectList.ID==ob2.ID;
             
