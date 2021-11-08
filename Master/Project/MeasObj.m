@@ -264,9 +264,9 @@ classdef MeasObj < Node
             TypeCount=size(obj.TypeTable,1);
             f=waitbar(0,'Loading all data');
             for i=1:TypeCount
-                order=double(obj.LoadOptions.Order(i));
+                order=obj.LoadOptions.Name(i);
                 if obj.LoadOptions.LoadRule(i)
-                    obj2=obj.TypeTable.TypesObj{order,1};
+                    obj2=obj.TypeTable.TypesObj{obj.TypeTable.DataType==order,1};
                     waitbar(i/(TypeCount+2),f,char(sprintf('Loading: ''%s'' data type',class(obj2)))); 
                     subresult=ReadContainer(obj2,FileMap);
                     
@@ -362,7 +362,7 @@ classdef MeasObj < Node
                     end
                 end
             end
-            catch
+            catch ME
                 fprintf('Meas n. %d\n',k);
             end
             
@@ -390,129 +390,7 @@ classdef MeasObj < Node
             end
             
         end
-        
-        function ReadData2(obj)
-            if obj.BruteFolderSet==0
-                GetBruteFolder(obj);
-            end
-            
-            try
-                obj.Version=obj.Version+1;
-                Types=OperLib.FindProp(obj,'TypeSettings');
-                TP=DataFrame.GetTypes;
 
-                ChTypes=sort(Types.DataType);
-
-                Lia = find(ChTypes==TP(1));
-                f1 = waitbar(0,'Please wait...','Name','Loading data');
-
-                %èekni jestli má MainTable
-                if sum(Lia)>0
-                    %yes, this profile has main maintable
-                    MainTable=Types.TypesObj{Lia,1}.TypeSettings;
-                    if sum(MainTable.Key)>0
-                        %yes, this profile has key column
-                        obj.Key=true;                    
-                    end
-                else
-                    %no, this profile does not has maintable
-                end   
-                
-                %--------------------------------------------------------------
-                F1Lim=size(Types,1);
-                for i=1:F1Lim
-                    CharDataType=lower(char(Types.Container(i)));
-                    waitbar(i/F1Lim,f1,['Processing ''' CharDataType ''' ...']);
-                    switch CharDataType
-                        case 'file'
-                            items=dir([obj.BruteFolder '*' char(Types.Sufix(i))]);
-                            Names=OperLib.SeparateFileName(items);
-
-                            if ~strcmp(Types.KeyWord(i),"")
-
-                                Index=find(contains(lower(Names),lower(Types.KeyWord(i))));
-                                if numel(Index)>1
-                                    %there is more maintables, which is forbidden
-                                    %-> error
-                                else
-                                    %this is right output
-                                    %i have desired FILE, and now I can read it
-                                    %according to the typetable and its datatype
-                                    filename=[items(Index).folder '\' items(Index).name];
-                                    %break;
-                                end
-                            else
-                                Index=find(contains(fileName,paterrn));
-                            end
-
-                            %filename=ReadDir(obj,i);
-                            obj1=Copy(Types.TypesObj{i});
-                            obj1.Parent=obj;
-                            OutPut=Read(obj1,filename);
-
-                            if obj.Key && i==1
-                                %obj.Data(i).('Key') = Shard(:,OperLib.GeKeyCol(obj.MainTable));
-                                Name=OutPut(:,OperLib.GeKeyCol(obj.MainTable));
-                                obj.Data=[obj.Data, Name];
-                                %obj.Data.RowNames='Name';
-                            end
-
-                            obj.Data=[obj.Data, TabRows(obj1)];
-
-                        case 'folder'
-                            %i got all folders from brute folder
-                            %is key option on? if so, then go through the list of
-                            %folders by name, if not, then by loaded order
-                            items=OperLib.DirFolder(obj.BruteFolder);
-
-                            %F2File=cell2table(cell(0,size(items,1)));
-                            f1pos=f1.Position;
-                            f2 = waitbar(0,'Please wait...','Name','Folder reading');
-                            f2.Position(2)=f1pos(2)-f2.Position(4)-40;
-
-                            F2Lim=numel(items);
-                            F2File=table;
-
-                            for j=1:F2Lim
-
-                                KeyNames=string({items.name}');
-                                [TF]=contains(lower(KeyNames(j)),lower(obj.Data.Name));
-                                if TF>0
-                                    waitbar(j/F2Lim,f2,['Processing: ''' char(obj.Data.Name(j)) '''']);
-                                    folder=[char(items(j).folder) '\' char(obj.Data.Name(j)) '\'];
-                                    %'obj2 = copy(obj1)'
-                                    obj2=Copy(Types.TypesObj{i});
-                                    obj2.Parent=obj;
-                                    Read(obj2,folder);
-                                    F2File=[F2File; table(obj2,...
-                                        'VariableNames',{char(Types.DataType(i))})];
-                                end
-                            end
-                            close(f2);
-                            obj.Data=[obj.Data, F2File];
-                        otherwise
-                    end
-                %--------------------------------------------------------------
-
-                end
-                close(f1);
-                obj.Count=size(obj.Data,1);
-
-                InitSel(obj);
-
-                saveobj(obj);
-            catch ME
-                close(f1);
-                close(f2);
-                msgbox(['Error while loading of data:\n' char(ME.message) '\n' ...
-                    'on line:' char(num2str(ME(1).line)) '\n' ...
-                    'file:' char(ME(1).file)]);
-                obj.Version=obj.Version-1;
-            end
-        end
-        
-        
-        
         function ReLoadData(obj,src,~)
 
             if ~exist(obj.BruteFolder, 'dir')

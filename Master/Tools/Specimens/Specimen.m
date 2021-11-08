@@ -1,4 +1,4 @@
-classdef Specimen < handle
+classdef Specimen < Item
     %SPECIMEN Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -8,7 +8,6 @@ classdef Specimen < handle
         Key;
         Data struct;
         Version;
-        Parent;
 %         Features;
 %         Metadata;
     end
@@ -16,6 +15,7 @@ classdef Specimen < handle
     
     methods
         function obj = Specimen(parent) %parent je experiment
+            obj@Item;
             obj.Parent=parent;
         end
         
@@ -34,6 +34,28 @@ classdef Specimen < handle
 %             if obj.Key==spec.Key
             CompareData(obj,spec.Data);
 %             end
+        end
+    end
+    
+    
+    methods %abstarct
+        function DrawGui(obj)
+            
+        end
+        
+        function stash=Pack(obj)
+            stash=struct;
+            stash.ID=obj.ID;
+            stash.MeasID=obj.MeasID;
+            stash.ID=obj.Key;
+            stash.Data=obj.Data;
+        end
+        
+        function Populate(obj,stash)
+            obj.ID=stash.ID;
+            obj.MeasID=stash.MeasID;
+            obj.Key=stash.ID;
+            obj.Data=stash.Data;
         end
     end
     

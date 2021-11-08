@@ -357,11 +357,14 @@ classdef ProjectObj < Node
         function MDeactivate(obj,~,~)
             ChangeState(obj.Parent,obj,0);
             delete(obj.Plotter);
-%             obj.Plotter=[];
+            obj.Plotter=[];
+            
             delete(obj.ExpMainNode);
-%             obj.ExpMainNode=[];
+            obj.ExpMainNode=[];
+            
             delete(obj.Experiments);
-%             obj.Experiments=[];
+            obj.Experiments=[];
+            
             obj.State=0;
             obj.TreeNode.Icon=Geticon(obj);
         end

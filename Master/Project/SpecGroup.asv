@@ -295,10 +295,8 @@ classdef SpecGroup < Node
             aIdx=aIdx';
             for i=1:numel(list)
                 sn=uistyle('BackgroundColor',colors(i,:));
-                rows=aIdx(data{:,i});
-                cols=linspace(2+i,2+i,numel(rows));
-                cols=cols';
-                addStyle(uit,sn,'cell',[rows,cols]);
+                rows=aIdx(data(:,i));
+                addStyle(uit,sn,'cell',[data(:,i),2+i]);
             end
         end
         
