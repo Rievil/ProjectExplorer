@@ -4,15 +4,15 @@ clear all;
 b=ExplorerAppStartMain;
 % clear all;
 %%
-list=GetProjectList(b);
+% list=GetProjectList(b);
 %%
 plt=GetProject(b,'3DPrint');
 %%
-list=GetSelList(plt,1);
-%%
-list=GetVarList(plt,1);
-%%
-list=GetSpecList(plt,1);
+% list=GetSelList(plt,1);
+% %%
+% list=GetVarList(plt,1);
+% %%
+% list=GetSpecList(plt,1);
 %%
 Tout=plt.GetSampleData('exp',1,'sel',17,'var',["ZedoLokal","ZedoCumHits"]);
 %% Without gui
