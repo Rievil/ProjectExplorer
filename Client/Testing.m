@@ -14,7 +14,7 @@ list=GetVarList(plt,1);
 %%
 list=GetSpecList(plt,1);
 %%
-Tout=plt.GetSampleData('exp',1,'sel',17,'var',["ZedoLokal","ZedoCumHits"]);
+Tout=plt.GetSampleData('exp',1,'sel',"3WPA",'var',["ZedoLokal","ZedoCumHits"]);
 %% Without gui
 c=ExplorerObj(0);
 %%

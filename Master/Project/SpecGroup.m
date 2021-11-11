@@ -53,7 +53,20 @@ classdef SpecGroup < Node
             end
             sel=obj.Sel;
         end
-
+        
+        
+        function idx=GetSelIdx(obj,sel)
+            arguments
+                obj
+                sel string;
+            end
+            
+            idx=false(obj.Count,1);
+            for i=1:numel(sel)
+                logarr=obj.Selector.Specimens{obj.Selector.Name==sel(i)};
+                idx=idx | logarr;
+            end
+        end
         
         function MenuChangeSelector(obj,src,~)
 %             ID=src.Value;

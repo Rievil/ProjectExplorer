@@ -32,9 +32,10 @@ classdef DataOperation < handle
                             case 'double'
                                 sel=obj.Experiments(exp).SpecGroup.Selector.Specimens{varargin{2}};
                             case 'string'
-                                sel=FindSpec(obj.Experiments(exp).SpecGroup,varargin{2});
+                                
+                                sel=obj.Experiments(exp).SpecGroup.GetSelIdx(varargin{2});
                             case 'char'
-                                sel=FindSpec(obj.Experiments(exp).SpecGroup,varargin{2});
+                                 sel=obj.Experiments(exp).SpecGroup.GetSelIdx(string(varargin{2}));
                             otherwise
                         end
                         
