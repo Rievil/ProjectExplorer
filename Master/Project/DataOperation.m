@@ -54,7 +54,22 @@ classdef DataOperation < handle
             T=GetData(obj,exp,sel,var);
         end
 
-
+        function out=GetKeyList(obj,exp)
+            
+            switch lower(class(exp))
+                case 'double'
+                    expID=exp;
+                    
+                case 'string'
+                case 'char'
+                otherwise
+                    disp('Error: Wrong format for experiment');
+                    
+            end
+            specList=obj.Experiments(expID).SpecGroup.Specimens;
+            
+            out=specList(:,2);
+        end
     end
     
     methods (Access=private)
