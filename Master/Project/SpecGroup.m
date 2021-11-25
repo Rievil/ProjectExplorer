@@ -192,7 +192,13 @@ classdef SpecGroup < Node
         end
         
         function idx=FindSpec(obj,key)
-            idx=contains(lower(obj.Specimens.Key),lower(key));
+            idx=logical(zeros(obj.Count,1));
+            for i=1:size(obj.Specimens,1)
+                if strcmp(lower(obj.Specimens.Key(i)),lower(key))
+                    idx(i)=true;
+                end
+            end
+%             idx=contains(lower(obj.Specimens.Key),lower(key));
         end
         
         function bool=SpecExist(obj,key)
@@ -209,7 +215,8 @@ classdef SpecGroup < Node
             
             spec.ID=obj.Specimens.ID(row);
             obj.Specimens.MeasID(row)=spec.MeasID;
-            Compare(obj.Specimens.Data(row),spec);
+%             CompareData(obj,spec.Data);
+            Compare(obj.Specimens.Data{row},spec);
         end
         
         function bool=CheckUnqKey(obj,spec)
@@ -467,7 +474,7 @@ classdef SpecGroup < Node
 %             obj.Count=stash.Count;
             if isfield(stash,'Specimens')
                 
-                for i=1:stash.Count
+                for i=1:size(stash.Specimens,1)
                     spec=Specimen(obj);
                     spec.Populate(stash.Specimens.Data(i));
                     obj.Specimens=[obj.Specimens; stash.Specimens(i,1:3),...

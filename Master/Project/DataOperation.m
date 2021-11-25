@@ -36,6 +36,8 @@ classdef DataOperation < handle
                                 sel=obj.Experiments(exp).SpecGroup.GetSelIdx(varargin{2});
                             case 'char'
                                  sel=obj.Experiments(exp).SpecGroup.GetSelIdx(string(varargin{2}));
+                            case 'cell'
+                                 sel=obj.Experiments(exp).SpecGroup.GetSelIdx(string(varargin{2}));
                             otherwise
                         end
                         
