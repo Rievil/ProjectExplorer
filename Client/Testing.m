@@ -270,7 +270,6 @@ txt = jsonencode(AEbox);
 data=b.Core.ProjectOverview.Projects(1, 1).Experiments.SpecGroup.Specimens.Data{1,1};
 save('TestVar.mat','data');
 %%
-load('TestVar.mat');
 %%
 IntObj = OPInter;
 
