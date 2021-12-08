@@ -328,7 +328,7 @@ classdef MeasObj < Node
         
         function MakeMainSpec(obj,result)
             SpecGroup=OperLib.FindProp(obj,'SpecGroup');
-            try
+%             try
             for k=1:size(result,2)
                 for i=1:size(result(k).key,1)
 
@@ -362,9 +362,9 @@ classdef MeasObj < Node
                     end
                 end
             end
-            catch ME
-                fprintf('Meas n. %d\n',k);
-            end
+%             catch ME
+%                 fprintf('Meas n. %d\n',k);
+%             end
             
         end
         
@@ -458,6 +458,21 @@ classdef MeasObj < Node
             event.Source.UserData.Value=obj.BruteFolder;
         end
         
+        function UpdateLoadOption(obj)
+%             T1=obj.ExpHandle.TypeSettings;
+            names=string(obj.ExpHandle.TypeSettings.DataType(:));
+            cnames=string(obj.LoadOptions.Name(:));
+            for i=1:numel(names)
+                A=contains(cnames,names(i));
+                if ~sum(A)>0
+%                     T=
+                    obj.LoadOptions=MakeOptionTable(obj);
+                    break;
+                end
+            end
+            
+        end
+        
         function T=MakeOptionTable(obj)
             TT=obj.ExpHandle.TypeSettings;
             T=table;
@@ -549,13 +564,13 @@ classdef MeasObj < Node
             la4.Layout.Column=1;
             
             if size(obj.LoadOptions,1)>0
-                T=obj.LoadOptions;
+                UpdateLoadOption(obj);
             else
-                T=MakeOptionTable(obj);
-                obj.LoadOptions=T;
+%                 T=
+                obj.LoadOptions=MakeOptionTable(obj);
             end
             
-            uit = uitable(g,'Data',T,...
+            uit = uitable(g,'Data',obj.LoadOptions,...
                 'ColumnEditable',[false,true,true,true],...
                 'DisplayDataChangedFcn',@obj.MLoadOptionChange);
             uit.Layout.Row=4;

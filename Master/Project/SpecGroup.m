@@ -72,9 +72,10 @@ classdef SpecGroup < Node
 %             ID=src.Value;
             CheckSelectors(obj);
             obj.CurrSelID=src.Value;
-            obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
+            row=obj.Selector.ID==obj.CurrSelID;
+            obj.Sel=obj.Selector.Specimens{row};
             obj.Children(3,1).Data.N=obj.Sel;
-            obj.UISelName.Value=obj.Selector.Name(obj.CurrSelID);
+            obj.UISelName.Value=obj.Selector.Name(row);
 %             disp('test');
         end
         
@@ -110,7 +111,7 @@ classdef SpecGroup < Node
             sel=GetEmptySel(obj);
             obj.Selector=[obj.Selector; table(NewID,Name,{sel},...
                 'VariableNames',{'ID','Name','Specimens'})];
-            
+            obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
 %             if obj.Init
 %                 lbox=obj.Children(6);
                 obj.UILBox.Items=obj.Selector.Name;
@@ -192,7 +193,13 @@ classdef SpecGroup < Node
         end
         
         function idx=FindSpec(obj,key)
-            idx=contains(lower(obj.Specimens.Key),lower(key));
+            idx=logical(zeros(obj.Count,1));
+            for i=1:size(obj.Specimens,1)
+                if strcmp(lower(obj.Specimens.Key(i)),lower(key))
+                    idx(i)=true;
+                end
+            end
+%             idx=contains(lower(obj.Specimens.Key),lower(key));
         end
         
         function bool=SpecExist(obj,key)
@@ -209,6 +216,7 @@ classdef SpecGroup < Node
             
             spec.ID=obj.Specimens.ID(row);
             obj.Specimens.MeasID(row)=spec.MeasID;
+%             CompareData(obj,spec.Data);
             Compare(obj.Specimens.Data(row),spec);
         end
         
@@ -225,7 +233,7 @@ classdef SpecGroup < Node
             
             spec.ID=OperLib.FindProp(obj,'SpecimenID');
             
-            obj.Specimens=[obj.Specimens; table(spec.ID,spec.Key,spec.MeasID,{spec},'VariableNames',...
+            obj.Specimens=[obj.Specimens; table(spec.ID,spec.Key,spec.MeasID,spec,'VariableNames',...
                 {'ID','Key','MeasID','Data'})];
             
         end
@@ -279,6 +287,28 @@ classdef SpecGroup < Node
                     A=contains(list,string(spec.Data(j).type));
                     data.(list(A))(i)=true;
                 end
+            end
+            
+            
+            if size(obj.Selector,1)==0
+                NewSelector(obj);
+            else
+                if obj.CurrSelID==0
+                    obj.CurrSelID=1;
+                    obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
+                else
+                    idx=obj.Selector.ID==obj.CurrSelID;
+                    if sum(idx)==1
+                        obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
+                    else
+                        obj.CurrSelID=1;
+                        obj.Sel=obj.Selector.Specimens{obj.CurrSelID};
+                    end
+                end
+            end
+            
+            if size(obj.Sel,1)~=size(obj.Specimens,1)
+                CheckSelectors(obj)
             end
             
             T=[table(obj.Sel,'VariableNames',{'N'}), obj.Specimens(:,2), data];
@@ -467,7 +497,7 @@ classdef SpecGroup < Node
 %             obj.Count=stash.Count;
             if isfield(stash,'Specimens')
                 
-                for i=1:stash.Count
+                for i=1:size(stash.Specimens,1)
                     spec=Specimen(obj);
                     spec.Populate(stash.Specimens.Data(i));
                     obj.Specimens=[obj.Specimens; stash.Specimens(i,1:3),...
