@@ -10,7 +10,9 @@ classdef AE < DataFrame
             obj@DataFrame(parent);
 
         end
-
+        
+        function result=ReadDb(obj)
+       end
     end
 end
 

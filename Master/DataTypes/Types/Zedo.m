@@ -52,6 +52,9 @@ classdef Zedo < AcousticEmission
     
     methods %reading
        %will read data started from dataloader
+       function result=ReadDb(obj)
+       end
+       
        function result=Read(obj,folder,~)
            result=struct;
            measfolder=dir(folder);
@@ -72,8 +75,7 @@ classdef Zedo < AcousticEmission
        
         function data=ReadFolder(obj,folder)
 %             data=GetEmptyArr(obj);
-            Cards=[];
-            speed=[];
+            
             obj.Folder=folder;
             alpha=OperLib.GetAlpha;
             warning('off','all');
@@ -107,11 +109,7 @@ classdef Zedo < AcousticEmission
                     [HeaderLine]=OperLib.GetHeadersLine(filename,'Event');
 
                     Events = readtable(filename,'ReadVariableNames',true,'HeaderLines',HeaderLine,'Delimiter','\t');
-                    
-                    if size(Events,1)==0
-                        break;
-                    end
-                    
+
                     time=string(Events{:,7});
                     Events(:,7)=[];
                     str=replace(time,'/',' ');

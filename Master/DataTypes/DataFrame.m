@@ -24,6 +24,7 @@ classdef DataFrame < OperLib & GUILib
     %Interface of class
     methods (Abstract)
         Read(obj);
+        ReadDb(obj);
         TabRows(obj);
         Copy(obj);
         PackUp(obj);
@@ -155,10 +156,13 @@ classdef DataFrame < OperLib & GUILib
             elseif Idx>0
                 %i got exactly one type
                 filename=[char(T.folder(Idx))  '\' (char(T.file(Idx)))];
-                opts=MakeReadOpt(obj,filename,T.suffix);
-                result=Read(obj,filename,opts);
-                
-%                 dat=readtable(Filename,opts);
+                switch T.suffix
+                    case '.db'
+                        result=ReadDb(obj,filename);
+                    otherwise
+                        opts=MakeReadOpt(obj,filename,T.suffix);
+                        result=Read(obj,filename,opts);
+                end
                 
             elseif Idx>1
                 %i got multiple types
@@ -182,6 +186,8 @@ classdef DataFrame < OperLib & GUILib
                     case '.xlsx'
                         opts = detectImportOptions(filename,'Sheet',obj.ImportOptions.Value{1},...
                             'NumHeaderLines',obj.ImportOptions.Value{4});
+                    case '.db'
+                        
                     otherwise
                         disp('zedo');
                         opts=[];
