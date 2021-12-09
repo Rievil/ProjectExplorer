@@ -245,7 +245,7 @@ classdef MeasObj < Node
             obj.TypeTable=OperLib.FindProp(obj,'TypeSettings');
             
             AllTypes=OperLib.GetTypes;
-            CurrentTypes=sort(obj.TypeTable.DataType);
+            CurrentTypes=obj.TypeTable.DataType;
             
             MTIdx=find(CurrentTypes==AllTypes(1));
             
