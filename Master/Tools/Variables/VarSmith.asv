@@ -54,6 +54,7 @@ classdef VarSmith < Item
             obj.Operators{1}.RunCh(data);
             restmp=obj.Operators{obj.Count}.Output;
             
+            
             result=cell2table(restmp);
             result.Properties.VariableNames=cellstr(obj.Operators{obj.Count}.Labels);
         end

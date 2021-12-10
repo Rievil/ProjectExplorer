@@ -24,6 +24,17 @@ classdef Node < OperLib & GUILib
 
         end
         
+        function save(obj)
+            fprintf("Saved object '%s'",class(obj));
+        end
+        
+        function delete(obj)
+            fprintf("Delted object '%s'",class(obj));
+        end
+        
+        function saveobj(obj)
+            fprintf("Saved saveobj object '%s'",class(obj));
+        end
 %         function Clear(obj)
 %             delete(obj.TreeNode);
 %             obj.TreeNode=[];
@@ -38,15 +49,15 @@ classdef Node < OperLib & GUILib
 %         end
         
         
-        function sobj = saveobj(obj)
-            switch class(obj)
-                case 'experiment'
-                case 'projectoverview'
-                case 'projectobj'
-                case 'measobj'
-                otherwise
-            end
-        end
+%         function sobj = saveobj(obj)
+%             switch class(obj)
+%                 case 'experiment'
+%                 case 'projectoverview'
+%                 case 'projectobj'
+%                 case 'measobj'
+%                 otherwise
+%             end
+%         end
         
         
     end

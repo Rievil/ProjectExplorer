@@ -224,8 +224,10 @@ classdef ProjectObj < Node & DataOperation
             
             stash.ExpMainNode=[];
             stash.Version=obj.Version;
-            if isvalid(obj.Plotter)
-                stash.Plotter=Pack(obj.Plotter);
+            if ~isempty(obj.Plotter)
+                if isvalid(obj.Plotter)
+                    stash.Plotter=Pack(obj.Plotter);
+                end
             end
 %             stash.Experiments=struct;
             n=0;

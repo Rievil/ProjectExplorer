@@ -19,6 +19,8 @@ list=GetSelList(plt,1);
 % list=GetSpecList(plt,1);
 %%
 Tout=plt.GetSampleData('exp',1,'sel',"300",'var',["Zedo","Press","MainTable"]);
+%%
+Tout=plt.GetSampleData('exp',1,'sel',"A",'var',["Test2"]);
 %% Without gui
 c=ExplorerObj(0);
 %%

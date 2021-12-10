@@ -116,8 +116,9 @@ classdef Zedo < AcousticEmission
                     time=datetime(str,'Format','dd.MM.yyyy hh:mm:ss.s');
                     Events=addvars(Events,time,'Before','Last_Hit_End_Relative_sec_');
                     Events.Properties.VariableNames{7}='DateTime';
-
-                    Order=split(Events{:,4},',');
+%                     Events{:,4}=string(Events{:,4});
+                    
+                    Order=split(string(Events{:,4}),',');
                     Order(:,1)=replace(Order(:,1),',','');
                     Events(:,4)=[];
                     Events=addvars(Events,lower(Order),'Before','Hits_IDs');
