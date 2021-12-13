@@ -230,8 +230,8 @@ classdef OperLib < handle
         end
         
         function out=GetSuffixTypes(varargin)
-            t=[".xls",".xlsx",".csv",".txt",".bin","~"];
-            STypes = categorical(t,{'.xls','.xlsx','.csv','.txt','.bin','~'},'Ordinal',true);
+            t=[".xls",".xlsx",".csv",".txt",".bin",".db","~"];
+            STypes = categorical(t,{'.xls','.xlsx','.csv','.txt','.bin','.db','~'},'Ordinal',true);
             if numel(varargin)>0
                 out=STypes(varargin{1});
             else
@@ -276,6 +276,10 @@ classdef OperLib < handle
                     Enc=categorical(enctypes,'Ordinal',1);
                     Name=["DecimalDelimiter","Encryption"]';
                     Value={DecimalDelimiter(1),Enc(1)}';
+                    T=table(Name,Value);
+                case '.db'
+                    Name="No prop";
+                    Value=categorical("");
                     T=table(Name,Value);
                 case '~'
                     Name=["No prop"]';

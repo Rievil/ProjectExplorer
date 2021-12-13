@@ -169,15 +169,14 @@ classdef ProjectOverView < Node
         function ClearIns(obj)
         end
         
+        function LoadIndividualProject(obj)
+            
+        end
+        
         function Populate(obj,stash)
             obj.ProjectCount=stash.ProjectCount;
             obj.ProjectID=stash.ProjectID;
-            
-%             if isfield(stash,'ProjectList')
-%                 obj.ProjectList=stash.ProjectList;
-%             end
-%             FillNode(obj);
-            
+
             n=0;
             for i=1:size(stash.ProjectList,1)
                 n=n+1;
