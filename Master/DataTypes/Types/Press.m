@@ -3,6 +3,7 @@ classdef Press < DataFrame
     properties
        Name char;
        ColNumbers=0;
+       MainKeys=false;
     end
     
     methods %main methods
@@ -43,6 +44,7 @@ classdef Press < DataFrame
             obj2.TypeSet=obj.TypeSet;
             obj2.Init=obj.Init;
             obj2.Pos=obj.Pos;
+            obj2.MainKeys=obj.MainKeys;
         end
         
         function Data=PackUp(obj)
@@ -58,6 +60,40 @@ classdef Press < DataFrame
     
     methods %reading methods
                 %will read data started from dataloader
+                
+        function result=ReadDb(obj,filename)
+            curr=cd;
+            [filepath,name,ext] = fileparts(filename);
+
+            cd(filepath);
+
+            conn = sqlite([char(name),char(ext)]);
+            cd(curr);
+            
+            data = cell2table(fetch(conn,'SELECT * FROM PressData'));
+            names=string(fetch(conn,'SELECT * FROM ColumnNames'));
+            close(conn);
+
+            data.Properties.VariableNames=names;
+            data.Key=lower(string(data.Key));
+            unq=unique(data.Key);
+            obj.ColNumbers=size(obj.TypeSettings,1);
+            
+            result=struct;
+            T=table;
+            for i=1:numel(unq)
+                
+                smallT=data(data.Key==unq(i),2:1:obj.ColNumbers+1);
+                smallT.Properties.VariableNames=obj.TypeSettings.VariableName;
+                result.data(i).meas=smallT;
+                
+            end
+            
+            result.key=unq;
+            result.count=i;
+            result.type=class(obj);
+        end
+       
         function result=Read(obj,filename,opts)
             
             obj.Filename=filename;
@@ -110,7 +146,9 @@ classdef Press < DataFrame
                 end
                 
 %                 result.data=Data;
-                result.key=[];
+%                 keys=
+                tmp=readtable(filename,'Sheet','Keys');
+                result.key=string(string(table2array(tmp)));
                 result.count=n;
                 result.type=class(obj);
 
@@ -185,7 +223,8 @@ classdef Press < DataFrame
                 obj.TypeSettings=T;
             end
         
-            cbx = uicheckbox(g,'Text','Order from main table?');
+            cbx = uicheckbox(g,'Text','Order from main table?',...
+                'ValueChangedFcn',@obj.SetMainKeys);
             cbx.Layout.Row=3;
             cbx.Layout.Column=[1 4];
             
@@ -270,6 +309,10 @@ classdef Press < DataFrame
         
         function Out=GetVariables(obj)
             
+        end
+        
+        function SetMainKeys(obj,~,~)
+            obj.MainKeys=~obj.MainKeys;
         end
     end
 end

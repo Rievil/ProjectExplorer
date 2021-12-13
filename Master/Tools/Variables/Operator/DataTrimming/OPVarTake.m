@@ -107,6 +107,15 @@ classdef OPVarTake < Operator
             obj.Labels=labels;
         end
         
+        function out=GetSample(obj,idx)
+%             datatypes=obj.Inspector.MemName;
+            dtype=obj.Adress{idx};
+            
+            data=table2struct(table(obj.Inspector.MemArray',obj.Inspector.MemName,'VariableNames',{'data','type'}));
+            out=GetVar(dtype,data);
+%             RunTool(obj,data);
+        end
+        
         function stash=Pack(obj)
             stash=struct;
             for i=1:obj.Count

@@ -38,8 +38,8 @@ classdef OpPicker < Item
             obj.List(3).Class={'OPMean','OPMin','OPMax','OPStdt'};
             
             obj.List(4).Name='Acoustic operations';
-            obj.List(4).Functions={'Cummulative','Localize'};
-            obj.List(4).Class={'OPCumm','OPLokalize'};
+            obj.List(4).Functions={'Cummulative','Localize','Event parameters'};
+            obj.List(4).Class={'OPCumm','OPLokalize','OPEventParam'};
             
             obj.List(5).Name='String operations';
             obj.List(5).Functions={'Concat'};

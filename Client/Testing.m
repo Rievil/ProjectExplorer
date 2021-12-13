@@ -8,13 +8,19 @@ b=ExplorerAppStartMain;
 %%
 plt=GetProject(b,'3DPrint');
 %%
+
+plt=GetProject(b,'Wombat');
+list=GetSelList(plt,1);
+%%
 % list=GetSelList(plt,1);
 % %%
 % list=GetVarList(plt,1);
 % %%
 % list=GetSpecList(plt,1);
 %%
-Tout=plt.GetSampleData('exp',1,'sel',"3WPA",'var',["ZedoLokal","ZedoCumHits"]);
+Tout=plt.GetSampleData('exp',1,'sel',"300",'var',["Zedo","Press","MainTable"]);
+%%
+Tout=plt.GetSampleData('exp',1,'sel',"A",'var',["Test2"]);
 %% Without gui
 c=ExplorerObj(0);
 %%

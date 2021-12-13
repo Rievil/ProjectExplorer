@@ -24,6 +24,10 @@ classdef AcousticEmission < DataFrame
             chann=struct("CardKey",[],"Card",[],"CardID",[],"Channel",[],"ChannelID",[],...
                 "Records",[]);
         end
+        
+        function result=ReadDb(obj)
+        end
+       
     end
 end
 

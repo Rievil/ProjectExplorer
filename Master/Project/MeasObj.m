@@ -237,6 +237,10 @@ classdef MeasObj < Node
             ReadData(obj);
         end
         
+        function FindMainTable(obj)
+        end
+        
+        
         function ReadData(obj)
             if obj.BruteFolderSet==0
                 GetBruteFolder(obj);
@@ -245,7 +249,7 @@ classdef MeasObj < Node
             obj.TypeTable=OperLib.FindProp(obj,'TypeSettings');
             
             AllTypes=OperLib.GetTypes;
-            CurrentTypes=sort(obj.TypeTable.DataType);
+            CurrentTypes=obj.TypeTable.DataType;
             
             MTIdx=find(CurrentTypes==AllTypes(1));
             
@@ -276,6 +280,10 @@ classdef MeasObj < Node
                         result=[result, subresult];
                     end
                     
+%                     if obj2.MainKeys
+%                         obj3=FindMainTable(obj.Parent);
+%                         result.Key=obj3.Key;
+%                     end
 %                     
                     if obj.LoadOptions.AllKeysThere(i)==true
 %                         MakeSpecimens(obj,result,result.key);

@@ -38,7 +38,7 @@ classdef ProjectOverView < Node
             
             obj.UITab=OperLib.FindProp(obj,'AppTabGroup');
             
-            obj.ProjectList=table([],[],[],[],'VariableNames',{'Name','ID','Folder','State'});
+            obj.ProjectList=table([],[],[],[],[],'VariableNames',{'Name','ID','Folder','State','ProjectObj'});
 %             FillNode(obj);
         end
         
@@ -60,6 +60,7 @@ classdef ProjectOverView < Node
                 case 1
                     FillNode(obj2);
                     obj.Projects=[obj.Projects, obj2];
+                    
                     CheckFolder(obj2);
                     AddProjectEntry(obj,obj2);
                 case 4
@@ -113,7 +114,10 @@ classdef ProjectOverView < Node
                     case "SpecimenID"
                         stash.(prop)=obj.(prop)-1;
                     case "ProjectList"
-                        stash.(prop)=obj.(prop);
+                        stash.(prop)=obj.(prop)(:,1:end-1);
+%                         for i=1:size(stash.ProjectList,1)
+%                         stash.ProjectList.ProjectObj=[];
+%                         end
                     case "Projects"
                         n=0;
                         
@@ -140,12 +144,12 @@ classdef ProjectOverView < Node
         end
         
         function AddProjectEntry(obj,ob2)
-            idx=obj.ProjectList.ID==ob2.ID;
+%             idx=obj.ProjectList.ID==ob2.ID;
             
-            if sum(idx)==0
+%             if sum(idx)==0
                 obj.ProjectList=[obj.ProjectList;
-                    table(string(ob2.Name),ob2.ID,ob2.ProjectFolder,1,'VariableNames',{'Name','ID','Folder','State'})];
-            end
+                    table(string(ob2.Name),ob2.ID,ob2.ProjectFolder,1,ob2,'VariableNames',{'Name','ID','Folder','State','ProjectObj'})];
+%             end
         end
         
         function ChangeState(obj,obj2,state)
@@ -165,30 +169,31 @@ classdef ProjectOverView < Node
         function ClearIns(obj)
         end
         
+        function LoadIndividualProject(obj)
+            
+        end
+        
         function Populate(obj,stash)
             obj.ProjectCount=stash.ProjectCount;
             obj.ProjectID=stash.ProjectID;
-            
-            if isfield(stash,'ProjectList')
-                obj.ProjectList=stash.ProjectList;
-            end
-%             FillNode(obj);
-            
+
             n=0;
-            for i=1:size(obj.ProjectList,1)
+            for i=1:size(stash.ProjectList,1)
                 n=n+1;
                 obj2=ProjectObj('new project',obj);
-                switch obj.ProjectList.State(i)
+                switch stash.ProjectList.State(i)
                     case 1
-                        Load(obj2,obj.ProjectList.Folder(i));
+                        Load(obj2,stash.ProjectList.Folder(i));
                     case 0
-                        obj2.Name=obj.ProjectList.Name(i);
-                        obj2.ID=obj.ProjectList.ID(i);
-                        obj2.ProjectFolder=obj.ProjectList.Folder(i);
+                        obj2.Name=stash.ProjectList.Name(i);
+                        obj2.ID=stash.ProjectList.ID(i);
+                        obj2.ProjectFolder=stash.ProjectList.Folder(i);
                         obj2.State=0;
                         FillGhostNode(obj2);
                 end
+                AddProjectEntry(obj,obj2);
                 obj.Projects(n)=obj2;
+                
             end
         end
         
@@ -206,7 +211,9 @@ classdef ProjectOverView < Node
                 
             end
         end
-
+        
+        
+        
         function FillNode(obj)
             obj.TreeNode=uitreenode(obj.UITree,'Text','Project OverView',...
                 'NodeData',{obj,'projectoverview'});

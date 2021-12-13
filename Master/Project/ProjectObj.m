@@ -224,8 +224,10 @@ classdef ProjectObj < Node & DataOperation
             
             stash.ExpMainNode=[];
             stash.Version=obj.Version;
-            if isvalid(obj.Plotter)
-                stash.Plotter=Pack(obj.Plotter);
+            if ~isempty(obj.Plotter)
+                if isvalid(obj.Plotter)
+                    stash.Plotter=Pack(obj.Plotter);
+                end
             end
 %             stash.Experiments=struct;
             n=0;
@@ -325,8 +327,17 @@ classdef ProjectObj < Node & DataOperation
         function Load(obj,filename)
             SandBox=OperLib.FindProp(obj,'SandBoxFolder');
             file=sprintf("%s%s\\main.mat",SandBox,filename);
-            load(file);
-            Populate(obj,stash);
+            try
+                load(file);
+
+                Populate(obj,stash);
+            catch ME
+                parts=split(filename,'_');
+                obj.ID=str2double(parts(2));
+                FillNode(obj);
+                MDeactivate(obj);
+                
+            end
         end
               
         function Remove(obj)
@@ -359,7 +370,7 @@ classdef ProjectObj < Node & DataOperation
         end
         
         function MDeactivate(obj,~,~)
-            ChangeState(obj.Parent,obj,0);
+            ChangeState(obj.Parent,obj,obj.ID);
             delete(obj.Plotter);
             obj.Plotter=[];
             

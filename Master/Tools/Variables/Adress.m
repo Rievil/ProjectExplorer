@@ -47,7 +47,7 @@ classdef Adress < handle
         end
 
         function arr=GetVar(obj,data)
-        
+            try
             A=data(obj.CurrArr).data;
             for i=1:numel(obj.Path)
                 typeIN=class(A);
@@ -65,6 +65,11 @@ classdef Adress < handle
                 end
             end
             arr=A;
+            catch ME
+                arr=[];
+                fprintf("Can't find '%s' ind '%s'\n",obj.Path{i},typeIN);
+            end
+            
         end
         
         function stash=Pack(obj)
