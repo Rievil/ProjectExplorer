@@ -113,6 +113,9 @@ classdef Press < DataFrame
                 for i=1:obj.ColNumbers:DCount
                     n=n+1;
                     
+                    if n==26
+                        disp('26');
+                    end 
                     Arr2=INData(:,i:i+obj.ColNumbers-1);
                     Arr=zeros([size(Arr2,1), obj.ColNumbers]);
                     for j=1:size(Arr,2)
