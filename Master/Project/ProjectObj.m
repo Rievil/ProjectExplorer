@@ -386,9 +386,10 @@ classdef ProjectObj < Node & DataOperation
         
         function MActivate(obj,~,~)
             ChangeState(obj.Parent,obj,1);
+            obj.State=1;
             obj.Plotter=Plotter(obj);
             Load(obj,obj.ProjectFolder);
-            obj.State=1;
+            
             obj.TreeNode.Icon=Geticon(obj);
         end
     end
