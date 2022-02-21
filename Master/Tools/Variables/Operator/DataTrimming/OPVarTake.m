@@ -159,7 +159,9 @@ classdef OPVarTake < Operator
         end
         
         function MCellSelected(obj,src,evnt)
-            obj.CurrAdress=evnt.Indices(1);
+            if ~isempty(evnt.Indices)
+                obj.CurrAdress=evnt.Indices(1);
+            end
         end
         
         
