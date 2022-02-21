@@ -144,18 +144,18 @@ classdef ProjectOverView < Node
         end
         
         function AddProjectEntry(obj,ob2)
-%             idx=obj.ProjectList.ID==ob2.ID;
+            idx=obj.ProjectList.ID==ob2.ID;
             
-%             if sum(idx)==0
+            if sum(idx)==0
                 obj.ProjectList=[obj.ProjectList;
                     table(string(ob2.Name),ob2.ID,ob2.ProjectFolder,1,ob2,'VariableNames',{'Name','ID','Folder','State','ProjectObj'})];
-%             end
+            end
         end
         
-        function ChangeState(obj,obj2,state)
+        function ChangeState(obj,obj2)
             row=CheckProjectEntry(obj,obj2.ID);
             if ~isempty(row)
-                obj.ProjectList.State(row)=state;
+                obj.ProjectList.State(row)=obj2.State;
             end
         end
         

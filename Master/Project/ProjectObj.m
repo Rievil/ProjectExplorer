@@ -370,7 +370,7 @@ classdef ProjectObj < Node & DataOperation
         end
         
         function MDeactivate(obj,~,~)
-            ChangeState(obj.Parent,obj,obj.ID);
+            
             delete(obj.Plotter);
             obj.Plotter=[];
             
@@ -381,12 +381,15 @@ classdef ProjectObj < Node & DataOperation
             obj.Experiments=[];
             
             obj.State=0;
+            ChangeState(obj.Parent,obj);
             obj.TreeNode.Icon=Geticon(obj);
         end
         
         function MActivate(obj,~,~)
-            ChangeState(obj.Parent,obj,1);
+            
             obj.State=1;
+            ChangeState(obj.Parent,obj);
+            
             obj.Plotter=Plotter(obj);
             Load(obj,obj.ProjectFolder);
             
