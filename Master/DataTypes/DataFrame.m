@@ -148,6 +148,7 @@ classdef DataFrame < OperLib & GUILib
             
             %filter by keyword
             name=T.name;
+            T(contains(T.file,'$'),:)=[];
             Idx=find(contains(lower(T.name),lower(obj.KeyWord)));
             
             if isempty(Idx)

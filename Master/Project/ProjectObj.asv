@@ -84,7 +84,7 @@ classdef ProjectObj < Node & DataOperation
             end
         end
         
-        function NewExperiment(obj) %volání aplikací
+        function NewExperiment(obj) %volÃ¡nÃ­ aplikacÃ­
             obj2=AddExperiment(obj);
             FillNode(obj2);
             ExpID=OperLib.FindProp(obj,'ExperimentID');
