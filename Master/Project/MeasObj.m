@@ -246,7 +246,7 @@ classdef MeasObj < Node
                 GetBruteFolder(obj);
             end
             obj.Version=obj.Version+1;
-            obj.TypeTable=OperLib.FindProp(obj,'TypeSettings');
+            obj.TypeTable=obj.ExpHandle.TypeSettings;
             
             AllTypes=OperLib.GetTypes;
             CurrentTypes=obj.TypeTable.DataType;

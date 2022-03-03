@@ -7,6 +7,7 @@ classdef Zedo < AcousticEmission
     properties
        HasEvents logical;
        SensorCoordinates;
+       ReadSignals=false;
     end
     
     properties (Access = private)
@@ -225,7 +226,7 @@ classdef Zedo < AcousticEmission
                                     Records(iCard).Detector(s).Signals=table;
                                     Records(iCard).Detector(s).Features=table;
                                     
-                                    if BoolSignals==true
+                                    if sum(BoolSignals)>0
                                         if Records(iCard).SignalPerEachDetector==true
                                             Idx=find(contains(CardFiles.name,DetectorName));
                                             DetSignals=CardFiles(Idx,:);
@@ -233,6 +234,24 @@ classdef Zedo < AcousticEmission
                                             ID(:,1)=[];
                                             ID=abs(double(ID));
                                             Records(iCard).Detector(s).Signals=[table(ID,'VariableNames',{'ID'}),DetSignals];
+
+                                            if obj.TypeSettings.Value{6}==true
+                                                f=waitbar(0,'Loading all data');
+                                                hits=table;
+                                                scount=size(Records(iCard).Detector(s).Signals,1);
+
+                                                for hitrow=1:scount
+                                                    waitbar(hitrow/scount,f,sprintf('Loading signal %d/%d of card %s ...',hitrow,scount,Records(iCard).Cards));
+                                                    sfolder=[char(Records(iCard).Detector(s).Signals.folder(hitrow)) '\'];
+                                                    sfile=[char(Records(iCard).Detector(s).Signals.name(hitrow)),...
+                                                        char(Records(iCard).Detector(s).Signals.suffix(hitrow))];
+
+                                                    [hit]=ReadHit(obj,sfolder,sfile);
+                                                    hits=[hits; table(hit.ID,{hit},'VariableNames',{'ID','Hit'})];
+                                                end
+                                                close(f);
+                                                Records(iCard).Detector(s).Signals=join(Records(iCard).Detector(s).Signals,hits,'Keys','ID');
+                                            end
                                         end
                                     end
                                     
@@ -325,7 +344,7 @@ classdef Zedo < AcousticEmission
         function [hit]=ReadHit(obj,folder,file)
             %folder='D:\Data\Vysoké uèení technické v Brnì\Fyzika.NDT - Dokumenty\Projekty\AE_Zedo\DataSource\A1\';
             %file='a-1.65.1a-ae-signal-hitdet0-id00156.txt';
-
+            
             fileID=fopen([folder file]);
             strBlock = textscan(fileID,'%s'); % Read the file as one block
             fclose(fileID);
@@ -436,11 +455,12 @@ classdef Zedo < AcousticEmission
         
         function T=GetZBl(obj)
             loctype=LocType(obj);
-            Name={'AE device','Number of cards','Channels per card','Localization','Local type'}';
+            Name={'AE device','Number of cards','Channels per card','Localization','Local type','ReadSignals'}';
             Value={'Zedo',...
                 1,2,...
                 false,...
-                loctype(1)}';
+                loctype(1),...
+                false}';
             T=table(Name,Value);
         end
         
@@ -512,6 +532,7 @@ classdef Zedo < AcousticEmission
 
             
             obj.Children=[g;la;uit];
+            obj.TypeSettings=T;
         end
         
     end
