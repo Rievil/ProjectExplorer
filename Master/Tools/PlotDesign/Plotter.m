@@ -103,53 +103,54 @@ classdef Plotter < Node
             
         end
         
-%         function Tout=GetSampleData(obj,exp,sel)
-%             Tout=table;
-%             Variables=obj.Parent.Experiments(exp).VarExp.Forge.Variables;
-%             SPecGroup=obj.Parent.Experiments(exp).SpecGroup;
-%             Sel=SPecGroup.Selector.Specimens{sel};
-%             T=obj.Parent.Experiments(exp).SpecGroup.Specimens(Sel,:);
-%             for i=1:size(T,1)
-%                 try
-%                     data=T.Data(i).Data;
-%                     Trow=T(i,1:3);
-%                     for j=1:numel(Variables)
-%                         Var=Variables(j);
-%                         x=Var.GetVariable(data);
-% 
-%                         finnames=strings(size(x,2),1);
-%                         for k=1:numel(finnames)
-%                             finnames(k,1)=string(sprintf('%s_%s',Var.Name,x.Properties.VariableNames{k}));
-%                         end
-%                         x.Properties.VariableNames=cellstr(finnames);
-%                         Trow=[Trow, x];
-%                         
-% 
-%                     end
-%                     
-%                     for g=1:size(Trow,2)
-%                         tmp=Trow{:,g};
-%                         switch class(tmp)
-%                             case 'categorical'
-%                                 tmp=string(tmp);
-%                                 Trow=[Trow(:,1:g-1),table(string(tmp),'VariableNames',{Trow.Properties.VariableNames{g}}),Trow(:,g+1:end)];
-%                         end
-%                     end
-%                     
-%                     if size(Tout,2)>0
+        function Tout=GetSampleData(obj,exp,sel)
+            Tout=table;
+            Variables=obj.Parent.Experiments(exp).VarExp.Forge.Variables;
+            SPecGroup=obj.Parent.Experiments(exp).SpecGroup;
+            idx=SPecGroup.GetSelIdx(sel);
+            % Sel=SPecGroup.Selector.Specimens{sel};
+            T=SPecGroup.Specimens(idx,:);
+            for i=1:size(T,1)
+                try
+                    data=T.Data(i).Data;
+                    Trow=T(i,1:3);
+                    for j=1:numel(Variables)
+                        Var=Variables(j);
+                        x=Var.GetVariable(data);
+
+                        finnames=strings(size(x,2),1);
+                        for k=1:numel(finnames)
+                            finnames(k,1)=string(sprintf('%s_%s',Var.Name,x.Properties.VariableNames{k}));
+                        end
+                        x.Properties.VariableNames=cellstr(finnames);
+                        Trow=[Trow, x];
+
+
+                    end
+
+                    for g=1:size(Trow,2)
+                        tmp=Trow{:,g};
+                        switch class(tmp)
+                            case 'categorical'
+                                tmp=string(tmp);
+                                Trow=[Trow(:,1:g-1),table(string(tmp),'VariableNames',{Trow.Properties.VariableNames{g}}),Trow(:,g+1:end)];
+                        end
+                    end
+
+                    if size(Tout,2)>0
+                        if size(Trow,2)==size(Tout,2)
+                            Tout=[Tout; Trow];
+                        end
+                    else
 %                         if size(Trow,2)==size(Tout,2)
-%                             Tout=[Tout; Trow];
+                        Tout=[Tout; Trow];
 %                         end
-%                     else
-% %                         if size(Trow,2)==size(Tout,2)
-%                         Tout=[Tout; Trow];
-% %                         end
-%                     end
-%                 catch ME
-%                     fprintf("Specimen ID:%d '%s' has problem, row: %d, reason: %s\n",T.ID(i),T.Key(i),i,string(ME.message));
-%                 end
-%             end
-%         end
+                    end
+                catch ME
+                    fprintf("Specimen ID:%d '%s' has problem, row: %d, reason: %s\n",T.ID(i),T.Key(i),i,string(ME.message));
+                end
+            end
+        end
         
         function DrawTest(obj)
             var1=obj.Parent.Experiments(1).VarExp.Forge.Variables(1, 5);

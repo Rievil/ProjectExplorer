@@ -315,13 +315,15 @@ classdef ProjectObj < Node & DataOperation
     methods 
         
         function Save(obj)
-            obj.Version=obj.Version+1;
-            obj.CheckFolder;
-            stash=Pack(obj);
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            filename=sprintf("%s%s\\main.mat",SandBox,stash.ProjectFolder);
-%             file=sprintf("%s\\main.mat",stash.ProjectFolder);
-            save(filename,'stash','-v7.3');
+            if isvalid(obj)
+                obj.Version=obj.Version+1;
+                obj.CheckFolder;
+                stash=Pack(obj);
+                SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+                filename=sprintf("%s%s\\main.mat",SandBox,stash.ProjectFolder);
+    %             file=sprintf("%s\\main.mat",stash.ProjectFolder);
+                save(filename,'stash','-v7.3');
+            end
         end
         
         function Load(obj,filename)

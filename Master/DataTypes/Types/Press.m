@@ -97,7 +97,67 @@ classdef Press < DataFrame
         function result=Read(obj,filename,opts)
             
             obj.Filename=filename;
+            if isfolder(obj.Filename)
+                result=ReadFolder(obj,filename);
+            else
+                result=obj.ReadFile(filename,opts);
+            end
+            
+        end
+        
+        function T=GetTension(obj,MT)
+            TenTMP=3/2*(0.240*0.001)/((MT.Data.B*0.001)*(MT.Data.T*0.001)^2);
+            Strength=obj.Data.Force.*TenTMP*1e-6;
+            T=obj.Data;
+            
+            if sum(contains(obj.Data.Properties.VariableNames,'Strength'))>0
+                obj.Data.Strength=Strength;
+            else
+                obj.Data=[obj.Data, table(Strength,'VariableNames',{'Strength'})];
+            end
+        end
+    end
+    %private methods for operating the variables
+    methods (Access = private) 
 
+        function result=ReadFolder(obj,folder)
+            files=struct2table(dir(folder));
+            files([1,2],:)=[];
+            files.('name')=string(files.('name'));
+            files.('folder')=string(files.('folder'));
+            result=struct;
+            try
+                for i=1:size(files,1)
+                    nfile=sprintf("%s\\%s",files.folder(i),files.name(i));
+                    Ti=readtable(nfile);
+                    Tii=Ti(:,obj.TypeSettings.ColOrder);
+                    Tii.Properties.VariableNames=obj.TypeSettings.VarName(:);
+                    Tii.Properties.VariableUnits=obj.TypeSettings.Unit;
+                    for j=1:size(obj.TypeSettings,1)
+                       Tii.(obj.TypeSettings.VarName(j))=Tii.(obj.TypeSettings.VarName(j))*obj.TypeSettings.Multiplier(j);
+                    end
+                    
+                    result.data(i).meas=Tii;
+                    result.key(i,1)=files.name(i);
+                end
+                
+                
+                result.count=size(files,1);
+                result.type=class(obj);
+
+            catch ME
+                error(['Error with file: ''' nfile, ...
+                    ''' with specimen: ''' char(num2str(i)) '''\n', ...
+                    'on column: ''' char(num2str(i)) '''']);
+            end
+
+
+
+            
+
+        end
+
+        function result=ReadFile(obj,filename,opts)
             INData=readtable(filename,opts);    
             %INData=ResamplePressData(obj,INData);
             
@@ -112,10 +172,6 @@ classdef Press < DataFrame
             try
                 for i=1:obj.ColNumbers:DCount
                     n=n+1;
-                    
-                    if n==26
-                        disp('26');
-                    end 
                     Arr2=INData(:,i:i+obj.ColNumbers-1);
                     Arr=zeros([size(Arr2,1), obj.ColNumbers]);
                     for j=1:size(Arr,2)
@@ -161,21 +217,8 @@ classdef Press < DataFrame
                     'on column: ''' char(num2str(i)) '''']);
             end
         end
-        
-        function T=GetTension(obj,MT)
-            TenTMP=3/2*(0.240*0.001)/((MT.Data.B*0.001)*(MT.Data.T*0.001)^2);
-            Strength=obj.Data.Force.*TenTMP*1e-6;
-            T=obj.Data;
-            
-            if sum(contains(obj.Data.Properties.VariableNames,'Strength'))>0
-                obj.Data.Strength=Strength;
-            else
-                obj.Data=[obj.Data, table(Strength,'VariableNames',{'Strength'})];
-            end
-        end
-    end
-    %private methods for operating the variables
-    methods (Access = private) 
+
+
         function [T]=ResamplePressData(obj,inT)
             T=table;
             TargetFreq=2;
