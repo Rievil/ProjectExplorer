@@ -10,6 +10,7 @@ classdef ProjectObj < Node & DataOperation
         CreationDate datetime;
         LastChange datetime;
         Plotter;
+        Analysis;
         ExpMainNode;
         Experiments;        
         ExpCount=0;
@@ -69,6 +70,7 @@ classdef ProjectObj < Node & DataOperation
             obj.Name=Name;
             SetStatus(obj,1);
             obj.Plotter=Plotter(obj);
+            obj.Analysis=AnalysisNode(obj);
 %             SetGuiParent(obj.Plotter,obj);
 %             obj.ID=OperLib.FindProp(obj,'ProjectID');
         end
@@ -203,8 +205,7 @@ classdef ProjectObj < Node & DataOperation
 %             end
             AddMainExpNode(obj);
             FillNode(obj.Plotter);
-            
-            
+            FillNode(obj.Analysis);
         end
         
         %saving
