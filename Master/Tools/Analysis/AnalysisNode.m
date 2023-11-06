@@ -68,9 +68,20 @@ classdef AnalysisNode < Node
             g=uigridlayout(obj.GuiParent);
             g.RowHeight = {22,'1x'};
             g.ColumnWidth = {150,'1x'};
+
+            cbox=uidropdown(g,"Items",["-","Fracture energy"],"ItemsData",[1,2],...
+                'ValueChangedFcn',@obj.CSelectAnalysis);
+            cbox.Layout.Row=1;
+            cbox.Layout.Column=1;
             
         end
 
+    end
+
+    methods (Access=private)
+        function CSelectAnalysis(obj,src,evnt)
+            fprintf("selected %s\n",src.Items{src.Value});
+        end
     end
 
 end

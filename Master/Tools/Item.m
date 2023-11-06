@@ -42,11 +42,9 @@ classdef Item < handle
             ClearGUI(obj);
             obj.Parent=[];
         end
-        
-%         function 
-        
+    
         function delete(obj)
-%             ClearGUI(obj);
+
             obj.Parent=[];
         end
       

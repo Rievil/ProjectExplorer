@@ -9,7 +9,7 @@ plt=han.Core.ProjectOverview.ProjectList.ProjectObj.Plotter;
 Tout=plt.GetSampleData(1,'Test');
 
 
-x=Tout.Var1_Deff{1};
-y=Tout.Var1_Force{1};
+x=Tout.Deff_Deff{1};
+y=Tout.Force_Force{1};
 
 plot(x,y);
