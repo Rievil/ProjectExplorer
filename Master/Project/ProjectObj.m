@@ -10,6 +10,7 @@ classdef ProjectObj < Node & DataOperation
         CreationDate datetime;
         LastChange datetime;
         Plotter;
+        Analysis;
         ExpMainNode;
         Experiments;        
         ExpCount=0;
@@ -69,6 +70,7 @@ classdef ProjectObj < Node & DataOperation
             obj.Name=Name;
             SetStatus(obj,1);
             obj.Plotter=Plotter(obj);
+            obj.Analysis=AnalysisNode(obj);
 %             SetGuiParent(obj.Plotter,obj);
 %             obj.ID=OperLib.FindProp(obj,'ProjectID');
         end
@@ -203,8 +205,7 @@ classdef ProjectObj < Node & DataOperation
 %             end
             AddMainExpNode(obj);
             FillNode(obj.Plotter);
-            
-            
+            FillNode(obj.Analysis);
         end
         
         %saving
@@ -315,13 +316,15 @@ classdef ProjectObj < Node & DataOperation
     methods 
         
         function Save(obj)
-            obj.Version=obj.Version+1;
-            obj.CheckFolder;
-            stash=Pack(obj);
-            SandBox=OperLib.FindProp(obj,'SandBoxFolder');
-            filename=sprintf("%s%s\\main.mat",SandBox,stash.ProjectFolder);
-%             file=sprintf("%s\\main.mat",stash.ProjectFolder);
-            save(filename,'stash','-v7.3');
+            if isvalid(obj)
+                obj.Version=obj.Version+1;
+                obj.CheckFolder;
+                stash=Pack(obj);
+                SandBox=OperLib.FindProp(obj,'SandBoxFolder');
+                filename=sprintf("%s%s\\main.mat",SandBox,stash.ProjectFolder);
+    %             file=sprintf("%s\\main.mat",stash.ProjectFolder);
+                save(filename,'stash','-v7.3');
+            end
         end
         
         function Load(obj,filename)

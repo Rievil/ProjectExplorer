@@ -137,7 +137,7 @@ classdef OperLib < handle
             Unit="N or s or MPA";
             IsDescriptive=false;
             Num=1;
-            T=table(Num,Label,Unit,ColNames(1),'VariableNames',{'ColOrder','VariableName','Unit','Type'});
+            T=table(Num,Label,Unit,ColNames(1),1,'VariableNames',{'ColOrder','VarName','Unit','Type','Multiplier'});
         end
         
         

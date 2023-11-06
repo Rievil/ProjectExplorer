@@ -93,7 +93,7 @@ classdef DataFrame < OperLib & GUILib
         
         function SetConType(obj,type)
             obj.ContainerType=type;
-            obj.ImportOptions=obj.ContChildren{3}.Data;
+            obj.ImportOptions=obj.ContChildren(3).Data;
         end
         
         function SetFrameOpt(obj,src,event)
