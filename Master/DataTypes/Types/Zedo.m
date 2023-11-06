@@ -200,6 +200,7 @@ classdef Zedo < AcousticEmission
                                 sigperdec=find(contains(CardSignals.name,SignalPatterns{2}));
                                 Records(iCard).Signals=table;
                                 Records(iCard).Features=table;
+                                Records(iCard).SignalPerEachDetector=false;
                                 if numel(sigperdec)==0
                                     %there is only one set of signals, per
                                     %whole channel
@@ -211,11 +212,10 @@ classdef Zedo < AcousticEmission
                                     
                                     CardSignals=[table(ID,'VariableNames',{'ID'}), CardSignals];
                                     Records(iCard).Signals=CardSignals;
-                                else
-                                    Records(iCard).SignalPerEachDetector=true;
                                 end
 
                                 Records(iCard).ConDetector=table;
+                                signalsread=false;
                                 for s=1:length(DecNum) %n hitdetector
 
                                     DetectorName=[SignalPatterns{2} num2str(DecNum(s))];
@@ -227,30 +227,40 @@ classdef Zedo < AcousticEmission
                                     Records(iCard).Detector(s).Features=table;
                                     
                                     if sum(BoolSignals)>0
-                                        if Records(iCard).SignalPerEachDetector==true
-                                            Idx=find(contains(CardFiles.name,DetectorName));
-                                            DetSignals=CardFiles(Idx,:);
-                                            ID=split(DetSignals.name,[DetectorName '-id']);
-                                            ID(:,1)=[];
-                                            ID=abs(double(ID));
-                                            Records(iCard).Detector(s).Signals=[table(ID,'VariableNames',{'ID'}),DetSignals];
+                                        if obj.TypeSettings.Value{6}==true
+                                            
+                                            Idx=find(contains(Records(iCard).Signals.name,DetectorName));
+                                            if isempty(Idx)
 
-                                            if obj.TypeSettings.Value{6}==true
-                                                f=waitbar(0,'Loading all data');
-                                                hits=table;
-                                                scount=size(Records(iCard).Detector(s).Signals,1);
+                                                %there is only one
+                                                %hitdet used, so select
+                                                %all signals
+                                                Idx=1:1:size(Records(iCard).Signals,1);
+                                            else
+                                                signalsread=false;
+                                            end
+                                            DetSignals=Records(iCard).Signals(Idx,:);
 
-                                                for hitrow=1:scount
-                                                    waitbar(hitrow/scount,f,sprintf('Loading signal %d/%d of card %s ...',hitrow,scount,Records(iCard).Cards));
-                                                    sfolder=[char(Records(iCard).Detector(s).Signals.folder(hitrow)) '\'];
-                                                    sfile=[char(Records(iCard).Detector(s).Signals.name(hitrow)),...
-                                                        char(Records(iCard).Detector(s).Signals.suffix(hitrow))];
-
-                                                    [hit]=ReadHit(obj,sfolder,sfile);
-                                                    hits=[hits; table(hit.ID,{hit},'VariableNames',{'ID','Hit'})];
+                                            if Records(iCard).SignalPerEachDetector==false
+                                                if signalsread==false
+                                                    signalsread=true;
+                                                    f=waitbar(0,'Loading all data','Postion',OperLib.GetLoadPosition(1));
+                                                    hits=table;
+                                                    scount=size(DetSignals,1);
+    
+                                                    for hitrow=1:scount
+                                                        waitbar(hitrow/scount,f,sprintf('Loading signal %d/%d of card %s ...',hitrow,scount,Records(iCard).Cards));
+                                                        sfolder=[char(DetSignals.folder(hitrow)) '\'];
+                                                        sfile=[char(DetSignals.name(hitrow)),...
+                                                            char(DetSignals.suffix(hitrow))];
+    
+                                                        [hit]=ReadHit(obj,sfolder,sfile);
+                                                        hits=[hits; table({hit},'VariableNames',{'Hit'})];
+                                                    end
+                                                    close(f);
+                                                    DetSignals=[DetSignals, hits];
+                                                    Records(iCard).Detector(s).Signals=DetSignals;
                                                 end
-                                                close(f);
-                                                Records(iCard).Detector(s).Signals=join(Records(iCard).Detector(s).Signals,hits,'Keys','ID');
                                             end
                                         end
                                     end

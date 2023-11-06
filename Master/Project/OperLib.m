@@ -37,6 +37,15 @@ classdef OperLib < handle
                 end
             end
         end
+
+        function dim=GetLoadPosition(n)
+            set(0,'units','pixels')  ;
+%             bd = get(0,'screensize');
+            bd=get(0, 'MonitorPositions');
+            x=300;
+            y=60;
+            dim=[bd(3)/2-x/2,bd(4)/2-(y/2)*(n-1)*2.05,x,y];
+        end
         
         %výpoèet 
         function [x,y]=Hypotenuse(XMax,YMax,Alpha)
